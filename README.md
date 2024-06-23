@@ -1,2 +1,2 @@
-# YECE
-YAML Entity Configuration Engine (YECE)
+# hery 🐻
+🐻 Hierarchical Entity Relational YAML (HERY) 🐻
