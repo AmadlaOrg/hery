@@ -9,6 +9,12 @@ import (
 	"sync"
 )
 
+// Entity holds the origin and version of an entity
+type Entity struct {
+	Origin  string
+	Version string
+}
+
 func StorageRoot() (string, error) {
 	var entityDir string
 
@@ -27,8 +33,8 @@ func StorageRoot() (string, error) {
 	return entityDir, nil
 }
 
-func CrawlDirectories(root string) (map[string]string, error) {
-	entities := make(map[string]string)
+func CrawlDirectories(root string) (map[string]Entity, error) {
+	entities := make(map[string]Entity)
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -43,7 +49,7 @@ func CrawlDirectories(root string) (map[string]string, error) {
 				re := regexp.MustCompile(`(.+)@v(\d+\.\d+\.\d+)`)
 				matches := re.FindStringSubmatch(info.Name())
 				if len(matches) == 3 {
-					entities[matches[1]] = matches[2]
+					entities[matches[1]] = Entity{Version: matches[2]}
 				}
 			}
 		}
@@ -55,8 +61,9 @@ func CrawlDirectories(root string) (map[string]string, error) {
 	return entities, nil
 }
 
-func CrawlDirectoriesParallel(root string) (map[string]string, error) {
-	entities := make(map[string]string)
+// CrawlDirectoriesParallel crawls the directories in parallel and returns a map of entities
+func CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
+	entities := make(map[string]Entity)
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
@@ -78,13 +85,22 @@ func CrawlDirectoriesParallel(root string) (map[string]string, error) {
 					continue
 				}
 				if matched {
-					// Split the directory name to extract the entity name and version
-					re := regexp.MustCompile(`(.+)@v(\d+\.\d+\.\d+)`)
-					matches := re.FindStringSubmatch(info.Name())
-					if len(matches) == 3 {
-						mu.Lock()
-						entities[matches[1]] = matches[2]
-						mu.Unlock()
+					matchedPath, err := regexp.MatchString(`.+@v\d+\.\d+\.\d+`, info.Name())
+					if err != nil {
+						fmt.Println("Error matching path:", err)
+					}
+					if matchedPath {
+						rePath := regexp.MustCompile(`^(.+[/\/]\.[A-z0-9-_]+[/\/]entity[/\/])(.+)([/\/].+@).+$`)
+						matchedPathComponents := rePath.FindStringSubmatch(path)
+
+						// Split the directory name to extract the entity name and version
+						re := regexp.MustCompile(`(.+)@v(\d+\.\d+\.\d+)`)
+						matches := re.FindStringSubmatch(info.Name())
+						if len(matches) == 3 && len(matchedPathComponents) == 4 {
+							mu.Lock()
+							entities[matches[1]] = Entity{Origin: matchedPathComponents[2], Version: matches[2]}
+							mu.Unlock()
+						}
 					}
 				}
 			}

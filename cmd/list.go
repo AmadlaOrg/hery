@@ -28,12 +28,13 @@ var ListCmd = &cobra.Command{
 	},
 }
 
-func displayEntities(entities map[string]string) {
+// displayEntities
+func displayEntities(entities map[string]entity.Entity) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Entity Name", "Version"})
+	table.SetHeader([]string{"Entity Origin", "Entity Name", "Version"})
 
-	for name, version := range entities {
-		table.Append([]string{name, version})
+	for name, e := range entities {
+		table.Append([]string{e.Origin, name, e.Version})
 	}
 
 	table.Render()
