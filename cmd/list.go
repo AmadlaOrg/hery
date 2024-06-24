@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"os"
@@ -12,7 +13,7 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all entities",
 	Run: func(cmd *cobra.Command, args []string) {
-		entityDir, err := entity.StorageRoot()
+		entityDir, err := storage.Get()
 		if err != nil {
 			fmt.Println("could not get the root storage directory:", err)
 			return
@@ -28,7 +29,7 @@ var ListCmd = &cobra.Command{
 	},
 }
 
-// displayEntities
+// displayEntities renders a table in the terminal to easily view a list of the entities
 func displayEntities(entities map[string]entity.Entity) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Entity Origin", "Entity Name", "Version"})

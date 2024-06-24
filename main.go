@@ -13,7 +13,7 @@ const appTitleName = "HERY"
 const version = "1.0.0"
 
 var rootCmd = &cobra.Command{
-	Use:     appName + " [collection]",
+	Use:     appName,
 	Short:   appTitleName + " CLI application",
 	Version: version,
 }
@@ -29,7 +29,8 @@ var versionCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(cmd.ListCmd)
-	rootCmd.AddCommand(cmd.BuildCmd)
+	rootCmd.AddCommand(cmd.ComposeCmd)
+	rootCmd.AddCommand(cmd.GetCmd)
 }
 
 func main() {

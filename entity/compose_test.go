@@ -10,7 +10,7 @@ import (
 )
 
 func TestBuildEntity(t *testing.T) {
-	err := BuildEntity("CPU", true)
+	err := ComposeEntity("CPU", true)
 	if err != nil {
 		return
 	}

@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"sync"
 )
 
@@ -13,25 +12,6 @@ import (
 type Entity struct {
 	Origin  string
 	Version string
-}
-
-// StorageRoot
-func StorageRoot() (string, error) {
-	var entityDir string
-
-	switch runtime.GOOS {
-	case "windows":
-		appDataDir := os.Getenv("APPDATA")
-		entityDir = filepath.Join(appDataDir, "Amadla", "entity")
-	default: // "linux" and "darwin" (macOS)
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("error getting home directory: %s", err)
-		}
-		entityDir = filepath.Join(homeDir, ".amadla", "entity")
-	}
-
-	return entityDir, nil
 }
 
 // CrawlDirectories

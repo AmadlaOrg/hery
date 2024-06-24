@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -11,8 +12,8 @@ import (
 	"sync"
 )
 
-func BuildEntity(entityArg string, printToScreen bool) error {
-	root, err := StorageRoot()
+func ComposeEntity(entityArg string, printToScreen bool) error {
+	root, err := storage.Get()
 	if err != nil {
 		return err
 	}
