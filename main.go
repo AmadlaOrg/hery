@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/AmadlaOrg/hery/cmd"
 	"github.com/spf13/cobra"
 )
@@ -11,7 +13,7 @@ const appTitleName = "HERY"
 const version = "1.0.0"
 
 var rootCmd = &cobra.Command{
-	Use:     appName,
+	Use:     appName + " [collection]",
 	Short:   appTitleName + " CLI application",
 	Version: version,
 }
@@ -33,5 +35,6 @@ func init() {
 func main() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 }

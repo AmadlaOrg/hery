@@ -15,6 +15,7 @@ type Entity struct {
 	Version string
 }
 
+// StorageRoot
 func StorageRoot() (string, error) {
 	var entityDir string
 
@@ -33,6 +34,7 @@ func StorageRoot() (string, error) {
 	return entityDir, nil
 }
 
+// CrawlDirectories
 func CrawlDirectories(root string) (map[string]Entity, error) {
 	entities := make(map[string]Entity)
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
