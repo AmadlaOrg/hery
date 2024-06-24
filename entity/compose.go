@@ -13,7 +13,7 @@ import (
 )
 
 func ComposeEntity(entityArg string, printToScreen bool) error {
-	root, err := storage.Get()
+	root, err := storage.Path()
 	if err != nil {
 		return err
 	}

@@ -7,8 +7,8 @@ import (
 	"runtime"
 )
 
-// Get returns the absolute path to where the entities are stored
-func Get() (string, error) {
+// Path returns the absolute path to where the entities are stored
+func Path() (string, error) {
 	var entityDir string
 
 	switch runtime.GOOS {
