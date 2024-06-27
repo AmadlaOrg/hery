@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/entity.schema.json",
+  "title": "Hery configuration properties.",
+  "description": "Defines the foundational Memory properties."
+}

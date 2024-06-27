@@ -8,12 +8,6 @@ import (
 	"sync"
 )
 
-// Entity holds the origin and version of an entity
-type Entity struct {
-	Origin  string
-	Version string
-}
-
 // CrawlDirectories
 func CrawlDirectories(root string) (map[string]Entity, error) {
 	entities := make(map[string]Entity)

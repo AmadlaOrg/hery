@@ -2,17 +2,26 @@ package entity
 
 import (
 	"fmt"
-	"net/http"
+	"github.com/AmadlaOrg/hery/entity/version"
+	"sync"
 )
 
-func Download(uri string) error {
-	if uri == "" {
-		return fmt.Errorf("uri is empty")
+func Get(entities []Entity, dest string) {
+	var wg sync.WaitGroup
+	wg.Add(len(entities))
+
+	for i, entity := range entities {
+		go func(i int, entity Entity) {
+			defer wg.Done()
+			entities[i].Version = version.Latest(
+				fmt.Sprintf("https://%s/%s", entity.Origin, entity.Name),
+				fmt.Sprintf("/tmp/repo%d", i))
+		}(i, entity)
 	}
 
-	// TODO: How does Go do it? SSH, HTTPS, some other way?
-	if _, err := http.Get(fmt.Sprintf("https://%s", uri)); err != nil {
-		return err
+	wg.Wait()
+
+	for _, entity := range entities {
+		fmt.Printf("Module: %s, Version: %s\n", entity.Name, entity.Version)
 	}
-	return nil
 }
