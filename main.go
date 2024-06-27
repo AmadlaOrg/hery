@@ -32,6 +32,7 @@ func init() {
 	rootCmd.AddCommand(cmd.ComposeCmd)
 	rootCmd.AddCommand(cmd.GetCmd)
 	rootCmd.AddCommand(cmd.ValidateCmd)
+	rootCmd.AddCommand(cmd.QueryCmd)
 }
 
 func main() {
