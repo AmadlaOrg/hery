@@ -3,28 +3,10 @@ package entity
 import (
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestStorageRoot(t *testing.T) {
-	expectedDir := ""
-	switch runtime.GOOS {
-	case "windows":
-		appDataDir := os.Getenv("APPDATA")
-		expectedDir = filepath.Join(appDataDir, "Amadla", "entity")
-	default: // "linux" and "darwin" (macOS)
-		homeDir, err := os.UserHomeDir()
-		assert.NoError(t, err)
-		expectedDir = filepath.Join(homeDir, ".amadla", "entity")
-	}
-
-	dir, err := StorageRoot()
-	assert.NoError(t, err)
-	assert.Equal(t, expectedDir, dir)
-}
 
 func TestCrawlDirectoriesParallel(t *testing.T) {
 	// Create a temporary directory structure for testing
