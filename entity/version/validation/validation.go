@@ -16,3 +16,13 @@ func Format(version string) (string, error) {
 
 	return "", errors.New("invalid version formatting")
 }
+
+// PseudoFormat
+func PseudoFormat(pseudoVersion string) (string, error) {
+	re := regexp.MustCompile(pseudoVersion)
+	if re.MatchString(pseudoVersion) {
+		return pseudoVersion, nil
+	}
+
+	return "", errors.New("invalid pseudo-version formatting")
+}

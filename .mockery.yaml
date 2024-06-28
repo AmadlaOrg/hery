@@ -1,0 +1,9 @@
+with-expecter: True
+packages:
+  github.com/AmadlaOrg/hery/git:
+    interfaces:
+      Git:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockGit"
+          inpackage: True

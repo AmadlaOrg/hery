@@ -6,6 +6,12 @@ import (
 	"os"
 )
 
+// Git interface to help with mocking
+type Git interface {
+	FetchRepo(url, dest string) error
+	Tags(repoPath string) ([]string, error)
+}
+
 // FetchRepo clones the repository from the given URL to the specified destination.
 func FetchRepo(url, dest string) error {
 	_, err := git.PlainClone(dest, false, &git.CloneOptions{
