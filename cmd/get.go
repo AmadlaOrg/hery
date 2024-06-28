@@ -8,6 +8,9 @@ var GetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get entity and its dependencies",
 	Run: func(cmd *cobra.Command, args []string) {
+		for _, arg := range args {
+			println(arg)
+		}
 		/*entityDir, err := storage.Path()
 		if err != nil {
 			fmt.Println("could not get the root storage directory:", err)
