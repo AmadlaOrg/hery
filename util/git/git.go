@@ -10,6 +10,7 @@ import (
 type Git interface {
 	FetchRepo(url, dest string) error
 	Tags(repoPath string) ([]string, error)
+	CommitHeadHash(repoPath string) (string, error)
 }
 
 // FetchRepo clones the repository from the given URL to the specified destination.
@@ -49,4 +50,27 @@ func Tags(repoPath string) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+// CommitHeadHash retrieves the hash of the most recent commit
+func CommitHeadHash(repoPath string) (string, error) {
+	// Open the repository
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return "", err
+	}
+
+	// Get the HEAD reference
+	ref, err := repo.Head()
+	if err != nil {
+		return "", err
+	}
+
+	// Get the commit object
+	commit, err := repo.CommitObject(ref.Hash())
+	if err != nil {
+		return "", err
+	}
+
+	return commit.Hash.String(), nil
 }

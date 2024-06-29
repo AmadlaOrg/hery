@@ -1,9 +1,37 @@
 with-expecter: True
 packages:
-  github.com/AmadlaOrg/hery/git:
+  github.com/AmadlaOrg/hery/util/file:
+    interfaces:
+      File:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockFile"
+          inpackage: True
+  github.com/AmadlaOrg/hery/util/git:
     interfaces:
       Git:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockGit"
+          inpackage: True
+  github.com/AmadlaOrg/hery/util/json:
+    interfaces:
+      Json:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockJson"
+          inpackage: True
+  github.com/AmadlaOrg/hery/util/json/schema:
+    interfaces:
+      Schema:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockJsonSchema"
+          inpackage: True
+  github.com/AmadlaOrg/hery/util/yaml:
+    interfaces:
+      Yaml:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockYaml"
           inpackage: True

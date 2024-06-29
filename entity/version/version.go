@@ -3,9 +3,7 @@ package version
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/util/git"
-	"os/exec"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -31,7 +29,7 @@ func List(dest string) ([]string, error) {
 	}
 }
 
-// Latest
+// Latest from a list of version array this will return the latest
 func Latest(versions []string) (string, error) {
 	// TODO: Is it really getting the more recent?
 	// TODO: Maybe we should filter so that it follows the format v1.0.0
@@ -43,14 +41,12 @@ func Latest(versions []string) (string, error) {
 }
 
 // GeneratePseudo version to be used when there is no other source to identify the version of the entity
-func GeneratePseudo(repoPath string) string {
-	cmd := exec.Command("git", "-C", repoPath, "rev-parse", "HEAD")
-	output, err := cmd.Output()
+func GeneratePseudo(repoPath string) (string, error) {
+	commitHeadHash, err := git.CommitHeadHash(repoPath)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	commitHash := strings.TrimSpace(string(output))
 	timestamp := time.Now().Format("20060102150405")
-	pseudoVersion := fmt.Sprintf("v0.0.0-%s-%s", timestamp, commitHash[:12])
-	return pseudoVersion
+	pseudoVersion := fmt.Sprintf("v0.0.0-%s-%s", timestamp, commitHeadHash[:12])
+	return pseudoVersion, nil
 }

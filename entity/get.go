@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-// Get
+// Get download in parallel all the entities
 func Get(entityUrls []string, dest string) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entityUrls))
@@ -43,7 +43,7 @@ func Get(entityUrls []string, dest string) error {
 			if err != nil {
 				entityVersion, err = version.Latest(entityVersionList)
 				if err != nil || entityVersion == "" {
-					entityVersion = version.GeneratePseudo(destination)
+					entityVersion, err = version.GeneratePseudo(destination)
 				} else {
 					// TODO:
 				}
