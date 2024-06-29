@@ -3,7 +3,8 @@ package entity
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/storage"
-	"github.com/AmadlaOrg/hery/util"
+	utilObjectPkg "github.com/AmadlaOrg/hery/util/object"
+	utilYamlPkg "github.com/AmadlaOrg/hery/util/yaml"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
@@ -103,7 +104,7 @@ func findEntityDirParallel(root, name, version string) (string, error) {
 							mu.Lock()
 
 							matchedDir = path
-							readYaml, err := util.ReadYaml(path, "amadla")
+							readYaml, err := utilYamlPkg.Read(path, "amadla")
 							if err != nil {
 								return
 							}
@@ -176,7 +177,7 @@ func mergeYamlFiles(dir string) ([]byte, error) {
 			if merged == nil {
 				merged = current
 			} else {
-				merged = util.MergeMultilevel(merged, current, true)
+				merged = utilObjectPkg.MergeMultilevel(merged, current, true)
 			}
 		}
 		return nil

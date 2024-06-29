@@ -2,7 +2,7 @@ package version
 
 import (
 	"fmt"
-	"github.com/AmadlaOrg/hery/git"
+	"github.com/AmadlaOrg/hery/util/git"
 	"os/exec"
 	"regexp"
 	"strings"

@@ -1,43 +1,13 @@
-package util
+package yaml
 
 import (
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestExists(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	t.Run("file exists", func(t *testing.T) {
-		filePath := filepath.Join(tmpDir, "file.txt")
-		err := os.WriteFile(filePath, []byte("test content"), 0644)
-		assert.NoError(t, err)
-
-		exists := FileExists(filePath)
-		assert.True(t, exists)
-	})
-
-	t.Run("file does not exist", func(t *testing.T) {
-		filePath := filepath.Join(tmpDir, "nonexistent.txt")
-
-		exists := FileExists(filePath)
-		assert.False(t, exists)
-	})
-
-	t.Run("directory exists", func(t *testing.T) {
-		dirPath := filepath.Join(tmpDir, "subdir")
-		err := os.Mkdir(dirPath, 0755)
-		assert.NoError(t, err)
-
-		exists := FileExists(dirPath)
-		assert.True(t, exists)
-	})
-}
-
-func TestReadYaml(t *testing.T) {
+func TestRead(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	t.Run("read .yml file", func(t *testing.T) {
@@ -46,7 +16,7 @@ func TestReadYaml(t *testing.T) {
 		err := os.WriteFile(filePath, content, 0644)
 		assert.NoError(t, err)
 
-		data, err := ReadYaml(tmpDir, "config")
+		data, err := Read(tmpDir, "config")
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]interface{}{"key": "value"}, data)
 	})
@@ -61,7 +31,7 @@ func TestReadYaml(t *testing.T) {
 		err := os.WriteFile(filePath, content, 0644)
 		assert.NoError(t, err)
 
-		data, err := ReadYaml(tmpDir, "config")
+		data, err := Read(tmpDir, "config")
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]interface{}{"key": "value"}, data)
 	})
@@ -75,13 +45,13 @@ func TestReadYaml(t *testing.T) {
 		err = os.WriteFile(yamlFilePath, content, 0644)
 		assert.NoError(t, err)
 
-		_, err = ReadYaml(tmpDir, "config")
+		_, err = Read(tmpDir, "config")
 		assert.Error(t, err)
 		assert.Equal(t, "both "+ymlFilePath+", "+yamlFilePath+" exists", err.Error())
 	})
 
 	t.Run("file does not exist", func(t *testing.T) {
-		_, err := ReadYaml(tmpDir, "nonexistent")
+		_, err := Read(tmpDir, "nonexistent")
 		assert.Error(t, err)
 		assert.Equal(t, filepath.Join(tmpDir, "nonexistent.yml")+" does not exist", err.Error())
 	})

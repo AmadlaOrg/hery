@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
-	"github.com/AmadlaOrg/hery/git"
+	"github.com/AmadlaOrg/hery/util/git"
 	"sync"
 )
 

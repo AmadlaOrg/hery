@@ -1,4 +1,4 @@
-package util
+package schema
 
 import (
 	"fmt"
@@ -6,8 +6,11 @@ import (
 	"os"
 )
 
-// LoadJSONSchema loads the JSON schema from a file
-func LoadJSONSchema(schemaPath string) (*jsonschema.Schema, error) {
+type Schema interface {
+}
+
+// Load loads the JSON schema from a file
+func Load(schemaPath string) (*jsonschema.Schema, error) {
 	compiler := jsonschema.NewCompiler()
 	openSchemaPath, err := os.Open(schemaPath)
 	if err != nil {

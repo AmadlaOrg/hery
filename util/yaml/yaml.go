@@ -1,20 +1,19 @@
-package util
+package yaml
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/util/file"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 )
 
-// FileExists verify that a file or directory exists
-func FileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil || !os.IsNotExist(err)
+type Yaml interface {
+	Read(path string, fileName string) (map[string]interface{}, error)
 }
 
-// ReadYaml makes it easy to read any yaml file with any of the two extensions: yml or yaml
-func ReadYaml(path string, fileName string) (map[string]interface{}, error) {
+// Read makes it easy to read any yaml file with any of the two extensions: yml or yaml
+func Read(path string, fileName string) (map[string]interface{}, error) {
 	fullFileNameYml := fmt.Sprintf("%s.yml", fileName)
 	fullFileNameYaml := fmt.Sprintf("%s.yaml", fileName)
 
@@ -22,8 +21,8 @@ func ReadYaml(path string, fileName string) (map[string]interface{}, error) {
 	YmlPath := filepath.Join(path, fullFileNameYml)
 	YamlPath := filepath.Join(path, fullFileNameYaml)
 
-	YmlPathExists := FileExists(YmlPath)
-	YamlPathExists := FileExists(YamlPath)
+	YmlPathExists := file.Exists(YmlPath)
+	YamlPathExists := file.Exists(YamlPath)
 
 	if !YmlPathExists && !YamlPathExists {
 		return nil, fmt.Errorf("%s does not exist", YmlPath)

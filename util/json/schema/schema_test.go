@@ -1,4 +1,4 @@
-package util
+package schema
 
 import (
 	"os"
@@ -25,7 +25,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Load schema and check
-		schema, err := LoadJSONSchema(schemaPath)
+		schema, err := Load(schemaPath)
 		assert.NoError(t, err)
 		assert.NotNil(t, schema)
 	})
@@ -35,7 +35,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		schemaPath := filepath.Join(tmpDir, "nonexistent.json")
 
 		// Load schema and check
-		schema, err := LoadJSONSchema(schemaPath)
+		schema, err := Load(schemaPath)
 		assert.Error(t, err)
 		assert.Nil(t, schema)
 	})
@@ -53,7 +53,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Load schema and check
-		schema, err := LoadJSONSchema(schemaPath)
+		schema, err := Load(schemaPath)
 		assert.Error(t, err)
 		assert.Nil(t, schema)
 	})

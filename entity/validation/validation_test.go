@@ -1,18 +1,17 @@
 package validation
 
 import (
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestEntity(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create schema file
-	schemaDir := filepath.Join(tmpDir, ".amadla")
+	schemaDir := filepath.Join(tmpDir, ".hery")
 	err := os.MkdirAll(schemaDir, 0755)
 	assert.NoError(t, err)
 	schemaContent := `{

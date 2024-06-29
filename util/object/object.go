@@ -1,4 +1,4 @@
-package util
+package object
 
 // MergeMultilevel
 func MergeMultilevel(dTo, dFrom map[string]interface{}, inplace bool) map[string]interface{} {

@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity/version"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -16,13 +17,13 @@ func CrawlDirectories(root string) (map[string]Entity, error) {
 			return err
 		}
 		if info.IsDir() {
-			matched, err := regexp.MatchString(`.+@v\d+\.\d+\.\d+`, info.Name())
+			matched, err := regexp.MatchString(version.Match, info.Name())
 			if err != nil {
 				return err
 			}
 			if matched {
 				// Split the directory name to extract the entity name and version
-				re := regexp.MustCompile(`(.+)@v(\d+\.\d+\.\d+)`)
+				re := regexp.MustCompile(version.FormatForDir)
 				matches := re.FindStringSubmatch(info.Name())
 				if len(matches) == 3 {
 					entities[matches[1]] = Entity{Version: matches[2]}
@@ -55,13 +56,13 @@ func CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 				continue
 			}
 			if info.IsDir() {
-				matched, err := regexp.MatchString(`.+@v\d+\.\d+\.\d+`, info.Name())
+				matched, err := regexp.MatchString(version.Match, info.Name())
 				if err != nil {
 					fmt.Println("Error matching regex:", err)
 					continue
 				}
 				if matched {
-					matchedPath, err := regexp.MatchString(`.+@v\d+\.\d+\.\d+`, info.Name())
+					matchedPath, err := regexp.MatchString(version.Match, info.Name())
 					if err != nil {
 						fmt.Println("Error matching path:", err)
 					}
@@ -70,7 +71,7 @@ func CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 						matchedPathComponents := rePath.FindStringSubmatch(path)
 
 						// Split the directory name to extract the entity name and version
-						re := regexp.MustCompile(`(.+)@v(\d+\.\d+\.\d+)`)
+						re := regexp.MustCompile(version.FormatForDir)
 						matches := re.FindStringSubmatch(info.Name())
 						if len(matches) == 3 && len(matchedPathComponents) == 4 {
 							mu.Lock()
