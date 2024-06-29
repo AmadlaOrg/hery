@@ -41,6 +41,9 @@ func Read(path string, fileName string) (map[string]interface{}, error) {
 
 	var current map[string]interface{}
 	err = yaml.Unmarshal(content, &current)
+	if err != nil {
+		return nil, err
+	}
 
 	return current, nil
 }

@@ -38,6 +38,10 @@ func Get(entityUrls []string, dest string) error {
 
 			// Extract or fetch the latest version
 			entityVersion, err := version.Extract(entityUrl)
+			if err != nil {
+				errCh <- err
+			}
+
 			// TODO: Make it global so that version.List(...) doesn't have to be called for the same Entity if look at again since you can have multiple versions of an entity
 			entityVersionList, err := version.List(destination)
 			if err != nil {
@@ -46,9 +50,15 @@ func Get(entityUrls []string, dest string) error {
 					entityVersion, err = version.GeneratePseudo(destination)
 				} else {
 					// TODO:
+					println("TODO")
 				}
 			}
 
+			if err != nil {
+				errCh <- err
+			}
+
+			println(entityVersion)
 			//entityUrls[i].Version = entityVersion
 		}(i, entityUrl)
 	}

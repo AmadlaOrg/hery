@@ -2,7 +2,7 @@ package git
 
 import (
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/storer"
 	"os"
 )
 
@@ -29,27 +29,18 @@ func FetchRepo(url, dest string) error {
 }
 
 // Tags returns a list of tags for the repository at the specified path.
-func Tags(repoPath string) ([]string, error) {
+func Tags(repoPath string) (storer.ReferenceIter, error) {
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
 		return nil, err
 	}
 
-	refs, err := repo.Tags()
+	tagRefs, err := repo.Tags()
 	if err != nil {
 		return nil, err
 	}
 
-	var tags []string
-	err = refs.ForEach(func(ref *plumbing.Reference) error {
-		tags = append(tags, ref.Name().Short())
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return tags, nil
+	return tagRefs, nil
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit

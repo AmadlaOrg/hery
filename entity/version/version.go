@@ -3,6 +3,7 @@ package version
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/util/git"
+	"github.com/go-git/go-git/v5/plumbing"
 	"regexp"
 	"time"
 )
@@ -21,12 +22,27 @@ func Extract(url string) (string, error) {
 func List(dest string) ([]string, error) {
 	tags, err := git.Tags(dest)
 	if err != nil {
-		return "", fmt.Errorf("error getting tags: %v\n", err)
+		return nil, fmt.Errorf("error getting tags: %v\n", err)
 	}
 
-	for _, tag := range tags {
+	// Regular expression for matching version tags
+	re := regexp.MustCompile(Format)
 
+	var versions []string
+
+	// Iterate over the tags and filter by the regex
+	err = tags.ForEach(func(ref *plumbing.Reference) error {
+		tagName := ref.Name().Short()
+		if re.MatchString(tagName) {
+			versions = append(versions, tagName)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error iterating tags: %v", err)
 	}
+
+	return versions, nil
 }
 
 // Latest from a list of version array this will return the latest
