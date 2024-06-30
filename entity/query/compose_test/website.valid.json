@@ -1,0 +1,63 @@
+{
+  "_entity": {
+    "github.com/AmadlaOrg/Entity@v1.0.0": [
+      {
+        "name": "Container",
+        "description": "Entity Container configuration definitions.",
+        "category": "Infrastructure",
+        "tags": [
+          "container"
+        ]
+      },
+      {
+        "name": "Infrastructure",
+        "description": "Entity Infrastructure configuration definitions.",
+        "category": "Infrastructure",
+        "tags": [
+          "infrastructure",
+          "cloud",
+          "server",
+          "vm",
+          "container"
+        ]
+      },
+      {
+        "name": "CPU",
+        "description": "CPU configuration definitions.",
+        "category": "System",
+        "tags": [
+          "system",
+          "cpu"
+        ]
+      },
+      {
+        "name": "Memory",
+        "description": "Memory configuration definitions.",
+        "category": "System",
+        "tags": [
+          "system",
+          "memory"
+        ]
+      },
+      {
+        "name": "Net",
+        "description": "Net configuration definitions.",
+        "category": "System",
+        "tags": [
+          "system",
+          "network",
+          "net"
+        ]
+      },
+      {
+        "name": "Storage",
+        "description": "Storage configuration definitions.",
+        "category": "System",
+        "tags": [
+          "system",
+          "storage"
+        ]
+      }
+    ]
+  }
+}
