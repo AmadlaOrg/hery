@@ -6,7 +6,6 @@ import (
 	utilObjectPkg "github.com/AmadlaOrg/hery/util/object"
 	utilYamlPkg "github.com/AmadlaOrg/hery/util/yaml"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -57,8 +56,8 @@ func ComposeEntity(entityArg string, printToScreen bool) error {
 
 func parseEntityArg(entityArg string) (string, string, error) {
 	// Validate entity name and version separately
-	entityNamePattern := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
-	entityWithVersionPattern := regexp.MustCompile(`^([a-zA-Z0-9]+)(@v\d+\.\d+\.\d+)$`)
+	entityNamePattern := regexp.MustCompile(entityNameMatch)
+	entityWithVersionPattern := regexp.MustCompile(entityNameAndVersionMatch)
 
 	if entityWithVersionPattern.MatchString(entityArg) {
 		matches := entityWithVersionPattern.FindStringSubmatch(entityArg)
@@ -165,7 +164,7 @@ func mergeYamlFiles(dir string) ([]byte, error) {
 			return err
 		}
 		if !info.IsDir() && (filepath.Ext(path) == ".yml" || filepath.Ext(path) == ".yaml") {
-			content, err := ioutil.ReadFile(path)
+			content, err := os.ReadFile(path)
 			if err != nil {
 				return err
 			}

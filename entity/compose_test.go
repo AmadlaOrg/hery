@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"testing"
@@ -181,4 +182,62 @@ func TestFindEntityDirParallel(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMergeYamlFiles(t *testing.T) {
+	// Create a temporary directory for testing
+	dir, err := os.MkdirTemp("", "test-yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	// Create sample YAML files
+	file1 := filepath.Join(dir, "file1.yml")
+	file2 := filepath.Join(dir, "file2.yaml")
+
+	content1 := `
+key1:
+  subkey1: value1
+key2: value2
+`
+	content2 := `
+key1:
+  subkey2: value3
+key3: value4
+`
+
+	if err := os.WriteFile(file1, []byte(content1), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(file2, []byte(content2), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Call the function to merge YAML files
+	mergedBytes, err := mergeYamlFiles(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Unmarshal the merged result
+	var merged map[string]interface{}
+	err = yaml.Unmarshal(mergedBytes, &merged)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Expected result
+	expected := map[string]interface{}{
+		"key1": map[interface{}]interface{}{
+			"subkey1": "value1",
+			"subkey2": "value3",
+		},
+		"key2": "value2",
+		"key3": "value4",
+	}
+
+	// Use testify's assert package to compare the results
+	assert.Equal(t, expected, merged)
 }

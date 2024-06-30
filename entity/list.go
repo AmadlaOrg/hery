@@ -46,6 +46,11 @@ func CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 
 	paths := make(chan string)
 
+	// Compile regular expressions outside the loop
+	versionMatchRegex := regexp.MustCompile(version.Match)
+	versionFormatForDirRegex := regexp.MustCompile(version.FormatForDir)
+	rePath := regexp.MustCompile(formatEntityPathAndNameVersion)
+
 	// Worker function
 	worker := func() {
 		defer wg.Done()
@@ -56,23 +61,14 @@ func CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 				continue
 			}
 			if info.IsDir() {
-				matched, err := regexp.MatchString(version.Match, info.Name())
-				if err != nil {
-					fmt.Println("Error matching regex:", err)
-					continue
-				}
+				matched := versionMatchRegex.MatchString(info.Name())
 				if matched {
-					matchedPath, err := regexp.MatchString(version.Match, info.Name())
-					if err != nil {
-						fmt.Println("Error matching path:", err)
-					}
+					matchedPath := versionMatchRegex.MatchString(info.Name())
 					if matchedPath {
-						rePath := regexp.MustCompile(`^(.+[/\/]\.[A-z0-9-_]+[/\/]entity[/\/])(.+)([/\/].+@).+$`)
 						matchedPathComponents := rePath.FindStringSubmatch(path)
 
 						// Split the directory name to extract the entity name and version
-						re := regexp.MustCompile(version.FormatForDir)
-						matches := re.FindStringSubmatch(info.Name())
+						matches := versionFormatForDirRegex.FindStringSubmatch(info.Name())
 						if len(matches) == 3 && len(matchedPathComponents) == 4 {
 							mu.Lock()
 							entities[matches[1]] = Entity{Origin: matchedPathComponents[2], Version: matches[2]}
