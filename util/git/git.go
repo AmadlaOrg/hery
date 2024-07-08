@@ -9,7 +9,7 @@ import (
 // Git interface to help with mocking
 type Git interface {
 	FetchRepo(url, dest string) error
-	Tags(repoPath string) ([]string, error)
+	Tags(repoPath string) (storer.ReferenceIter, error)
 	CommitHeadHash(repoPath string) (string, error)
 }
 

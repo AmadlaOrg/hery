@@ -1,5 +1,5 @@
 {
-  "_entity": {
+  "entities": {
     "github.com/AmadlaOrg/Entity@v1.0.0": [
       {
         "_id": "015fac46-9693-4409-a38a-519f43678efb",
@@ -186,7 +186,7 @@
       }
     ]
   },
-  "_id": {
+  "ids": {
     "015fac46-9693-4409-a38a-519f43678efb": {
       "_entity": "github.com/AmadlaOrg/Entity@v1.0.0",
       "_index": 0

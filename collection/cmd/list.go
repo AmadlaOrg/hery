@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var ListCmd = &cobra.Command{
@@ -26,13 +24,13 @@ var ListCmd = &cobra.Command{
 }
 
 // displayCollectionsList display the directories (that are collections) using tablewriter
-func displayCollectionsList(collections [][]string) {
+/*func displayCollectionsList(collections [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Directories"})
+	table.SetHeader([]string{"Collections"})
 
 	for _, v := range collections {
 		table.Append(v)
 	}
 
 	table.Render()
-}
+}*/
