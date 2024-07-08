@@ -1,6 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/entity.schema.json",
-  "title": "Hery configuration properties.",
-  "description": "Defines the foundational Memory properties."
+  "title": "HERY basic configuration properties.",
+  "description": "Defines the basic HERY entity properties.",
+  "type": "object",
+  "properties": {
+    "_entity": {
+      "type": "string",
+      "format": "uri"
+    },
+    "_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_\\-:/]+$"
+    }
+  },
+  "required": ["_entity"]
 }
