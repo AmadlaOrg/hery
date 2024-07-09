@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/AmadlaOrg/hery/server"
+	"log"
 	"net"
 	"os"
 )
@@ -16,13 +17,13 @@ type Client interface {
 func Connect() {
 	conn, err := net.Dial("unix", server.SocketPath)
 	if err != nil {
-		fmt.Println("Dial error:", err)
+		log.Fatalf("Dial error: %v", err)
 		return
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()
 		if err != nil {
-
+			log.Println("Close error:", err)
 		}
 	}(conn)
 
@@ -37,14 +38,14 @@ func Connect() {
 		}
 		_, err := conn.Write([]byte(text))
 		if err != nil {
-			fmt.Println("Write error:", err)
+			log.Printf("Write error: %v", err)
 			break
 		}
 		response, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
-			fmt.Println("Read error:", err)
+			log.Printf("Read error: %v", err)
 			break
 		}
-		fmt.Println("Response:", response)
+		log.Printf("Response: %v", response)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 )
 
 type Cache interface {
@@ -22,7 +23,7 @@ func Create() {
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-
+			log.Fatalf("Error closing database connection: %v", err)
 		}
 	}(db)
 
@@ -48,10 +49,13 @@ func Create() {
 
 func Insert() {
 	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-
+			log.Fatalf("Unable to close database: %v", err)
 		}
 	}(db)
 
@@ -60,7 +64,7 @@ func Insert() {
 	for _, name := range []string{"Alice", "Bob", "Charlie"} {
 		_, err = db.Exec(insertUserSQL, name)
 		if err != nil {
-			fmt.Println("Error inserting record:", err)
+			log.Fatalf("Error inserting record: %v", err)
 			return
 		}
 	}
@@ -68,10 +72,14 @@ func Insert() {
 
 func Select() {
 	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-
+			log.Fatalf("Unable to close database: %v", err)
 		}
 	}(db)
 
@@ -80,7 +88,7 @@ func Select() {
 	querySQL := `SELECT name FROM users WHERE name = 'Alice'`
 	err = db.QueryRow(querySQL).Scan(&name)
 	if err != nil {
-		fmt.Println("Error querying record:", err)
+		log.Fatalf("Error querying record: %v", err)
 		return
 	}
 

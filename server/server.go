@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -18,7 +19,7 @@ func handleConnection(conn net.Conn) {
 	defer func(conn net.Conn) {
 		err := conn.Close()
 		if err != nil {
-
+			log.Printf("Error closing connection: %v", err)
 		}
 	}(conn)
 	reader := bufio.NewReader(conn)
@@ -58,7 +59,7 @@ func Start() {
 	defer func(l net.Listener) {
 		err := l.Close()
 		if err != nil {
-
+			log.Fatalf("Error closing socket: %v", err)
 		}
 	}(l)
 
