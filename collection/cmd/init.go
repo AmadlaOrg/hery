@@ -1,22 +1,49 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"github.com/AmadlaOrg/hery/collection/validation"
+	"github.com/AmadlaOrg/hery/storage"
+	"github.com/spf13/cobra"
+	"log"
+	"os"
+)
 
 var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init collection (create)",
 	Run: func(cmd *cobra.Command, args []string) {
-		/*entityDir, err := storage.Path()
-		if err != nil {
-			fmt.Println("could not get the root storage directory:", err)
-			return
+		// Check if exactly one argument is provided
+		if len(args) != 1 {
+			log.Fatal("Missing collection name.")
 		}
 
-		// TODO: Maybe display that it is downloading
-		err = entity.Get(entityDir)
+		arg := args[0]
+
+		// Validate the argument
+		if validName, err := validation.CollectionName(arg); !validName || err != nil {
+			log.Fatalf("Argument does not match the required pattern: %v", err)
+		}
+
+		// Retrieve storage path
+		storagePath, err := storage.Path()
 		if err != nil {
-			fmt.Println("Error crawling directories:", err)
-			return
-		}*/
+			log.Fatal(err)
+		}
+
+		// Full path to the target directory
+		targetDir := fmt.Sprintf("%s/%s", storagePath, arg)
+
+		// Check if the directory exists
+		if _, err := os.Stat(targetDir); os.IsNotExist(err) {
+			// Create the directory
+			err = os.MkdirAll(fmt.Sprintf("%s/entity", targetDir), os.ModePerm)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Directory '%s' with subdirectory 'entity' created.\n", targetDir)
+		} else {
+			fmt.Printf("Directory '%s' already exists.\n", targetDir)
+		}
 	},
 }

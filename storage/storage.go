@@ -8,6 +8,10 @@ import (
 	"runtime"
 )
 
+type Storage interface {
+	Path() (string, error)
+}
+
 // Path returns the absolute path to where the entities are stored
 func Path() (string, error) {
 	var entityDir string
@@ -16,7 +20,7 @@ func Path() (string, error) {
 	// Using env var
 	//
 
-	envStoragePathValue := os.Getenv(heryStoragePath)
+	envStoragePathValue := os.Getenv(HeryStoragePath)
 
 	if envStoragePathValue != "" {
 		envStoragePath, err := filepath.Abs(envStoragePathValue)
@@ -48,13 +52,13 @@ func Path() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
 		appDataDir := os.Getenv("APPDATA")
-		entityDir = filepath.Join(appDataDir, "Hery", "entity")
+		entityDir = filepath.Join(appDataDir, "Hery")
 	default: // "linux" and "darwin" (macOS)
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return "", fmt.Errorf("error getting home directory: %s", err)
 		}
-		entityDir = filepath.Join(homeDir, ".hery", "entity")
+		entityDir = filepath.Join(homeDir, ".hery")
 	}
 
 	return entityDir, nil

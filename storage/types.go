@@ -1,5 +1,5 @@
 package storage
 
 const (
-	heryStoragePath = "HERY_STORAGE_PATH"
+	HeryStoragePath = "HERY_STORAGE_PATH"
 )
