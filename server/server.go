@@ -9,8 +9,6 @@ import (
 	"syscall"
 )
 
-const socketPath = "/tmp/hery.sock"
-
 type Server interface {
 	Start() error
 }
@@ -45,14 +43,14 @@ func processCommand(cmd string) string {
 
 // Start
 func Start() {
-	if _, err := os.Stat(socketPath); err == nil {
-		err := os.Remove(socketPath)
+	if _, err := os.Stat(SocketPath); err == nil {
+		err := os.Remove(SocketPath)
 		if err != nil {
 			return
 		}
 	}
 
-	l, err := net.Listen("unix", socketPath)
+	l, err := net.Listen("unix", SocketPath)
 	if err != nil {
 		fmt.Println("Listen error:", err)
 		return

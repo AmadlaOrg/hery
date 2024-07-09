@@ -3,11 +3,10 @@ package client
 import (
 	"bufio"
 	"fmt"
+	"github.com/AmadlaOrg/hery/server"
 	"net"
 	"os"
 )
-
-const socketPath = "/tmp/hery.sock"
 
 type Client interface {
 	Connect() error
@@ -15,7 +14,7 @@ type Client interface {
 
 // Connect
 func Connect() {
-	conn, err := net.Dial("unix", socketPath)
+	conn, err := net.Dial("unix", server.SocketPath)
 	if err != nil {
 		fmt.Println("Dial error:", err)
 		return
