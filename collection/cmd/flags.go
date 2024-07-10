@@ -21,7 +21,7 @@ func SetFlags(cmd *cobra.Command) {
 
 // GetCollectionFlag returns the collection name set by the env var or the command flag
 func GetCollectionFlag() (string, error) {
-	if validation.CollectionName(collection) {
+	if validation.Name(collection) {
 		return collection, nil
 	}
 	return "", errors.New("invalid collection")

@@ -21,7 +21,7 @@ var InitCmd = &cobra.Command{
 		arg := args[0]
 
 		// Validate the collection name that is pass in `arg`
-		if validation.CollectionName(arg) {
+		if validation.Name(arg) {
 			log.Fatal("Collection name is required or is in the wrong format.")
 		}
 

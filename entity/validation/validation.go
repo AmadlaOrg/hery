@@ -3,10 +3,13 @@ package validation
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity/version"
+	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/util/file"
 	schemaPkg "github.com/AmadlaOrg/hery/util/json/schema"
 	"github.com/santhosh-tekuri/jsonschema"
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -75,6 +78,15 @@ func EntityUrl(url string) bool {
 	}
 	for _, r := range url {
 		if unicode.IsSpace(r) || r == ':' || r == '?' || r == '&' || r == '=' || r == '#' {
+			return false
+		}
+	}
+	if strings.Contains(url, "@") {
+		ver, err := version.Extract(url)
+		if err != nil {
+			log.Fatalf("error extracting version: %v", err)
+		}
+		if !versionValidationPkg.Format(ver) {
 			return false
 		}
 	}

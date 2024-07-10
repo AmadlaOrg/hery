@@ -5,24 +5,36 @@ import (
 	"github.com/AmadlaOrg/hery/collection"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
+	utilFilePkg "github.com/AmadlaOrg/hery/util/file"
 	"github.com/AmadlaOrg/hery/util/git"
 	"log"
+	"path/filepath"
 	"sync"
 )
 
 // Get with collection name and the args that are the entities urls, calls on download to get the entities
 func Get(collectionName, storagePath string, args []string) {
+	// Validate that all the URLs pass in the arguments are valid
+	if len(args) == 0 {
+		log.Fatal("No entity URL(s) specified")
+	}
+
 	for _, arg := range args {
 		if !validation.EntityUrl(arg) {
 			log.Fatalf("Invalid entity URL: %s", arg)
 		}
 	}
+
 	collectionStoragePath := collection.Path(collectionName, storagePath)
+	if !utilFilePkg.Exists(collectionStoragePath) {
+		log.Fatalf("The collection storage directory does not exist: %s", collectionStoragePath)
+	}
+
 	println(collectionStoragePath)
-	/*err = download(args, collectionStoragePath)
+	err := download(args, collectionStoragePath)
 	if err != nil {
 		log.Fatal(err)
-	}*/
+	}
 }
 
 // download in parallel all the entities
@@ -40,13 +52,13 @@ func download(entityUrls []string, collectionStoragePath string) error {
 			// TODO: skip (continue) loop-iteration if entity with same version was already downloaded/installed maybe make a Map
 
 			// Verify entity URL and build URL
-			if !validation.EntityUrl(entityUrl) {
+			/*if !validation.EntityUrl(entityUrl) {
 				errCh <- fmt.Errorf("invalid entity url: %s", entityUrl)
 				return
-			}
+			}*/
 			url := fmt.Sprintf("https://%s", entityUrl)
 
-			destination := fmt.Sprintf("/tmp/repo%d", i)
+			destination := filepath.Join(collectionStoragePath, entityUrl)
 
 			// Download the Entity with `git clone`
 			if err := git.FetchRepo(url, destination); err != nil {

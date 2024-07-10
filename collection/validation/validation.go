@@ -6,11 +6,11 @@ import (
 	"regexp"
 )
 
-// CollectionName validates that the collection name follows the format
-func CollectionName(collectionName string) bool {
+// Name validates that the collection name follows the format
+func Name(collectionName string) bool {
 	matched, err := regexp.MatchString(collection.Match, collectionName)
 	if err != nil {
-		log.Println("Error validating collection name: ", err)
+		log.Fatalln("Error validating collection name: ", err)
 	}
 	return matched
 }

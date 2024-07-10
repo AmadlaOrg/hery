@@ -2,7 +2,7 @@ package validation
 
 import "testing"
 
-func TestCollectionName(t *testing.T) {
+func TestName(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -20,10 +20,7 @@ func TestCollectionName(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := CollectionName(test.input)
-			if (err != nil) != test.hasError {
-				t.Errorf("CollectionName(%q) returned error: %v, expected error: %v", test.input, err, test.hasError)
-			}
+			result := Name(test.input)
 			if result != test.expected {
 				t.Errorf("CollectionName(%q) = %v; expected %v", test.input, result, test.expected)
 			}
