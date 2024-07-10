@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/env"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -21,16 +22,9 @@ var SettingsCmd = &cobra.Command{
 		table.SetHeader([]string{"Setting", "Value"})
 		table.Append([]string{"Collections path", heryPath})
 
-		heryEnvVars := []string{
-			storage.HeryStoragePath,
-		}
-
-		for _, varName := range heryEnvVars {
+		for _, varName := range env.List() {
 			val := os.Getenv(varName)
-
-			if val != "" {
-				table.Append([]string{varName, val})
-			}
+			table.Append([]string{varName, val})
 		}
 
 		table.Render()

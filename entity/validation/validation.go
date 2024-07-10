@@ -69,11 +69,11 @@ func Entity(entityPath string) error {
 }
 
 // EntityUrl validates the module path for go get
-func EntityUrl(path string) bool {
-	if strings.Contains(path, "://") {
+func EntityUrl(url string) bool {
+	if strings.Contains(url, "://") {
 		return false
 	}
-	for _, r := range path {
+	for _, r := range url {
 		if unicode.IsSpace(r) || r == ':' || r == '?' || r == '&' || r == '=' || r == '#' {
 			return false
 		}

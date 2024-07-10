@@ -2,14 +2,31 @@ package entity
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/collection"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	"github.com/AmadlaOrg/hery/util/git"
+	"log"
 	"sync"
 )
 
-// Get download in parallel all the entities
-func Get(entityUrls []string, dest string) error {
+// Get with collection name and the args that are the entities urls, calls on download to get the entities
+func Get(collectionName, storagePath string, args []string) {
+	for _, arg := range args {
+		if !validation.EntityUrl(arg) {
+			log.Fatalf("Invalid entity URL: %s", arg)
+		}
+	}
+	collectionStoragePath := collection.Path(collectionName, storagePath)
+	println(collectionStoragePath)
+	/*err = download(args, collectionStoragePath)
+	if err != nil {
+		log.Fatal(err)
+	}*/
+}
+
+// download in parallel all the entities
+func download(entityUrls []string, collectionStoragePath string) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entityUrls))
 

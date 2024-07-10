@@ -1,27 +1,33 @@
 package cmd
 
 import (
+	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
+	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 var GetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get entity and its dependencies",
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, arg := range args {
-			println(arg)
-		}
-		/*entityDir, err := storage.Path()
+		collection, err := collectionPkgCmd.GetCollectionFlag()
 		if err != nil {
-			fmt.Println("could not get the root storage directory:", err)
+			log.Fatalln(err.Error())
+		}
+		path, err := storage.Path()
+		if err != nil {
 			return
 		}
-
-		// TODO: Maybe display that it is downloading
-		err = entity.Get(entityDir)
+		entity.Get(collection, path, args)
+		/*if !validation.CollectionName(collectionName) {
+			log.Fatalf("Invalid collection name: %s", collectionName)
+		}
+		storagePath, err := storage.Path()
 		if err != nil {
-			fmt.Println("Error crawling directories:", err)
-			return
-		}*/
+			log.Fatal(err)
+		}
+		entity.Get("amadla", storagePath, args)*/
 	},
 }

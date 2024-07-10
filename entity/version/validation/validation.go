@@ -7,14 +7,14 @@ import (
 )
 
 // Format validates that the version follows one of these formats: `v1.0.0` or `v1.0` or `v1`
-func Format(version string) (string, error) {
+func Format(version string) bool {
 	re := regexp.MustCompile(versionPkg.Format)
 
 	if re.MatchString(version) {
-		return version, nil
+		return true
 	}
 
-	return "", errors.New("invalid version formatting")
+	return false
 }
 
 // PseudoFormat

@@ -20,9 +20,9 @@ var InitCmd = &cobra.Command{
 
 		arg := args[0]
 
-		// Validate the argument
-		if validName, err := validation.CollectionName(arg); !validName || err != nil {
-			log.Fatalf("Argument does not match the required pattern: %v", err)
+		// Validate the collection name that is pass in `arg`
+		if validation.CollectionName(arg) {
+			log.Fatal("Collection name is required or is in the wrong format.")
 		}
 
 		// Retrieve storage path

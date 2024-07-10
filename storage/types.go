@@ -1,5 +1,7 @@
 package storage
 
+import "github.com/AmadlaOrg/hery/env"
+
 const (
-	HeryStoragePath = "HERY_STORAGE_PATH"
+	HeryStoragePath = env.HeryStoragePath
 )
