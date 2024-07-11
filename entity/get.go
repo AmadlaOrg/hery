@@ -7,8 +7,10 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version"
 	utilFilePkg "github.com/AmadlaOrg/hery/util/file"
 	"github.com/AmadlaOrg/hery/util/git"
+	"github.com/AmadlaOrg/hery/util/url"
 	"log"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -51,42 +53,71 @@ func download(entityUrls []string, collectionStoragePath string) error {
 
 			// TODO: skip (continue) loop-iteration if entity with same version was already downloaded/installed maybe make a Map
 
-			// Verify entity URL and build URL
-			/*if !validation.EntityUrl(entityUrl) {
-				errCh <- fmt.Errorf("invalid entity url: %s", entityUrl)
-				return
-			}*/
-			url := fmt.Sprintf("https://%s", entityUrl)
+			var entityUrlPath string
+			var entityFullRepoUrl string
+			var entityVersion string
+			if strings.Contains(entityUrl, "@") {
+				entityVersion, versionExtractErr := version.Extract(entityUrl)
+				entityUrlPath = url.EntityPathUrl(entityUrl, entityVersion)
+				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
+				entityVersionList, err := version.List(entityFullRepoUrl)
+
+				// If no tags (versions) are found there will be no errors but there might be some error caused by git
+				if err != nil {
+					errCh <- err
+				} else {
+
+					// True if no version was extracted after @
+					if versionExtractErr != nil {
+						errCh <- versionExtractErr
+					} else {
+						// From the git repo there are no tags then it will be `0`
+						if len(entityVersionList) == 0 {
+							entityVersion, err = version.GeneratePseudo(entityFullRepoUrl)
+						} else { // Tries to find the newest version from git repo tags
+							entityVersion, err = version.Latest(entityVersionList)
+						}
+					}
+				}
+			} else {
+				entityUrlPath = entityUrl
+				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
+			}
 
 			destination := filepath.Join(collectionStoragePath, entityUrl)
 
 			// Download the Entity with `git clone`
-			if err := git.FetchRepo(url, destination); err != nil {
+			if err := git.FetchRepo(entityFullRepoUrl, destination); err != nil {
 				errCh <- fmt.Errorf("error fetching repo: %v\n", err)
 			}
 
 			// Extract or fetch the latest version
-			entityVersion, err := version.Extract(entityUrl)
+			/*entityVersion, err := version.Extract(entityUrl)
 			if err != nil {
-				errCh <- err
-			}
+				//errCh <- err
 
-			// TODO: Make it global so that version.List(...) doesn't have to be called for the same Entity if look at again since you can have multiple versions of an entity
-			entityVersionList, err := version.List(destination)
-			if err != nil {
-				entityVersion, err = version.Latest(entityVersionList)
-				if err != nil || entityVersion == "" {
-					entityVersion, err = version.GeneratePseudo(destination)
-				} else {
-					// TODO:
-					println("TODO")
+				// TODO: Make it global so that version.List(...) doesn't have to be called for the same Entity if look at again since you can have multiple versions of an entity
+				entityVersionList, err := version.List(destination)
+				if err != nil {
+					entityVersion, err = version.Latest(entityVersionList)
+					if err != nil || entityVersion == "" {
+						entityVersion, err = version.GeneratePseudo(destination)
+					} else {
+						// TODO:
+						println("TODO")
+					}
 				}
-			}
+			}*/
 
-			if err != nil {
+			/*if err != nil {
 				errCh <- err
-			}
+			}*/
 
+			dirName := filepath.Base(destination)
+			if strings.Contains(dirName, "@") {
+
+			}
+			//os.Rename()
 			println(entityVersion)
 			//entityUrls[i].Version = entityVersion
 		}(i, entityUrl)

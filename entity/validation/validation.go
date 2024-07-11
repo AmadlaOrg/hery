@@ -89,6 +89,7 @@ func EntityUrl(url string) bool {
 		if !versionValidationPkg.Format(ver) {
 			return false
 		}
+		// TODO: Check with git if the version actually exists
 	}
 	return true
 }

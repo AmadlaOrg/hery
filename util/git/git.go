@@ -2,14 +2,12 @@ package git
 
 import (
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/storer"
 	"os"
 )
 
 // Git interface to help with mocking
 type Git interface {
 	FetchRepo(url, dest string) error
-	Tags(repoPath string) (storer.ReferenceIter, error)
 	CommitHeadHash(repoPath string) (string, error)
 }
 
@@ -26,21 +24,6 @@ func FetchRepo(url, dest string) error {
 		// },
 	})
 	return err
-}
-
-// Tags returns a list of tags for the repository at the specified path.
-func Tags(repoPath string) (storer.ReferenceIter, error) {
-	repo, err := git.PlainOpen(repoPath)
-	if err != nil {
-		return nil, err
-	}
-
-	tagRefs, err := repo.Tags()
-	if err != nil {
-		return nil, err
-	}
-
-	return tagRefs, nil
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit

@@ -1,6 +1,6 @@
 module github.com/AmadlaOrg/hery
 
-go 1.22.4
+go 1.22.5
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
@@ -21,7 +21,7 @@ require (
 	github.com/PaesslerAG/gval v1.2.2 // indirect
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/cloudflare/circl v1.3.9 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.5 // indirect
+	github.com/cyphar/filepath-securejoin v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
