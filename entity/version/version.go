@@ -19,22 +19,6 @@ func Extract(url string) (string, error) {
 	return matches[1], nil
 }
 
-// Exists checks if a specific version exists in the list of versions
-func Exists(entityUrlPath, version string) (bool, error) {
-	versions, err := List(entityUrlPath)
-	if err != nil {
-		return false, err
-	}
-
-	for _, v := range versions {
-		if v == version {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 // List returns a list of all the versions in tags with the format `v1.0.0` or `v1.0` or `v1`
 func List(entityUrlPath string) ([]string, error) {
 	tags, err := remote.Tags(entityUrlPath)
@@ -167,8 +151,8 @@ func parseVersion(version string) ([]int, string) {
 }
 
 // GeneratePseudo version to be used when there is no other source to identify the version of the entity
-func GeneratePseudo(entityUrlPath string) (string, error) {
-	commitHeadHash, err := remote.CommitHeadHash(entityUrlPath)
+func GeneratePseudo(entityFullRepoUrl string) (string, error) {
+	commitHeadHash, err := remote.CommitHeadHash(entityFullRepoUrl)
 	if err != nil {
 		return "", err
 	}

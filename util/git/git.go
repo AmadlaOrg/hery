@@ -11,6 +11,22 @@ type Git interface {
 	CommitHeadHash(repoPath string) (string, error)
 }
 
+type BasicAuth struct {
+	Username, Password string
+}
+
+type TokenAuth struct {
+	Token string
+}
+
+type Attributes struct {
+	BasicAuth     BasicAuth
+	TokenAuth     TokenAuth
+	RepositoryUrl string
+	Tag           string
+	Destination   string
+}
+
 // FetchRepo clones the repository from the given URL to the specified destination.
 func FetchRepo(url, dest string) error {
 	_, err := git.PlainClone(dest, false, &git.CloneOptions{

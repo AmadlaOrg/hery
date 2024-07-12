@@ -9,7 +9,6 @@ import (
 	schemaPkg "github.com/AmadlaOrg/hery/util/json/schema"
 	"github.com/santhosh-tekuri/jsonschema"
 	"gopkg.in/yaml.v3"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,24 +71,37 @@ func Entity(entityPath string) error {
 }
 
 // EntityUrl validates the module path for go get
-func EntityUrl(url string) bool {
-	if strings.Contains(url, "://") {
-		return false
+//
+// -------------------------------------------------------------------------------
+//
+// --- Params ---
+// entityUrl string: the entity url (with version or not)
+// checkVersionExist bool: to indicate to check the version exist or not
+//
+// --- Return ---
+// bool: is valid true or not
+// string: valid version
+// error: error message
+//
+// -------------------------------------------------------------------------------
+func EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error) {
+	if strings.Contains(entityUrl, "://") {
+		return false, "", nil
 	}
-	for _, r := range url {
+	for _, r := range entityUrl {
 		if unicode.IsSpace(r) || r == ':' || r == '?' || r == '&' || r == '=' || r == '#' {
-			return false
+			return false, "", nil
 		}
 	}
-	if strings.Contains(url, "@") {
-		ver, err := version.Extract(url)
+	if strings.Contains(entityUrl, "@") {
+		ver, err := version.Extract(entityUrl)
 		if err != nil {
-			log.Fatalf("error extracting version: %v", err)
+			return false, "", fmt.Errorf("error extracting version: %v", err)
 		}
 		if !versionValidationPkg.Format(ver) {
-			return false
+			return false, "", nil
 		}
 		// TODO: Check with git if the version actually exists
 	}
-	return true
+	return true, "", nil
 }
