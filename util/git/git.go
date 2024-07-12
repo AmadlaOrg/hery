@@ -5,30 +5,16 @@ import (
 	"os"
 )
 
-// Git interface to help with mocking
-type Git interface {
+// Interface to help with mocking
+type Interface interface {
 	FetchRepo(url, dest string) error
 	CommitHeadHash(repoPath string) (string, error)
 }
 
-type BasicAuth struct {
-	Username, Password string
-}
-
-type TokenAuth struct {
-	Token string
-}
-
-type Attributes struct {
-	BasicAuth     BasicAuth
-	TokenAuth     TokenAuth
-	RepositoryUrl string
-	Tag           string
-	Destination   string
-}
+type Git struct{}
 
 // FetchRepo clones the repository from the given URL to the specified destination.
-func FetchRepo(url, dest string) error {
+func (g *Git) FetchRepo(url, dest string) error {
 	_, err := git.PlainClone(dest, false, &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
@@ -43,7 +29,7 @@ func FetchRepo(url, dest string) error {
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit
-func CommitHeadHash(repoPath string) (string, error) {
+func (g *Git) CommitHeadHash(repoPath string) (string, error) {
 	// Open the repository
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {

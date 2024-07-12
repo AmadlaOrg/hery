@@ -9,8 +9,19 @@ import (
 	"time"
 )
 
+type Interface interface {
+	Extract(url string) (string, error)
+	List(entityUrlPath string) ([]string, error)
+	Latest(versions []string) (string, error)
+	GeneratePseudo(entityFullRepoUrl string) (string, error)
+}
+
+type Version struct {
+	gitRemote remote.Interface
+}
+
 // Extract extracts the version from a go get URI.
-func Extract(url string) (string, error) {
+func (v *Version) Extract(url string) (string, error) {
 	re := regexp.MustCompile(`@(.+)$`)
 	matches := re.FindStringSubmatch(url)
 	if len(matches) < 2 {
@@ -20,8 +31,8 @@ func Extract(url string) (string, error) {
 }
 
 // List returns a list of all the versions in tags with the format `v1.0.0` or `v1.0` or `v1`
-func List(entityUrlPath string) ([]string, error) {
-	tags, err := remote.Tags(entityUrlPath)
+func (v *Version) List(entityUrlPath string) ([]string, error) {
+	tags, err := v.gitRemote.Tags(entityUrlPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting tags: %v\n", err)
 	}
@@ -42,27 +53,27 @@ func List(entityUrlPath string) ([]string, error) {
 }
 
 // Latest returns the most recent version from the list of versions
-func Latest(versions []string) (string, error) {
+func (v *Version) Latest(versions []string) (string, error) {
 	if len(versions) == 0 {
 		return "", fmt.Errorf("no versions found")
 	}
 
 	sort.Slice(versions, func(i, j int) bool {
-		return versionLess(versions[i], versions[j])
+		return v.versionLess(versions[i], versions[j])
 	})
 
 	return versions[len(versions)-1], nil
 }
 
 // versionLess compares two version strings and returns true if v1 < v2
-func versionLess(v1, v2 string) bool {
-	return compareVersions(v1, v2) < 0
+func (v *Version) versionLess(v1, v2 string) bool {
+	return v.compareVersions(v1, v2) < 0
 }
 
 // compareVersions compares two version strings and returns -1, 0, or 1 if v1 < v2, v1 == v2, or v1 > v2
-func compareVersions(v1, v2 string) int {
-	parts1, pre1 := parseVersion(v1)
-	parts2, pre2 := parseVersion(v2)
+func (v *Version) compareVersions(v1, v2 string) int {
+	parts1, pre1 := v.parseVersion(v1)
+	parts2, pre2 := v.parseVersion(v2)
 
 	for i := 0; i < len(parts1) && i < len(parts2); i++ {
 		if parts1[i] < parts2[i] {
@@ -85,14 +96,14 @@ func compareVersions(v1, v2 string) int {
 	} else if pre1 != "" && pre2 == "" {
 		return -1
 	} else if pre1 != "" && pre2 != "" {
-		return comparePreRelease(pre1, pre2)
+		return v.comparePreRelease(pre1, pre2)
 	}
 
 	return 0
 }
 
 // comparePreRelease compares pre-release versions and returns -1, 0, or 1 if pre1 < pre2, pre1 == pre2, or pre1 > pre2
-func comparePreRelease(pre1, pre2 string) int {
+func (v *Version) comparePreRelease(pre1, pre2 string) int {
 	preOrder := map[string]int{"alpha": 0, "beta": 1, "rc": 2}
 	parts1 := strings.Split(pre1, ".")
 	parts2 := strings.Split(pre2, ".")
@@ -126,7 +137,7 @@ func comparePreRelease(pre1, pre2 string) int {
 }
 
 // parseVersion parses a version string into its components and a pre-release identifier
-func parseVersion(version string) ([]int, string) {
+func (v *Version) parseVersion(version string) ([]int, string) {
 	re := regexp.MustCompile(Format)
 	matches := re.FindStringSubmatch(version)
 
@@ -151,8 +162,8 @@ func parseVersion(version string) ([]int, string) {
 }
 
 // GeneratePseudo version to be used when there is no other source to identify the version of the entity
-func GeneratePseudo(entityFullRepoUrl string) (string, error) {
-	commitHeadHash, err := remote.CommitHeadHash(entityFullRepoUrl)
+func (v *Version) GeneratePseudo(entityFullRepoUrl string) (string, error) {
+	commitHeadHash, err := v.gitRemote.CommitHeadHash(entityFullRepoUrl)
 	if err != nil {
 		return "", err
 	}

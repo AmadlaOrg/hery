@@ -5,19 +5,20 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"log"
 )
 
-// GitRemote interface to help with mocking
-type GitRemote interface {
-	Tags(repoPath string) (storer.ReferenceIter, error)
+// Interface to help with mocking
+type Interface interface {
+	Tags(repoPath string) ([]string, error)
 	CommitHeadHash(repoPath string) (string, error)
 }
 
+type GitRemote struct{}
+
 // Tags returns a list of tags for the repository at the specified path.
-func Tags(url string) ([]string, error) {
+func (gt *GitRemote) Tags(url string) ([]string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
@@ -44,7 +45,7 @@ func Tags(url string) ([]string, error) {
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit
-func CommitHeadHash(url string) (string, error) {
+func (gt *GitRemote) CommitHeadHash(url string) (string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},

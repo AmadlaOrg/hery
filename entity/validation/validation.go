@@ -15,6 +15,16 @@ import (
 	"unicode"
 )
 
+type Interface interface {
+	Entity(entityPath string) error
+	EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error)
+}
+
+type Validation struct {
+	version           version.Interface
+	versionValidation versionValidationPkg.Interface
+}
+
 // Schema
 func Schema() *jsonschema.Schema {
 	return nil
@@ -28,7 +38,7 @@ func Schema() *jsonschema.Schema {
 }*/
 
 // Entity validates the YAML content against the JSON schema
-func Entity(entityPath string) error {
+func (v *Validation) Entity(entityPath string) error {
 	schemaPath := filepath.Join(entityPath, ".amadla", "schema.json")
 	schema, err := schemaPkg.Load(schemaPath)
 	if err != nil {
@@ -84,7 +94,7 @@ func Entity(entityPath string) error {
 // error: error message
 //
 // -------------------------------------------------------------------------------
-func EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error) {
+func (v *Validation) EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error) {
 	if strings.Contains(entityUrl, "://") {
 		return false, "", nil
 	}
@@ -94,11 +104,11 @@ func EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error) {
 		}
 	}
 	if strings.Contains(entityUrl, "@") {
-		ver, err := version.Extract(entityUrl)
+		ver, err := v.version.Extract(entityUrl)
 		if err != nil {
 			return false, "", fmt.Errorf("error extracting version: %v", err)
 		}
-		if !versionValidationPkg.Format(ver) {
+		if !v.versionValidation.Format(ver) {
 			return false, "", nil
 		}
 		// TODO: Check with git if the version actually exists

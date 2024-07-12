@@ -16,8 +16,20 @@ import (
 	"sync"
 )
 
+type GetInterface interface {
+	Get(collectionName, storagePath string, args []string)
+	download(entityUrls []string, collectionStoragePath string) error
+}
+
+type GetService struct {
+	Git                     git.Interface
+	entityValidation        validation.Interface
+	entityVersion           version.Interface
+	entityVersionValidation versionValidationPkg.Interface
+}
+
 // Get with collection name and the args that are the entities urls, calls on download to get the entities
-func Get(collectionName, storagePath string, args []string) {
+func (gs *GetService) Get(collectionName, storagePath string, args []string) {
 	// Validate that all the URLs pass in the arguments are valid
 	if len(args) == 0 {
 		log.Fatal("No entity URL(s) specified")
@@ -25,7 +37,7 @@ func Get(collectionName, storagePath string, args []string) {
 
 	for _, arg := range args {
 		// TODO: Transform
-		if isEntityUrlValid, entityVersion, err := validation.EntityUrl(arg, true); err != nil {
+		if isEntityUrlValid, entityVersion, err := gs.entityValidation.EntityUrl(arg, true); err != nil {
 			log.Fatalf("Invalid entity URL: %s", arg)
 		}
 	}
@@ -36,14 +48,14 @@ func Get(collectionName, storagePath string, args []string) {
 	}
 
 	println(collectionStoragePath)
-	err := download(args, collectionStoragePath)
+	err := gs.download(args, collectionStoragePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 // download in parallel all the entities
-func download(entityUrls []string, collectionStoragePath string) error {
+func (gs *GetService) download(entityUrls []string, collectionStoragePath string) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entityUrls))
 
@@ -69,18 +81,18 @@ func download(entityUrls []string, collectionStoragePath string) error {
 				// TODO: Moved to entity->validation
 				var versionExists = false
 				if entityVersion == "latest" {
-					entityVersionList, err := version.List(entityFullRepoUrl)
+					entityVersionList, err := gs.entityVersion.List(entityFullRepoUrl)
 					if err != nil {
 						errCh <- err
 						return
 					}
-					entityVersion, err = version.Latest(entityVersionList)
+					entityVersion, err = gs.entityVersion.Latest(entityVersionList)
 					if err != nil {
 						errCh <- err
 						return
 					}
 					versionExists = true
-				} else if !versionValidationPkg.Format(entityVersion) {
+				} else if !gs.entityVersionValidation.Format(entityVersion) {
 					errCh <- errors.New("entity version in the entity url is wrong format")
 					return
 				}
@@ -89,7 +101,7 @@ func download(entityUrls []string, collectionStoragePath string) error {
 				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
 
 				if !versionExists {
-					versionExists, err := versionValidationPkg.Exists(entityUrlPath, entityVersion)
+					versionExists, err := gs.entityVersionValidation.Exists(entityUrlPath, entityVersion)
 					if err != nil {
 						errCh <- err
 						return
@@ -102,19 +114,19 @@ func download(entityUrls []string, collectionStoragePath string) error {
 			} else {
 				entityUrlPath = entityUrl
 				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
-				entityVersionList, err := version.List(entityFullRepoUrl)
+				entityVersionList, err := gs.entityVersion.List(entityFullRepoUrl)
 				if err != nil {
 					errCh <- err
 					return
 				}
 				if len(entityVersionList) == 0 {
-					entityVersion, err = version.GeneratePseudo(entityFullRepoUrl)
+					entityVersion, err = gs.entityVersion.GeneratePseudo(entityFullRepoUrl)
 					if err != nil {
 						errCh <- err
 						return
 					}
 				} else {
-					entityVersion, err = version.Latest(entityVersionList)
+					entityVersion, err = gs.entityVersion.Latest(entityVersionList)
 					if err != nil {
 						errCh <- err
 						return
@@ -126,7 +138,7 @@ func download(entityUrls []string, collectionStoragePath string) error {
 			destination := filepath.Join(collectionStoragePath, entityUrl)
 
 			// Download the Entity with `git clone`
-			if err := git.FetchRepo(entityFullRepoUrl, destination); err != nil {
+			if err := gs.Git.FetchRepo(entityFullRepoUrl, destination); err != nil {
 				errCh <- fmt.Errorf("error fetching repo: %v\n", err)
 			}
 

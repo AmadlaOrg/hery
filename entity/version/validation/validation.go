@@ -6,9 +6,19 @@ import (
 	"regexp"
 )
 
+type Interface interface {
+	Exists(entityUrlPath, version string) (bool, error)
+	Format(version string) bool
+	PseudoFormat(pseudoVersion string) (string, error)
+}
+
+type Validation struct {
+	version versionPkg.Interface
+}
+
 // Exists checks if a specific version exists in the list of versions
-func Exists(entityUrlPath, version string) (bool, error) {
-	versions, err := versionPkg.List(entityUrlPath)
+func (vs *Validation) Exists(entityUrlPath, version string) (bool, error) {
+	versions, err := vs.version.List(entityUrlPath)
 	if err != nil {
 		return false, err
 	}
@@ -23,7 +33,7 @@ func Exists(entityUrlPath, version string) (bool, error) {
 }
 
 // Format validates that the version follows one of these formats: `v1.0.0` or `v1.0` or `v1`
-func Format(version string) bool {
+func (vs *Validation) Format(version string) bool {
 	re := regexp.MustCompile(versionPkg.Format)
 
 	if re.MatchString(version) {
@@ -34,7 +44,7 @@ func Format(version string) bool {
 }
 
 // PseudoFormat
-func PseudoFormat(pseudoVersion string) (string, error) {
+func (vs *Validation) PseudoFormat(pseudoVersion string) (string, error) {
 	re := regexp.MustCompile(pseudoVersion)
 	if re.MatchString(pseudoVersion) {
 		return pseudoVersion, nil
