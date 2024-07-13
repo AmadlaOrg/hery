@@ -7,18 +7,17 @@ But to glorify what!?
 
 ## History
 
-Whilst working on the [Amadla](github.com/AmadlaOrg/) project I tried different ways to store, and organize 
+Whilst working on the [Amadla](https://github.com/AmadlaOrg/) project I tried different ways to store, and organize 
 configurations and nothing was found that satisfied the requirements and the desideratum of what solutions it was 
 supposed to provide.
 
 So by trying out different ideas in code and on paper, HERY was born.
 
-It was important for the [Amadla](github.com/AmadlaOrg/) project that the reinventing of the wheel not supervened nor should it be
+It was important for the [Amadla](https://github.com/AmadlaOrg/) project that the reinventing of the wheel not supervened nor should it be
 adding complexity by creating too many new concepts. A maximum of technologies needed to be familiar to the users.
 
 This is why HERY is more of an extension to YAML than a completely new 
-[Electronic Data Interchange (EDI)](https://en.wikipedia.org/wiki/Electronic_data_interchange)/storage/
-[markup](https://en.wikipedia.org/wiki/Markup_language) thingamajig.
+[Electronic Data Interchange (EDI)](https://en.wikipedia.org/wiki/Electronic_data_interchange)/storage/[markup](https://en.wikipedia.org/wiki/Markup_language) thingamajig.
 
 But again back to the question... Glorify what!?
 
