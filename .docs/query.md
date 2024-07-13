@@ -18,7 +18,7 @@ entities._entity("github.com/AmadlaOrg/EntityApplication@v*")
 
 Again, yes, that simple!
 
-> In `("")` it is possible to use [glob](https://en.wikipedia.org/wiki/Glob_(programming).
+> In `("")` it is possible to use [glob](https://en.wikipedia.org/wiki/Glob_(programming)).
 
 ## Selecting by any entity property
 ```heryquery

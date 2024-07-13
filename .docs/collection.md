@@ -12,3 +12,8 @@ With the cli it is possible to list and add a collection.
 
 ## Where?
 `~/.henry/` or `{project root}/.henry/`.
+
+## How to set?
+With the environment variable: `HERY_COLLECTION=amadla`
+
+It is also possible to pass it as a command flag: `--collection=amadla` or `-c amadla`
