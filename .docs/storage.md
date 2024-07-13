@@ -12,12 +12,12 @@ Example of a storage structure:
 - `hery/` - The root of the storage for collections of entities
   - `amadla/` - An example of a collection
     - `entity/` - All the entities are stored inside of this directory
-      - `github.com/` - From 
+      - `github.com/` - From this point forward the path to the entity is broken down into directories
         - `AmadlaOrg/`
-          - `Entity/`
-            - `.amadla/`
-              - `schema.json`
-            - `amadla.yml`
-          - `EntityApplication/`
+          - `Entity@v1.0.0/` - Entity name with the version
+            - `.amadla/` - The directory is always named after the collection
+              - `schema.json` - The schema for the entity
+            - `amadla.yml` - Is an entity with data, normally used to define an entity
+          - `EntityApplication@v1.0.0/` - This is just another entity
             - ...
     - `amadla.cache` - The [SQLite](https://www.sqlite.org/) caching
