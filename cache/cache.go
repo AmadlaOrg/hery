@@ -13,6 +13,10 @@ type Cache interface {
 	Select()
 }
 
+// TODO: journal mode: wal
+// This will help with performance
+// https://stackoverflow.com/questions/57118674/go-sqlite3-with-journal-mode-wal-gives-database-is-locked-error
+
 func Create() {
 	// Open an in-memory SQLite database
 	db, err := sql.Open("sqlite3", ":memory:")

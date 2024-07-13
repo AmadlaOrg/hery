@@ -1,0 +1,59 @@
+entities: {
+  shape: sql_table
+  _id: string {constraint: primary_key}
+  _entity: string
+  name: string
+  uri: string
+  origin: string
+  version: string
+  abspath: string
+  have: bool
+  hash: string
+  exists: bool
+  table_name: string
+}
+
+github-com-AmadlaOrg-Entity-v1-0-0: {
+  shape: sql_table
+  _id: string {constraint: primary_key}
+  name: string
+  description: string
+  category: string
+  tags: string
+}
+
+github-com-AmadlaOrg-EntitySystem-Net-v1-0-0: {
+  shape: sql_table
+  _id: string {constraint: primary_key}
+  ports: string
+}
+
+github-com-AmadlaOrg-EntityApplication-v1-0-0: {
+  shape: sql_table
+  _id: string {constraint: primary_key}
+  require: string
+  optional: string
+  restart_policy: string
+}
+
+github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0: {
+  shape: sql_table
+  _id: string {constraint: primary_key}
+  server_name: string
+  optional: string
+  listen: string
+}
+
+github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0-column-listen: {
+  shape: sql_table
+  _id: string {constraint: primary_key}
+  _github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0_id: string
+  _github-com-AmadlaOrg-EntitySystem-Net-v1-0-0_id: string
+}
+
+entities.table_name -> github-com-AmadlaOrg-Entity-v1-0-0
+entities.table_name -> github-com-AmadlaOrg-EntitySystem-Net-v1-0-0
+entities.table_name -> github-com-AmadlaOrg-EntityApplication-v1-0-0
+entities.table_name -> github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0
+github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0._id -> github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0-column-listen._github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0_id
+github-com-AmadlaOrg-EntityApplication-WebServer-v1-0-0-column-listen._github-com-AmadlaOrg-EntitySystem-Net-v1-0-0_id -> github-com-AmadlaOrg-EntitySystem-Net-v1-0-0._id
