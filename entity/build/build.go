@@ -22,7 +22,8 @@ type Build struct {
 	EntityVersionValidation versionValidationPkg.Interface
 }
 
-// MetaFromRemote gathers as many details about an Entity as possible from git and from the URI pass to populate the Entity struct
+// MetaFromRemote gathers as many details about an Entity as possible from git and from the URI pass to populate the
+// Entity struct
 //
 // It also validates values that are pass to it.
 func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
@@ -42,8 +43,6 @@ func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
 		// TODO: Check with git if the version actually exists
 	}
 
-	println(uriEntityVersion)
-
 	return entity.Entity{
 		Name:    "",
 		Uri:     entityUri,
@@ -56,7 +55,8 @@ func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
 	}, nil
 }
 
-// MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI pass to populate the Entity struct
+// MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI pass to
+// populate the Entity struct
 //
 // It also validates values that are pass to it and what is set in storage.
 func (b *Build) MetaFromLocal(entityUri string) entity.Entity {
