@@ -42,6 +42,8 @@ func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
 		// TODO: Check with git if the version actually exists
 	}
 
+	println(uriEntityVersion)
+
 	return entity.Entity{
 		Name:    "",
 		Uri:     entityUri,
@@ -51,7 +53,7 @@ func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
 		Have:    false,
 		Hash:    "",
 		Exist:   true,
-	}
+	}, nil
 }
 
 // MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI pass to populate the Entity struct

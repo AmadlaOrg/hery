@@ -107,7 +107,7 @@ func (gs *GetService) download(entityUrls []string, collectionStoragePath string
 						return
 					}
 					if !versionExists {
-						errCh <- errors.New(fmt.Sprintf("The version of the entity URL does not exist: %s", entityUrl))
+						errCh <- fmt.Errorf("the version of the entity URL does not exist: %s", entityUrl)
 						return
 					}
 				}

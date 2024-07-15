@@ -10,9 +10,9 @@ import (
 // NewGetService to set up the Get service
 func NewGetService() *GetService {
 	return &GetService{
-		Git:                     utilGit.NewGitService(),              // Replace with actual constructor
-		EntityValidation:        validation.NewValidationService(),    // Replace with actual constructor
-		EntityVersion:           version.NewVersion(),                 // Replace with actual constructor
-		EntityVersionValidation: versionValidationPkg.NewValidation(), // Replace with actual constructor
+		Git:                     utilGit.NewGitService(),
+		EntityValidation:        validation.NewEntityValidationService(),
+		EntityVersion:           version.NewEntityVersionService(),
+		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
 	}
 }

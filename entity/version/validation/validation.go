@@ -34,13 +34,7 @@ func (vs *Validation) Exists(entityUrlPath, version string) (bool, error) {
 
 // Format validates that the version follows one of these formats: `v1.0.0` or `v1.0` or `v1`
 func (vs *Validation) Format(version string) bool {
-	re := regexp.MustCompile(versionPkg.Format)
-
-	if re.MatchString(version) {
-		return true
-	}
-
-	return false
+	return regexp.MustCompile(versionPkg.Format).MatchString(version)
 }
 
 // PseudoFormat
