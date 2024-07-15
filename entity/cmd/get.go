@@ -20,7 +20,12 @@ var GetCmd = &cobra.Command{
 		if err != nil {
 			return
 		}
-		entity.Get(collection, path, args)
+
+		// Use the NewGetService function
+		getService := entity.NewGetService()
+
+		// Call the Get method
+		getService.Get(collection, path, args)
 		/*if !validation.CollectionName(collectionName) {
 			log.Fatalf("Invalid collection name: %s", collectionName)
 		}

@@ -17,7 +17,7 @@ import (
 
 type Interface interface {
 	Entity(entityPath string) error
-	EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error)
+	EntityUrl(entityUrl string) bool
 }
 
 type Validation struct {
@@ -94,24 +94,14 @@ func (v *Validation) Entity(entityPath string) error {
 // error: error message
 //
 // -------------------------------------------------------------------------------
-func (v *Validation) EntityUrl(entityUrl string, checkVersionExist bool) (bool, string, error) {
+func (v *Validation) EntityUrl(entityUrl string) bool {
 	if strings.Contains(entityUrl, "://") {
-		return false, "", nil
+		return false
 	}
 	for _, r := range entityUrl {
 		if unicode.IsSpace(r) || r == ':' || r == '?' || r == '&' || r == '=' || r == '#' {
-			return false, "", nil
+			return false
 		}
 	}
-	if strings.Contains(entityUrl, "@") {
-		ver, err := v.version.Extract(entityUrl)
-		if err != nil {
-			return false, "", fmt.Errorf("error extracting version: %v", err)
-		}
-		if !v.versionValidation.Format(ver) {
-			return false, "", nil
-		}
-		// TODO: Check with git if the version actually exists
-	}
-	return true, "", nil
+	return true
 }

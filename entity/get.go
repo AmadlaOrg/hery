@@ -23,9 +23,9 @@ type GetInterface interface {
 
 type GetService struct {
 	Git                     git.Interface
-	entityValidation        validation.Interface
-	entityVersion           version.Interface
-	entityVersionValidation versionValidationPkg.Interface
+	EntityValidation        validation.Interface
+	EntityVersion           version.Interface
+	EntityVersionValidation versionValidationPkg.Interface
 }
 
 // Get with collection name and the args that are the entities urls, calls on download to get the entities
@@ -37,7 +37,7 @@ func (gs *GetService) Get(collectionName, storagePath string, args []string) {
 
 	for _, arg := range args {
 		// TODO: Transform
-		if isEntityUrlValid, entityVersion, err := gs.entityValidation.EntityUrl(arg, true); err != nil {
+		if gs.EntityValidation.EntityUrl(arg) {
 			log.Fatalf("Invalid entity URL: %s", arg)
 		}
 	}
@@ -81,18 +81,18 @@ func (gs *GetService) download(entityUrls []string, collectionStoragePath string
 				// TODO: Moved to entity->validation
 				var versionExists = false
 				if entityVersion == "latest" {
-					entityVersionList, err := gs.entityVersion.List(entityFullRepoUrl)
+					entityVersionList, err := gs.EntityVersion.List(entityFullRepoUrl)
 					if err != nil {
 						errCh <- err
 						return
 					}
-					entityVersion, err = gs.entityVersion.Latest(entityVersionList)
+					entityVersion, err = gs.EntityVersion.Latest(entityVersionList)
 					if err != nil {
 						errCh <- err
 						return
 					}
 					versionExists = true
-				} else if !gs.entityVersionValidation.Format(entityVersion) {
+				} else if !gs.EntityVersionValidation.Format(entityVersion) {
 					errCh <- errors.New("entity version in the entity url is wrong format")
 					return
 				}
@@ -101,7 +101,7 @@ func (gs *GetService) download(entityUrls []string, collectionStoragePath string
 				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
 
 				if !versionExists {
-					versionExists, err := gs.entityVersionValidation.Exists(entityUrlPath, entityVersion)
+					versionExists, err := gs.EntityVersionValidation.Exists(entityUrlPath, entityVersion)
 					if err != nil {
 						errCh <- err
 						return
@@ -114,19 +114,19 @@ func (gs *GetService) download(entityUrls []string, collectionStoragePath string
 			} else {
 				entityUrlPath = entityUrl
 				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
-				entityVersionList, err := gs.entityVersion.List(entityFullRepoUrl)
+				entityVersionList, err := gs.EntityVersion.List(entityFullRepoUrl)
 				if err != nil {
 					errCh <- err
 					return
 				}
 				if len(entityVersionList) == 0 {
-					entityVersion, err = gs.entityVersion.GeneratePseudo(entityFullRepoUrl)
+					entityVersion, err = gs.EntityVersion.GeneratePseudo(entityFullRepoUrl)
 					if err != nil {
 						errCh <- err
 						return
 					}
 				} else {
-					entityVersion, err = gs.entityVersion.Latest(entityVersionList)
+					entityVersion, err = gs.EntityVersion.Latest(entityVersionList)
 					if err != nil {
 						errCh <- err
 						return
