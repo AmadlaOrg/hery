@@ -13,7 +13,8 @@ var SettingsCmd = &cobra.Command{
 	Use:   "settings",
 	Short: "List the paths and other environment variables for HERY",
 	Run: func(cmd *cobra.Command, args []string) {
-		heryPath, err := storage.Path()
+		storageService := storage.NewStorageService()
+		heryPath, err := storageService.Main()
 		if err != nil {
 			fmt.Println(err)
 		}
