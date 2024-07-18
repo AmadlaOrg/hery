@@ -26,7 +26,8 @@ var InitCmd = &cobra.Command{
 		}
 
 		// Retrieve storage path
-		storagePath, err := storage.Path()
+		storageService := storage.NewStorageService()
+		storagePath, err := storageService.Main()
 		if err != nil {
 			log.Fatal(err)
 		}

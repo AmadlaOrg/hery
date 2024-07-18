@@ -25,3 +25,51 @@ func TestBinarySearch(t *testing.T) {
 		})
 	}
 }
+
+func TestExistInStringArr(t *testing.T) {
+	tests := []struct {
+		name     string
+		str      string
+		strArr   []string
+		expected bool
+	}{
+		{
+			name:     "String exists in array",
+			str:      "hello",
+			strArr:   []string{"hello", "world"},
+			expected: true,
+		},
+		{
+			name:     "String does not exist in array",
+			str:      "goodbye",
+			strArr:   []string{"hello", "world"},
+			expected: false,
+		},
+		{
+			name:     "Empty string in array",
+			str:      "",
+			strArr:   []string{"", "world"},
+			expected: true,
+		},
+		{
+			name:     "Empty string not in array",
+			str:      "",
+			strArr:   []string{"hello", "world"},
+			expected: false,
+		},
+		{
+			name:     "Array is empty",
+			str:      "hello",
+			strArr:   []string{},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ExistInStringArr(tt.str, tt.strArr); got != tt.expected {
+				t.Errorf("ExistInStringArr() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

@@ -1,4 +1,4 @@
-package entity
+package get
 
 import (
 	"github.com/AmadlaOrg/hery/entity/validation"
@@ -8,8 +8,8 @@ import (
 )
 
 // NewGetService to set up the Get service
-func NewGetService() *GetService {
-	return &GetService{
+func NewGetService() *Service {
+	return &Service{
 		Git:                     utilGit.NewGitService(),
 		EntityValidation:        validation.NewEntityValidationService(),
 		EntityVersion:           version.NewEntityVersionService(),

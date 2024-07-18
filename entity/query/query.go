@@ -1,4 +1,4 @@
-package entity
+package query
 
 import (
 	"fmt"
@@ -9,8 +9,10 @@ import (
 	"v.io/v23/glob"
 )
 
+type Query struct{}
+
 // Query
-func Query(args []string) {
+func (q *Query) Q(args []string) {
 	for _, arg := range args {
 		if arg == "!" {
 			continue

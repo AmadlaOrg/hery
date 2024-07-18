@@ -21,8 +21,8 @@ type Interface interface {
 }
 
 type Validation struct {
-	version           version.Interface
-	versionValidation versionValidationPkg.Interface
+	Version           version.Interface
+	VersionValidation versionValidationPkg.Interface
 }
 
 // Schema

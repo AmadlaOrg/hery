@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/compose"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -14,7 +14,8 @@ var ComposeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		entityArg := args[0]
 		printToScreen, _ := cmd.Flags().GetBool("print")
-		err := entity.ComposeEntity(entityArg, printToScreen)
+		composeService := compose.NewComposeService()
+		err := composeService.Entity(entityArg, printToScreen)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)

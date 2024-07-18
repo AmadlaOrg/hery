@@ -13,3 +13,13 @@ func BinarySearch(sortedList []string, target string) int {
 	}
 	return -1
 }
+
+// ExistInStringArr checks if a string exist in an array
+func ExistInStringArr(str string, strArr []string) bool {
+	for _, strItem := range strArr {
+		if strItem == str {
+			return true
+		}
+	}
+	return false
+}

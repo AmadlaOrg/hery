@@ -2,7 +2,7 @@ package cmd
 
 import (
 	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
-	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/get"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
 	"log"
@@ -16,13 +16,14 @@ var GetCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-		path, err := storage.Path()
+		storageService := storage.NewStorageService()
+		path, err := storageService.Main()
 		if err != nil {
 			return
 		}
 
 		// Use the NewGetService function
-		getService := entity.NewGetService()
+		getService := get.NewGetService()
 
 		// Call the Get method
 		getService.Get(collection, path, args)

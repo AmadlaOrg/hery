@@ -12,7 +12,8 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List collections",
 	Run: func(cmd *cobra.Command, args []string) {
-		storagePath, err := storage.Path()
+		storageService := storage.NewStorageService()
+		storagePath, err := storageService.Main()
 		if err != nil {
 			log.Fatal(err)
 		}

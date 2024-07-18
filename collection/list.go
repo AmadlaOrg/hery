@@ -1,14 +1,8 @@
 package collection
 
-import (
-	"fmt"
-	"github.com/AmadlaOrg/hery/storage"
-	"os"
-)
-
 // List gathers all the directories that are collections in the `.henry` main storage directory to return them
-func List() ([][]string, error) {
-	path, err := storage.Path()
+/*func List() ([][]string, error) {
+	path, err := storage.Main()
 	if err != nil {
 		return nil, err
 	}
@@ -28,4 +22,4 @@ func List() ([][]string, error) {
 	}
 
 	return directories, nil
-}
+}*/

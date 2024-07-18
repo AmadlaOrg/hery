@@ -1,35 +1,24 @@
 package validation
 
 import (
-	"errors"
 	versionPkg "github.com/AmadlaOrg/hery/entity/version"
+	utilString "github.com/AmadlaOrg/hery/util/string"
 	"regexp"
 )
 
 type Interface interface {
-	Exists(entityUrlPath, version string) (bool, error)
+	Exists(version string, versions []string) bool
 	Format(version string) bool
-	PseudoFormat(pseudoVersion string) (string, error)
+	PseudoFormat(pseudoVersion string) bool
 }
 
 type Validation struct {
-	version versionPkg.Interface
+	Version versionPkg.Interface
 }
 
 // Exists checks if a specific version exists in the list of versions
-func (vs *Validation) Exists(entityUrlPath, version string) (bool, error) {
-	versions, err := vs.version.List(entityUrlPath)
-	if err != nil {
-		return false, err
-	}
-
-	for _, v := range versions {
-		if v == version {
-			return true, nil
-		}
-	}
-
-	return false, nil
+func (vs *Validation) Exists(version string, versions []string) bool {
+	return utilString.ExistInStringArr(version, versions)
 }
 
 // Format validates that the version follows one of these formats: `v1.0.0` or `v1.0` or `v1`
@@ -38,11 +27,8 @@ func (vs *Validation) Format(version string) bool {
 }
 
 // PseudoFormat
-func (vs *Validation) PseudoFormat(pseudoVersion string) (string, error) {
+func (vs *Validation) PseudoFormat(pseudoVersion string) bool {
+	// TODO: Needs a regex
 	re := regexp.MustCompile(pseudoVersion)
-	if re.MatchString(pseudoVersion) {
-		return pseudoVersion, nil
-	}
-
-	return "", errors.New("invalid pseudo-version formatting")
+	return re.MatchString(pseudoVersion)
 }

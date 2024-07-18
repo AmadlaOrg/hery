@@ -10,7 +10,6 @@ import (
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/git"
 	"github.com/AmadlaOrg/hery/util/url"
-	"path/filepath"
 	"strings"
 )
 
@@ -23,23 +22,29 @@ type Build struct {
 	EntityValidation        validation.Interface
 	EntityVersion           version.Interface
 	EntityVersionValidation versionValidationPkg.Interface
+	Storage                 storage.Storage
 }
 
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI pass to populate the
 // Entity struct
 //
 // It also validates values that are pass to it.
-func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
+func (b *Build) MetaFromRemote(collectionName, entityUri string) (entity.Entity, error) {
 	if !b.EntityValidation.EntityUrl(entityUri) {
 		return entity.Entity{
 			Exist: false,
 		}, errors.New("invalid entity url")
 	}
 
+	paths, err := b.Storage.Paths(collectionName)
+	if err != nil {
+		return entity.Entity{}, err
+	}
+
 	var entityUrlPath string
 	var entityFullRepoUrl string
 	var entityVersion string
-	var uriEntityVersion string
+	//var uriEntityVersion string
 	if strings.Contains(entityUri, "@") {
 		uriEntityVersion, err := b.EntityVersion.Extract(entityUri)
 		if err != nil {
@@ -51,14 +56,16 @@ func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
 		entityUrlPath = url.EntityPathUrl(entityUri, uriEntityVersion)
 		entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
 
-		var versionExists = false
+		entityVersionList, err := b.EntityVersion.List(entityFullRepoUrl)
+		if err != nil {
+			return entity.Entity{
+				Exist: false,
+			}, fmt.Errorf("error listing versions: %v", err)
+		}
+
+		//var versionExists = false
 		if uriEntityVersion == "latest" {
-			entityVersionList, err := b.EntityVersion.List()
-			if err != nil {
-				return entity.Entity{
-					Exist: false,
-				}, fmt.Errorf("error listing versions: %v", err)
-			}
+
 			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {
 				return entity.Entity{
@@ -70,18 +77,20 @@ func (b *Build) MetaFromRemote(entityUri string) (entity.Entity, error) {
 				Exist: false,
 			}, nil
 		}
-		if b.EntityVersionValidation.Exists(entityUri, uriEntityVersion) {
+		/*if b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
 
-		}
+		}*/
 		// TODO: Check with git if the version actually exists
 	}
+
+	entityPath := paths.EntityPath(paths.Collection, entityUrlPath)
 
 	return entity.Entity{
 		Name:    "",
 		Uri:     entityUri,
 		Origin:  entityUrlPath,
 		Version: entityVersion,
-		AbsPath: filepath.Join(storage.Path(), "entity", entityFullRepoUrl),
+		AbsPath: entityPath,
 		Have:    false,
 		Hash:    "",
 		Exist:   true,

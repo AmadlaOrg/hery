@@ -1,7 +1,8 @@
-package entity
+package compose
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/storage"
 	utilObjectPkg "github.com/AmadlaOrg/hery/util/object"
 	utilYamlPkg "github.com/AmadlaOrg/hery/util/yaml"
@@ -12,8 +13,16 @@ import (
 	"sync"
 )
 
-func ComposeEntity(entityArg string, printToScreen bool) error {
-	root, err := storage.Path()
+type Interface interface {
+	ComposeEntity(entityArg string, printToScreen bool) error
+}
+
+type Compose struct {
+	Storage storage.Storage
+}
+
+func (c *Compose) Entity(entityArg string, printToScreen bool) error {
+	root, err := c.Storage.Main()
 	if err != nil {
 		return err
 	}
@@ -56,8 +65,8 @@ func ComposeEntity(entityArg string, printToScreen bool) error {
 
 func parseEntityArg(entityArg string) (string, string, error) {
 	// Validate entity name and version separately
-	entityNamePattern := regexp.MustCompile(entityNameMatch)
-	entityWithVersionPattern := regexp.MustCompile(entityNameAndVersionMatch)
+	entityNamePattern := regexp.MustCompile(entity.EntityNameMatch)
+	entityWithVersionPattern := regexp.MustCompile(entity.EntityNameAndVersionMatch)
 
 	if entityWithVersionPattern.MatchString(entityArg) {
 		matches := entityWithVersionPattern.FindStringSubmatch(entityArg)

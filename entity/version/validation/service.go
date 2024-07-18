@@ -7,6 +7,6 @@ import (
 // NewEntityVersionValidationService to set up the Entity version validation service
 func NewEntityVersionValidationService() *Validation {
 	return &Validation{
-		version: version.NewEntityVersionService(),
+		Version: version.NewEntityVersionService(),
 	}
 }

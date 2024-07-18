@@ -13,7 +13,8 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all entities",
 	Run: func(cmd *cobra.Command, args []string) {
-		entityDir, err := storage.Path()
+		storageService := storage.NewStorageService()
+		entityDir, err := storageService.Main()
 		if err != nil {
 			fmt.Println("could not get the root storage directory:", err)
 			return

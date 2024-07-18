@@ -9,13 +9,39 @@ import (
 )
 
 type Storage interface {
-	Path() (string, error)
+	Paths(collectionName string) (*AbsPaths, error)
+	Main() (string, error)
+	EntityPath(collectionPath, entityRelativePath string) string
 }
 
-// Path returns the absolute path to where the entities are stored
-func Path() (string, error) {
-	var entityDir string
+type AbsPaths struct {
+	Storage    string
+	Collection string
+	Entities   string
+	Cache      string
+}
 
+// Paths returns the absolute path to where the entities are stored
+func (d *AbsPaths) Paths(collectionName string) (*AbsPaths, error) {
+	mainPath, err := d.Main()
+	if err != nil {
+		return &AbsPaths{}, err
+	}
+
+	collectionPath := d.collectionPath(mainPath, collectionName)
+	entityPath := d.entitiesPath(collectionPath)
+	cachePath := d.cachePath(collectionName, collectionPath)
+
+	return &AbsPaths{
+		Storage:    mainPath,
+		Collection: collectionPath,
+		Entities:   entityPath,
+		Cache:      cachePath,
+	}, nil
+}
+
+// Main returns the main path for .hery storage path
+func (d *AbsPaths) Main() (string, error) {
 	//
 	// Using env var
 	//
@@ -49,17 +75,39 @@ func Path() (string, error) {
 	// Default
 	//
 
+	var mainDir string
 	switch runtime.GOOS {
 	case "windows":
 		appDataDir := os.Getenv("APPDATA")
-		entityDir = filepath.Join(appDataDir, "Hery")
+		mainDir = filepath.Join(appDataDir, "Hery")
 	default: // "linux" and "darwin" (macOS)
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return "", fmt.Errorf("error getting home directory: %s", err)
 		}
-		entityDir = filepath.Join(homeDir, ".hery")
+		mainDir = filepath.Join(homeDir, ".hery")
 	}
 
-	return entityDir, nil
+	return mainDir, nil
+}
+
+// collectionPath returns the collection absolute path
+func (d *AbsPaths) collectionPath(mainPath, collectionName string) string {
+	return filepath.Join(mainPath, collectionName)
+}
+
+// entityPath returns the entity absolute path
+func (d *AbsPaths) entitiesPath(collectionPath string) string {
+	return filepath.Join(collectionPath, "entity")
+}
+
+// cachePath returns the collection cache absolute path
+func (d *AbsPaths) cachePath(collectionName, collectionPath string) string {
+	return filepath.Join(collectionPath, fmt.Sprintf("%s.cache", collectionName))
+}
+
+// EntityPath returns the absolute path to a specific entity
+func (d *AbsPaths) EntityPath(collectionPath, entityRelativePath string) string {
+	entitiesPath := d.entitiesPath(collectionPath)
+	return filepath.Join(entitiesPath, entityRelativePath)
 }

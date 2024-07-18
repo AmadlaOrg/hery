@@ -2,14 +2,14 @@ package entity
 
 const (
 	// The entity name format
-	entityNameMatch = `^[a-zA-Z0-9]+$`
+	EntityNameMatch = `^[a-zA-Z0-9]+$`
 
 	// The entity name and version format
 	// @deprecated: the version is wrong since it changed
-	entityNameAndVersionMatch = `^([a-zA-Z0-9]+)(@v\d+\.\d+\.\d+)$`
+	EntityNameAndVersionMatch = `^([a-zA-Z0-9]+)(@v\d+\.\d+\.\d+)$`
 
 	// Used to identify the entities that are stored in a collection
-	formatEntityPathAndNameVersion = `^(.+[/\/]\.[A-z0-9-_]+[/\/]entity[/\/])(.+)([/\/].+@).+$`
+	FormatEntityPathAndNameVersion = `^(.+[/\/]\.[A-z0-9-_]+[/\/]entity[/\/])(.+)([/\/].+@).+$`
 )
 
 // Entity holds the origin and version of an entity

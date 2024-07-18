@@ -1,4 +1,4 @@
-package entity
+package get
 
 import (
 	"errors"
@@ -16,12 +16,12 @@ import (
 	"sync"
 )
 
-type GetInterface interface {
+type Interface interface {
 	Get(collectionName, storagePath string, args []string)
 	download(entityUrls []string, collectionStoragePath string) error
 }
 
-type GetService struct {
+type Service struct {
 	Git                     git.Interface
 	EntityValidation        validation.Interface
 	EntityVersion           version.Interface
@@ -29,7 +29,7 @@ type GetService struct {
 }
 
 // Get with collection name and the args that are the entities urls, calls on download to get the entities
-func (gs *GetService) Get(collectionName, storagePath string, args []string) {
+func (gs *Service) Get(collectionName, storagePath string, args []string) {
 	// Validate that all the URLs pass in the arguments are valid
 	if len(args) == 0 {
 		log.Fatal("No entity URL(s) specified")
@@ -55,7 +55,7 @@ func (gs *GetService) Get(collectionName, storagePath string, args []string) {
 }
 
 // download in parallel all the entities
-func (gs *GetService) download(entityUrls []string, collectionStoragePath string) error {
+func (gs *Service) download(entityUrls []string, collectionStoragePath string) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entityUrls))
 
@@ -101,11 +101,11 @@ func (gs *GetService) download(entityUrls []string, collectionStoragePath string
 				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
 
 				if !versionExists {
-					versionExists, err := gs.EntityVersionValidation.Exists(entityUrlPath, entityVersion)
+					/*versionExists, err := gs.EntityVersionValidation.Exists(entityUrlPath, entityVersion)
 					if err != nil {
 						errCh <- err
 						return
-					}
+					}*/
 					if !versionExists {
 						errCh <- fmt.Errorf("the version of the entity URL does not exist: %s", entityUrl)
 						return
