@@ -15,7 +15,7 @@ var ComposeCmd = &cobra.Command{
 		entityArg := args[0]
 		printToScreen, _ := cmd.Flags().GetBool("print")
 		composeService := compose.NewComposeService()
-		err := composeService.Entity(entityArg, printToScreen)
+		err := composeService.ComposeEntity(entityArg, printToScreen)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)

@@ -21,8 +21,8 @@ type Interface interface {
 }
 
 type Validation struct {
-	Version           version.Interface
-	VersionValidation versionValidationPkg.Interface
+	Version           version.Manager
+	VersionValidation *versionValidationPkg.VersionValidation
 }
 
 // Schema
@@ -81,19 +81,6 @@ func (v *Validation) Entity(entityPath string) error {
 }
 
 // EntityUrl validates the module path for go get
-//
-// -------------------------------------------------------------------------------
-//
-// --- Params ---
-// entityUrl string: the entity url (with version or not)
-// checkVersionExist bool: to indicate to check the version exist or not
-//
-// --- Return ---
-// bool: is valid true or not
-// string: valid version
-// error: error message
-//
-// -------------------------------------------------------------------------------
 func (v *Validation) EntityUrl(entityUrl string) bool {
 	if strings.Contains(entityUrl, "://") {
 		return false

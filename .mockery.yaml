@@ -9,10 +9,17 @@ packages:
           inpackage: True
   github.com/AmadlaOrg/hery/util/git:
     interfaces:
-      Git:
+      RepoManager:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockGit"
+          inpackage: True
+  github.com/AmadlaOrg/hery/util/git/remote:
+    interfaces:
+      RepoRemoteManager:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockGitRemote"
           inpackage: True
   github.com/AmadlaOrg/hery/util/json:
     interfaces:

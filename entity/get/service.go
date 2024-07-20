@@ -8,8 +8,8 @@ import (
 )
 
 // NewGetService to set up the Get service
-func NewGetService() *Service {
-	return &Service{
+func NewGetService() *GetterService {
+	return &GetterService{
 		Git:                     utilGit.NewGitService(),
 		EntityValidation:        validation.NewEntityValidationService(),
 		EntityVersion:           version.NewEntityVersionService(),

@@ -10,128 +10,77 @@ import (
 	utilFilePkg "github.com/AmadlaOrg/hery/util/file"
 	"github.com/AmadlaOrg/hery/util/git"
 	"github.com/AmadlaOrg/hery/util/url"
-	"log"
 	"path/filepath"
 	"strings"
 	"sync"
 )
 
-type Interface interface {
-	Get(collectionName, storagePath string, args []string)
+// EntityGetter is an interface for getting entities.
+type EntityGetter interface {
+	Get(collectionName, storagePath string, args []string) error
 	download(entityUrls []string, collectionStoragePath string) error
 }
 
-type Service struct {
-	Git                     git.Interface
+// GetterService struct implements the EntityGetter interface.
+type GetterService struct {
+	Git                     git.RepoManager
 	EntityValidation        validation.Interface
-	EntityVersion           version.Interface
-	EntityVersionValidation versionValidationPkg.Interface
+	EntityVersion           *version.Service
+	EntityVersionValidation versionValidationPkg.VersionValidator
 }
 
-// Get with collection name and the args that are the entities urls, calls on download to get the entities
-func (gs *Service) Get(collectionName, storagePath string, args []string) {
-	// Validate that all the URLs pass in the arguments are valid
+// Get retrieves entities based on the provided collection name and arguments.
+func (gs *GetterService) Get(collectionName, storagePath string, args []string) error {
+	// Validate that all the URLs passed in the arguments are valid
 	if len(args) == 0 {
-		log.Fatal("No entity URL(s) specified")
+		return errors.New("no entity URL(s) specified")
 	}
 
 	for _, arg := range args {
-		// TODO: Transform
-		if gs.EntityValidation.EntityUrl(arg) {
-			log.Fatalf("Invalid entity URL: %s", arg)
+		if !gs.EntityValidation.EntityUrl(arg) {
+			return fmt.Errorf("invalid entity URL: %s", arg)
 		}
 	}
 
 	collectionStoragePath := collection.Path(collectionName, storagePath)
 	if !utilFilePkg.Exists(collectionStoragePath) {
-		log.Fatalf("The collection storage directory does not exist: %s", collectionStoragePath)
+		return fmt.Errorf("the collection storage directory does not exist: %s", collectionStoragePath)
 	}
 
 	println(collectionStoragePath)
-	err := gs.download(args, collectionStoragePath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return gs.download(args, collectionStoragePath)
 }
 
-// download in parallel all the entities
-func (gs *Service) download(entityUrls []string, collectionStoragePath string) error {
+// download retrieves entities in parallel.
+func (gs *GetterService) download(entityUrls []string, collectionStoragePath string) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entityUrls))
 
 	errCh := make(chan error, len(entityUrls)) // Channel to collect errors
 	//TODO: entityPaths := make([]string, len(entityUrls)) Maybe check with directories
 
-	for i, entityUrl := range entityUrls {
-		go func(i int, entityUrl string) {
+	for _, entityUrl := range entityUrls {
+		go func(entityUrl string) {
 			defer wg.Done()
 
 			// TODO: skip (continue) loop-iteration if entity with same version was already downloaded/installed maybe make a Map
 
-			var entityUrlPath string
+			//var entityUrlPath string
 			var entityFullRepoUrl string
 			var entityVersion string
+
 			if strings.Contains(entityUrl, "@") {
-				/*entityVersion, err := version.Extract(entityUrl)
+				/*entityUrlPath, entityFullRepoUrl, entityVersion, err := gs.processEntityUrlWithVersion(entityUrl)
 				if err != nil {
 					errCh <- err
 					return
 				}*/
-
-				// TODO: Moved to entity->validation
-				var versionExists = false
-				if entityVersion == "latest" {
-					entityVersionList, err := gs.EntityVersion.List(entityFullRepoUrl)
-					if err != nil {
-						errCh <- err
-						return
-					}
-					entityVersion, err = gs.EntityVersion.Latest(entityVersionList)
-					if err != nil {
-						errCh <- err
-						return
-					}
-					versionExists = true
-				} else if !gs.EntityVersionValidation.Format(entityVersion) {
-					errCh <- errors.New("entity version in the entity url is wrong format")
-					return
-				}
-
-				entityUrlPath = url.EntityPathUrl(entityUrl, entityVersion)
-				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
-
-				if !versionExists {
-					/*versionExists, err := gs.EntityVersionValidation.Exists(entityUrlPath, entityVersion)
-					if err != nil {
-						errCh <- err
-						return
-					}*/
-					if !versionExists {
-						errCh <- fmt.Errorf("the version of the entity URL does not exist: %s", entityUrl)
-						return
-					}
-				}
 			} else {
-				entityUrlPath = entityUrl
-				entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
-				entityVersionList, err := gs.EntityVersion.List(entityFullRepoUrl)
+				/*entityUrlPath, entityFullRepoUrl, entityVersion, err := gs.processEntityUrlWithoutVersion(entityUrl)
 				if err != nil {
 					errCh <- err
 					return
-				}
-				if len(entityVersionList) == 0 {
-					entityVersion, err = gs.EntityVersion.GeneratePseudo(entityFullRepoUrl)
-					if err != nil {
-						errCh <- err
-						return
-					}
-				} else {
-					entityVersion, err = gs.EntityVersion.Latest(entityVersionList)
-					if err != nil {
-						errCh <- err
-						return
-					}
-				}
+				}*/
 				entityUrl = fmt.Sprintf("%s@%s", entityUrl, entityVersion)
 			}
 
@@ -139,25 +88,85 @@ func (gs *Service) download(entityUrls []string, collectionStoragePath string) e
 
 			// Download the Entity with `git clone`
 			if err := gs.Git.FetchRepo(entityFullRepoUrl, destination); err != nil {
-				errCh <- fmt.Errorf("error fetching repo: %v\n", err)
+				errCh <- fmt.Errorf("error fetching repo: %v", err)
 			}
 
 			println(entityVersion)
-			//entityUrls[i].Version = entityVersion
-		}(i, entityUrl)
+		}(entityUrl)
 	}
 
 	wg.Wait()
-	close(errCh) // Close the error channel
+	close(errCh)
 
-	var err error
+	var combinedErr error
 	for e := range errCh {
-		if err == nil {
-			err = e
+		if combinedErr == nil {
+			combinedErr = e
 		} else {
-			err = fmt.Errorf("%v; %v", err, e) // Combine multiple errors
+			combinedErr = fmt.Errorf("%v; %v", combinedErr, e)
 		}
 	}
 
-	return err
+	return combinedErr
+}
+
+func (gs *GetterService) processEntityUrlWithVersion(entityUrl string) (string, string, string, error) {
+	uriEntityVersion, err := gs.EntityVersion.Extract(entityUrl)
+	if err != nil {
+		return "", "", "", fmt.Errorf("error extracting version: %v", err)
+	}
+
+	entityUrlPath := url.EntityPathUrl(entityUrl, uriEntityVersion)
+	entityFullRepoUrl := url.EntityFullRepoUrl(entityUrlPath)
+
+	entityVersionList, err := gs.EntityVersion.List(entityFullRepoUrl)
+	if err != nil {
+		return "", "", "", fmt.Errorf("error listing versions: %v", err)
+	}
+
+	var entityVersion string
+	var versionExists bool
+	if uriEntityVersion == "latest" {
+		entityVersion, err = gs.EntityVersion.Latest(entityVersionList)
+		if err != nil {
+			return "", "", "", fmt.Errorf("error finding latest version: %v", err)
+		}
+		versionExists = true
+	} else if !gs.EntityVersionValidation.Format(uriEntityVersion) {
+		return "", "", "", errors.New("entity version in the entity url is wrong format")
+	}
+
+	if !versionExists {
+		// Check if the version exists
+		/*versionExists := gs.EntityVersionValidation.Exists(entityUrlPath, uriEntityVersion)
+		if !versionExists {
+			return "", "", "", fmt.Errorf("the version of the entity URL does not exist: %s", entityUrl)
+		}*/
+	}
+
+	return entityUrlPath, entityFullRepoUrl, entityVersion, nil
+}
+
+func (gs *GetterService) processEntityUrlWithoutVersion(entityUrl string) (string, string, string, error) {
+	entityUrlPath := entityUrl
+	entityFullRepoUrl := url.EntityFullRepoUrl(entityUrlPath)
+	entityVersionList, err := gs.EntityVersion.List(entityFullRepoUrl)
+	if err != nil {
+		return "", "", "", fmt.Errorf("error listing versions: %v", err)
+	}
+
+	var entityVersion string
+	if len(entityVersionList) == 0 {
+		entityVersion, err = gs.EntityVersion.GeneratePseudo(entityFullRepoUrl)
+		if err != nil {
+			return "", "", "", fmt.Errorf("error generating pseudo version: %v", err)
+		}
+	} else {
+		entityVersion, err = gs.EntityVersion.Latest(entityVersionList)
+		if err != nil {
+			return "", "", "", fmt.Errorf("error finding latest version: %v", err)
+		}
+	}
+
+	return entityUrlPath, entityFullRepoUrl, entityVersion, nil
 }

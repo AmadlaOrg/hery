@@ -1,3 +1,4 @@
 .gen.
 _test.
 mock_
+main.go

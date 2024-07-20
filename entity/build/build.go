@@ -3,6 +3,8 @@ package build
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -10,26 +12,26 @@ import (
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/git"
 	"github.com/AmadlaOrg/hery/util/url"
-	"strings"
 )
 
-type Interface interface {
-	MetaFromRemote(entityUri string) entity.Entity
+// MetaBuilder to help with mocking and to gather metadata from remote and local sources.
+type MetaBuilder interface {
+	MetaFromRemote(collectionName, entityUri string) (entity.Entity, error)
+	MetaFromLocal(entityUri string) entity.Entity
 }
 
-type Build struct {
-	Git                     git.Interface
+// Builder struct implements the MetaBuilder interface.
+type Builder struct {
+	Git                     git.RepoManager
 	EntityValidation        validation.Interface
-	EntityVersion           version.Interface
-	EntityVersionValidation versionValidationPkg.Interface
+	EntityVersion           version.Manager
+	EntityVersionValidation versionValidationPkg.VersionValidation
 	Storage                 storage.Storage
 }
 
-// MetaFromRemote gathers as many details about an Entity as possible from git and from the URI pass to populate the
-// Entity struct
-//
-// It also validates values that are pass to it.
-func (b *Build) MetaFromRemote(collectionName, entityUri string) (entity.Entity, error) {
+// MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
+// Entity struct. It also validates values that are passed to it.
+func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entity, error) {
 	if !b.EntityValidation.EntityUrl(entityUri) {
 		return entity.Entity{
 			Exist: false,
@@ -65,7 +67,6 @@ func (b *Build) MetaFromRemote(collectionName, entityUri string) (entity.Entity,
 
 		//var versionExists = false
 		if uriEntityVersion == "latest" {
-
 			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {
 				return entity.Entity{
@@ -97,11 +98,10 @@ func (b *Build) MetaFromRemote(collectionName, entityUri string) (entity.Entity,
 	}, nil
 }
 
-// MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI pass to
-// populate the Entity struct
-//
-// It also validates values that are pass to it and what is set in storage.
-func (b *Build) MetaFromLocal(entityUri string) entity.Entity {
+// MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI passed to
+// populate the Entity struct. It also validates values that are passed to it and what is set in storage.
+func (b *Builder) MetaFromLocal(entityUri string) entity.Entity {
+	// Implementation logic for MetaFromLocal
 
 	return entity.Entity{
 		Name:    "",

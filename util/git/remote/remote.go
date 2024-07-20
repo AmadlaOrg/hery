@@ -6,34 +6,33 @@ import (
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"log"
 )
 
-// Interface to help with mocking
-type Interface interface {
-	Tags(repoPath string) ([]string, error)
-	CommitHeadHash(repoPath string) (string, error)
+// RepoRemoteManager to help with mocking
+type RepoRemoteManager interface {
+	Tags(url string) ([]string, error)
+	CommitHeadHash(url string) (string, error)
 }
 
 type GitRemote struct{}
 
-// Tags returns a list of tags for the repository at the specified path.
-func (gt *GitRemote) Tags(url string) ([]string, error) {
+// Tags returns a list of tags for the repository at the specified URL.
+func (gr *GitRemote) Tags(url string) ([]string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
 	})
 
-	// We can then use every Remote functions to retrieve wanted information
+	// Retrieve all references from the remote repository
 	refs, err := rem.List(&git.ListOptions{
 		// Returns all references, including peeled references.
 		PeelingOption: git.AppendPeeled,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	// Filters the references list and only keeps tags
+	// Filter the references list and only keep tags
 	var tags []string
 	for _, ref := range refs {
 		if ref.Name().IsTag() {
@@ -45,7 +44,7 @@ func (gt *GitRemote) Tags(url string) ([]string, error) {
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit
-func (gt *GitRemote) CommitHeadHash(url string) (string, error) {
+func (gr *GitRemote) CommitHeadHash(url string) (string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},

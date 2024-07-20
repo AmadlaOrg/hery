@@ -13,15 +13,18 @@ import (
 	"sync"
 )
 
-type Interface interface {
+// EntityComposer is an interface for composing entities.
+type EntityComposer interface {
 	ComposeEntity(entityArg string, printToScreen bool) error
 }
 
-type Compose struct {
+// Composer struct implements the EntityComposer interface.
+type Composer struct {
 	Storage storage.Storage
 }
 
-func (c *Compose) Entity(entityArg string, printToScreen bool) error {
+// ComposeEntity gathers as many details about an Entity as possible and composes it.
+func (c *Composer) ComposeEntity(entityArg string, printToScreen bool) error {
 	root, err := c.Storage.Main()
 	if err != nil {
 		return err
@@ -43,7 +46,7 @@ func (c *Compose) Entity(entityArg string, printToScreen bool) error {
 		return err
 	}
 
-	println("entityDir: " + entityDir)
+	fmt.Println("entityDir: " + entityDir)
 
 	// Read and merge the YAML files
 	/*mergedYaml, err := mergeYamlFiles(entityDir)
@@ -54,7 +57,7 @@ func (c *Compose) Entity(entityArg string, printToScreen bool) error {
 	if printToScreen {
 		fmt.Println(string(mergedYaml))
 	} else {
-		err = ioutil.WriteFile(entityName+".lock", mergedYaml, 0644)
+		err = os.WriteFile(entityName+".lock", mergedYaml, 0644)
 		if err != nil {
 			return err
 		}
@@ -64,7 +67,6 @@ func (c *Compose) Entity(entityArg string, printToScreen bool) error {
 }
 
 func parseEntityArg(entityArg string) (string, string, error) {
-	// Validate entity name and version separately
 	entityNamePattern := regexp.MustCompile(entity.EntityNameMatch)
 	entityWithVersionPattern := regexp.MustCompile(entity.EntityNameAndVersionMatch)
 
@@ -98,33 +100,30 @@ func findEntityDirParallel(root, name, version string) (string, error) {
 				}
 				info, err := os.Stat(path)
 				if err != nil {
-					fmt.Println("Error stating path:", err)
 					continue
 				}
 				if info.IsDir() {
 					matched, err := regexp.MatchString(fmt.Sprintf(`%s@v\d+\.\d+\.\d+`, name), info.Name())
 					if err != nil {
-						fmt.Println("Error matching regex:", err)
 						continue
 					}
 					if matched {
 						if version == "" || info.Name() == name+version {
 							mu.Lock()
-
 							matchedDir = path
 							readYaml, err := utilYamlPkg.Read(path, "amadla")
 							if err != nil {
+								mu.Unlock()
 								return
 							}
 							marshalled, err := yaml.Marshal(readYaml)
 							if err != nil {
-								fmt.Println("Error marshalling YAML:", err)
+								mu.Unlock()
 								return
 							}
 							fmt.Printf("%s\n", marshalled)
-
 							mu.Unlock()
-							once.Do(func() { close(done) }) // Signal to stop processing
+							once.Do(func() { close(done) })
 							return
 						}
 					}
@@ -135,21 +134,19 @@ func findEntityDirParallel(root, name, version string) (string, error) {
 		}
 	}
 
-	// Start a fixed number of workers
 	numWorkers := 10
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go worker()
 	}
 
-	// Walk the directory tree
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		select {
 		case paths <- path:
-		case <-done: // Exit early if we already found a match
+		case <-done:
 			return filepath.SkipDir
 		}
 		return nil

@@ -8,11 +8,11 @@ import (
 )
 
 // NewEntityBuildService to set up the entity build service
-func NewEntityBuildService() *Build {
-	return &Build{
+func NewEntityBuildService() *Builder {
+	return &Builder{
 		Git:                     git.NewGitService(),
 		EntityValidation:        entityValidation.NewEntityValidationService(),
 		EntityVersion:           version.NewEntityVersionService(),
-		EntityVersionValidation: entityVersionValidation.NewEntityVersionValidationService(),
+		EntityVersionValidation: *entityVersionValidation.NewEntityVersionValidationService(),
 	}
 }

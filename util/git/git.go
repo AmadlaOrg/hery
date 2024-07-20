@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-// Interface to help with mocking
-type Interface interface {
+// RepoManager to help with mocking
+type RepoManager interface {
 	FetchRepo(url, dest string) error
 	CommitHeadHash(repoPath string) (string, error)
 }
