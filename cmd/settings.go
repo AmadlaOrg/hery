@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/AmadlaOrg/hery/env"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 )
 
@@ -16,14 +16,19 @@ var SettingsCmd = &cobra.Command{
 		storageService := storage.NewStorageService()
 		heryPath, err := storageService.Main()
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Setting", "Value"})
 		table.Append([]string{"Collections path", heryPath})
 
-		for _, varName := range env.List() {
+		envList, err := env.List()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, varName := range envList {
 			val := os.Getenv(varName)
 			table.Append([]string{varName, val})
 		}

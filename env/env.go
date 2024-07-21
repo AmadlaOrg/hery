@@ -1,20 +1,22 @@
 package env
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"log"
 	"path/filepath"
 	"strings"
 )
 
+var filepathAbs = filepath.Abs
+
 // List collects string constants from the types.go file in the env package
-func List() []string {
+func List() ([]string, error) {
 	// Get the absolute path of the current directory
-	dir, err := filepath.Abs(filepath.Dir("."))
+	dir, err := filepathAbs(filepath.Dir("."))
 	if err != nil {
-		log.Fatalf("Failed to get the absolute path of the current directory: %v", err)
+		return nil, fmt.Errorf("failed to get the absolute path of the current directory: %v", err)
 	}
 
 	// Construct the full path to types.go
@@ -25,7 +27,7 @@ func List() []string {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, filename, nil, parser.AllErrors)
 	if err != nil {
-		log.Fatalf("Failed to parse file %s: %v", filename, err)
+		return nil, fmt.Errorf("failed to parse file %s: %v", filename, err)
 	}
 
 	// Inspect the AST and collect string constants
@@ -53,5 +55,5 @@ func List() []string {
 		return false
 	})
 
-	return constants
+	return constants, nil
 }

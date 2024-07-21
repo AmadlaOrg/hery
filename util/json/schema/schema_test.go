@@ -57,4 +57,22 @@ func TestLoadJSONSchema(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, schema)
 	})
+
+	t.Run("add resource failure", func(t *testing.T) {
+		// Create a schema file with no read permissions
+		schemaPath := filepath.Join(tmpDir, "unreadable_schema.json")
+		err := os.WriteFile(schemaPath, []byte(`{}`), 0000) // No read permissions
+		assert.NoError(t, err)
+		defer func(name string, mode os.FileMode) {
+			err := os.Chmod(name, mode)
+			if err != nil {
+				assert.FailNow(t, err.Error())
+			}
+		}(schemaPath, 0644) // Ensure the file can be removed after the test
+
+		// Load schema and check
+		schema, err := Load(schemaPath)
+		assert.Error(t, err)
+		assert.Nil(t, schema)
+	})
 }

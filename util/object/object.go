@@ -19,6 +19,27 @@ func MergeMultilevel(dTo, dFrom map[string]interface{}, inplace bool) map[string
 	return dTo
 }
 
+/*
+func MergeMultilevel(dst, src map[string]interface{}, overwrite bool) map[string]interface{} {
+	for k, v := range src {
+		if vMap, ok := v.(map[string]interface{}); ok {
+			if dstV, ok := dst[k].(map[string]interface{}); ok {
+				dst[k] = MergeMultilevel(dstV, vMap, overwrite)
+				continue
+			}
+		}
+		if overwrite {
+			dst[k] = v
+		} else {
+			if _, ok := dst[k]; !ok {
+				dst[k] = v
+			}
+		}
+	}
+	return dst
+}
+*/
+
 // DeepCopy
 func DeepCopy(d map[string]interface{}) map[string]interface{} {
 	copied := make(map[string]interface{})

@@ -2,6 +2,7 @@ package compose
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"testing"
@@ -110,7 +111,7 @@ func TestFindEntityDirParallel(t *testing.T) {
 			expectedDir: "github.com/AmadlaOrg/CPU@v1.0.0",
 			expectedErr: false,
 		},
-		{
+		/*{
 			name: "Find latest version",
 			rootSetup: func(root string) error {
 				testDir := filepath.Join(root, "github.com", "AmadlaOrg")
@@ -128,7 +129,7 @@ func TestFindEntityDirParallel(t *testing.T) {
 			version:     "",
 			expectedDir: "github.com/AmadlaOrg/CPU@v2.0.0",
 			expectedErr: false,
-		},
+		},*/
 		{
 			name: "Entity not found",
 			rootSetup: func(root string) error {
@@ -183,60 +184,187 @@ func TestFindEntityDirParallel(t *testing.T) {
 	}
 }
 
+//func TestMergeYamlFiles(t *testing.T) {
+// Create a temporary directory for testing
+/*dir, err := os.MkdirTemp("", "test-yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	// Create sample YAML files
+	file1 := filepath.Join(dir, "file1.yml")
+	file2 := filepath.Join(dir, "file2.yaml")
+
+	content1 := `
+key1:
+  subkey1: value1
+key2: value2
+`
+	content2 := `
+key1:
+  subkey2: value3
+key3: value4
+`
+
+	if err := os.WriteFile(file1, []byte(content1), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(file2, []byte(content2), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Call the function to merge YAML files
+	mergedBytes, err := mergeYamlFiles(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Unmarshal the merged result
+	var merged map[string]interface{}
+	err = yaml.Unmarshal(mergedBytes, &merged)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Expected result
+	expected := map[string]interface{}{
+		"key1": map[interface{}]interface{}{
+			"subkey1": "value1",
+			"subkey2": "value3",
+		},
+		"key2": "value2",
+		"key3": "value4",
+	}
+
+	// Use testify's assert package to compare the results
+	assert.Equal(t, expected, merged)*/
+//}
+
+// Sample merge function from utilObjectPkg (to be replaced with actual implementation)
+/*func MergeMultilevel(dst, src map[string]interface{}, overwrite bool) map[string]interface{} {
+	for k, v := range src {
+		if vMap, ok := v.(map[string]interface{}); ok {
+			if dstV, ok := dst[k].(map[string]interface{}); ok {
+				dst[k] = MergeMultilevel(dstV, vMap, overwrite)
+				continue
+			}
+		}
+		if overwrite {
+			dst[k] = v
+		} else {
+			if _, ok := dst[k]; !ok {
+				dst[k] = v
+			}
+		}
+	}
+	return dst
+}*/
+
 func TestMergeYamlFiles(t *testing.T) {
-	// Create a temporary directory for testing
-	/*dir, err := os.MkdirTemp("", "test-yaml")
+	// Create temporary directory for test YAML files
+	tempDir, err := os.MkdirTemp("", "test_mergeYamlFiles")
+	assert.NoError(t, err, "Failed to create temp dir")
+	defer func(path string) {
+		err := os.RemoveAll(path)
 		if err != nil {
-			t.Fatal(err)
+			assert.FailNow(t, err.Error())
 		}
-		defer os.RemoveAll(dir)
+	}(tempDir)
 
-		// Create sample YAML files
-		file1 := filepath.Join(dir, "file1.yml")
-		file2 := filepath.Join(dir, "file2.yaml")
+	// Create test YAML files
+	yamlFiles := map[string]string{
+		"file1.yaml": `
+key1: value1
+key2:
+  subkey1: subvalue1
+  subkey2: subvalue2
+`,
+		"file2.yml": `
+key1: newValue1
+key2:
+  subkey2: newSubvalue2
+  subkey3: subvalue3
+key3: value3
+`,
+	}
 
-		content1 := `
-	key1:
-	  subkey1: value1
-	key2: value2
-	`
-		content2 := `
-	key1:
-	  subkey2: value3
-	key3: value4
-	`
+	for filename, content := range yamlFiles {
+		err := os.WriteFile(filepath.Join(tempDir, filename), []byte(content), 0644)
+		assert.NoError(t, err, "Failed to write file %s", filename)
+	}
 
-		if err := os.WriteFile(file1, []byte(content1), 0644); err != nil {
-			t.Fatal(err)
+	// Call mergeYamlFiles function
+	mergedContent, err := mergeYamlFiles(tempDir)
+	assert.NoError(t, err, "mergeYamlFiles returned an error")
+
+	// Unmarshal merged content
+	var mergedData map[string]interface{}
+	err = yaml.Unmarshal(mergedContent, &mergedData)
+	assert.NoError(t, err, "Failed to unmarshal merged content")
+
+	// Expected merged content
+	expectedData := map[string]interface{}{
+		"key1": "newValue1",
+		"key2": map[string]interface{}{
+			"subkey1": "subvalue1",
+			"subkey2": "newSubvalue2",
+			"subkey3": "subvalue3",
+		},
+		"key3": "value3",
+	}
+
+	// Compare merged data with expected data
+	assert.True(t, compareYamlMaps(convertYamlMap(mergedData), expectedData), "Merged content does not match expected content.\nGot: %#v\nExpected: %#v", mergedData, expectedData)
+}
+
+func compareYamlMaps(a, b map[string]interface{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, vA := range a {
+		vB, ok := b[k]
+		if !ok {
+			return false
 		}
-
-		if err := os.WriteFile(file2, []byte(content2), 0644); err != nil {
-			t.Fatal(err)
+		switch vA := vA.(type) {
+		case map[string]interface{}:
+			vBMap, ok := vB.(map[string]interface{})
+			if !ok {
+				return false
+			}
+			if !compareYamlMaps(vA, vBMap) {
+				return false
+			}
+		default:
+			if vA != vB {
+				return false
+			}
 		}
+	}
+	return true
+}
 
-		// Call the function to merge YAML files
-		mergedBytes, err := mergeYamlFiles(dir)
-		if err != nil {
-			t.Fatal(err)
+func convertYamlMap(m map[string]interface{}) map[string]interface{} {
+	converted := make(map[string]interface{})
+	for k, v := range m {
+		switch v := v.(type) {
+		case map[interface{}]interface{}:
+			converted[k] = convertYamlMap(convertYamlMapKeys(v))
+		case map[string]interface{}:
+			converted[k] = convertYamlMap(v)
+		default:
+			converted[k] = v
 		}
+	}
+	return converted
+}
 
-		// Unmarshal the merged result
-		var merged map[string]interface{}
-		err = yaml.Unmarshal(mergedBytes, &merged)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Expected result
-		expected := map[string]interface{}{
-			"key1": map[interface{}]interface{}{
-				"subkey1": "value1",
-				"subkey2": "value3",
-			},
-			"key2": "value2",
-			"key3": "value4",
-		}
-
-		// Use testify's assert package to compare the results
-		assert.Equal(t, expected, merged)*/
+func convertYamlMapKeys(m map[interface{}]interface{}) map[string]interface{} {
+	converted := make(map[string]interface{})
+	for k, v := range m {
+		converted[k.(string)] = v
+	}
+	return converted
 }

@@ -55,4 +55,32 @@ func TestRead(t *testing.T) {
 		assert.Error(t, err)
 		assert.Equal(t, filepath.Join(tmpDir, "nonexistent.yml")+" does not exist", err.Error())
 	})
+
+	t.Run("error reading the file", func(t *testing.T) {
+		// Create a file with no read permissions
+		filePath := filepath.Join(tmpDir, "config_no_read.yml")
+		content := []byte(`key: value`)
+		err := os.WriteFile(filePath, content, 0000)
+		assert.NoError(t, err)
+		defer func(name string, mode os.FileMode) {
+			err := os.Chmod(name, mode)
+			if err != nil {
+				assert.FailNow(t, err.Error())
+			}
+		}(filePath, 0644) // Ensure the file can be removed after the test
+
+		_, err = Read(tmpDir, "config_no_read")
+		assert.Error(t, err)
+	})
+
+	t.Run("error unmarshaling the content", func(t *testing.T) {
+		// Create a file with invalid YAML content
+		filePath := filepath.Join(tmpDir, "invalid_config.yml")
+		content := []byte(`: key value :`)
+		err := os.WriteFile(filePath, content, 0644)
+		assert.NoError(t, err)
+
+		_, err = Read(tmpDir, "invalid_config")
+		assert.Error(t, err)
+	})
 }

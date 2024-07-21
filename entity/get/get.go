@@ -3,16 +3,11 @@ package get
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/collection"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
-	utilFilePkg "github.com/AmadlaOrg/hery/util/file"
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/git"
-	"github.com/AmadlaOrg/hery/util/url"
-	"path/filepath"
-	"strings"
-	"sync"
 )
 
 // EntityGetter is an interface for getting entities.
@@ -30,7 +25,7 @@ type GetterService struct {
 }
 
 // Get retrieves entities based on the provided collection name and arguments.
-func (gs *GetterService) Get(collectionName, storagePath string, args []string) error {
+func (gs *GetterService) Get(collectionName string, storagePath *storage.AbsPaths, args []string) error {
 	// Validate that all the URLs passed in the arguments are valid
 	if len(args) == 0 {
 		return errors.New("no entity URL(s) specified")
@@ -42,46 +37,41 @@ func (gs *GetterService) Get(collectionName, storagePath string, args []string) 
 		}
 	}
 
-	collectionStoragePath := collection.Path(collectionName, storagePath)
-	if !utilFilePkg.Exists(collectionStoragePath) {
-		return fmt.Errorf("the collection storage directory does not exist: %s", collectionStoragePath)
-	}
-
-	println(collectionStoragePath)
-	return gs.download(args, collectionStoragePath)
+	return nil
+	//return gs.download(args, storagePath)
 }
 
 // download retrieves entities in parallel.
-func (gs *GetterService) download(entityUrls []string, collectionStoragePath string) error {
-	var wg sync.WaitGroup
-	wg.Add(len(entityUrls))
+/*func (gs *GetterService) download(entityUrls []string, collectionStoragePath string) error {
+var wg sync.WaitGroup
+wg.Add(len(entityUrls))
 
-	errCh := make(chan error, len(entityUrls)) // Channel to collect errors
-	//TODO: entityPaths := make([]string, len(entityUrls)) Maybe check with directories
+errCh := make(chan error, len(entityUrls)) // Channel to collect errors
+//TODO: entityPaths := make([]string, len(entityUrls)) Maybe check with directories
 
-	for _, entityUrl := range entityUrls {
-		go func(entityUrl string) {
-			defer wg.Done()
+for _, entityUrl := range entityUrls {
+	go func(entityUrl string) {
+		defer wg.Done()
 
-			// TODO: skip (continue) loop-iteration if entity with same version was already downloaded/installed maybe make a Map
+		// TODO: skip (continue) loop-iteration if entity with same version was already downloaded/installed maybe make a Map
 
-			//var entityUrlPath string
-			var entityFullRepoUrl string
-			var entityVersion string
+		//var entityUrlPath string
+		var entityFullRepoUrl string
+		var entityVersion string
 
-			if strings.Contains(entityUrl, "@") {
-				/*entityUrlPath, entityFullRepoUrl, entityVersion, err := gs.processEntityUrlWithVersion(entityUrl)
-				if err != nil {
-					errCh <- err
-					return
-				}*/
-			} else {
-				/*entityUrlPath, entityFullRepoUrl, entityVersion, err := gs.processEntityUrlWithoutVersion(entityUrl)
-				if err != nil {
-					errCh <- err
-					return
-				}*/
-				entityUrl = fmt.Sprintf("%s@%s", entityUrl, entityVersion)
+		if strings.Contains(entityUrl, "@") {
+			/*entityUrlPath, entityFullRepoUrl, entityVersion, err := gs.processEntityUrlWithVersion(entityUrl)
+			if err != nil {
+				errCh <- err
+				return
+			}*/
+/*} else {
+/*entityUrlPath, entityFullRepoUrl, entityVersion, err := gs.processEntityUrlWithoutVersion(entityUrl)
+if err != nil {
+	errCh <- err
+	return
+}*/
+/*	entityUrl = fmt.Sprintf("%s@%s", entityUrl, entityVersion)
 			}
 
 			destination := filepath.Join(collectionStoragePath, entityUrl)
@@ -136,13 +126,15 @@ func (gs *GetterService) processEntityUrlWithVersion(entityUrl string) (string, 
 		return "", "", "", errors.New("entity version in the entity url is wrong format")
 	}
 
+	//if !versionExists {
+	// Check if the version exists
+	/*versionExists := gs.EntityVersionValidation.Exists(entityUrlPath, uriEntityVersion)
 	if !versionExists {
-		// Check if the version exists
-		/*versionExists := gs.EntityVersionValidation.Exists(entityUrlPath, uriEntityVersion)
-		if !versionExists {
-			return "", "", "", fmt.Errorf("the version of the entity URL does not exist: %s", entityUrl)
-		}*/
-	}
+		return "", "", "", fmt.Errorf("the version of the entity URL does not exist: %s", entityUrl)
+	}*/
+//}
+/*
+	fmt.Println(versionExists)
 
 	return entityUrlPath, entityFullRepoUrl, entityVersion, nil
 }
@@ -169,4 +161,4 @@ func (gs *GetterService) processEntityUrlWithoutVersion(entityUrl string) (strin
 	}
 
 	return entityUrlPath, entityFullRepoUrl, entityVersion, nil
-}
+}*/

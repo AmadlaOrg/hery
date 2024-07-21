@@ -13,20 +13,14 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all entities",
 	Run: func(cmd *cobra.Command, args []string) {
-		storageService := storage.NewStorageService()
-		entityDir, err := storageService.Main()
-		if err != nil {
-			fmt.Println("could not get the root storage directory:", err)
-			return
-		}
-
-		entities, err := entity.CrawlDirectoriesParallel(entityDir)
-		if err != nil {
-			fmt.Println("Error crawling directories:", err)
-			return
-		}
-
-		displayEntities(entities)
+		concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
+			entities, err := entity.CrawlDirectoriesParallel(paths.Entities)
+			if err != nil {
+				fmt.Println("Error crawling directories:", err)
+				return
+			}
+			displayEntities(entities)
+		})
 	},
 }
 

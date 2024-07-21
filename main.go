@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/AmadlaOrg/hery/cmd"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 const appName = "hery"
@@ -39,7 +38,7 @@ func init() {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
+		//os.Exit(1)
 	}
 }
