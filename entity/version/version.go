@@ -39,6 +39,10 @@ func (v *Service) List(entityUrlPath string) ([]string, error) {
 		return nil, fmt.Errorf("error getting tags: %v", err)
 	}
 
+	if len(tags) == 0 {
+		return []string{}, nil
+	}
+
 	// Regular expression for matching version tags
 	re := regexp.MustCompile(Format)
 

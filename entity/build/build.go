@@ -26,7 +26,7 @@ type Builder struct {
 	EntityValidation        validation.Interface
 	EntityVersion           version.Manager
 	EntityVersionValidation versionValidationPkg.VersionValidation
-	Storage                 storage.Storage
+	Storage                 storage.AbsPaths
 }
 
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
@@ -82,6 +82,34 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 
 		}*/
 		// TODO: Check with git if the version actually exists
+	} else {
+		entityFullRepoUrl := url.EntityFullRepoUrl(entityUri)
+		entityVersionList, err := b.EntityVersion.List(entityFullRepoUrl)
+		if err != nil {
+			return entity.Entity{
+				Exist: false,
+			}, fmt.Errorf("error listing versions: %v", err)
+		}
+
+		if len(entityVersionList) == 0 {
+			pseudo, err := b.EntityVersion.GeneratePseudo(entityFullRepoUrl)
+			if err != nil {
+				return entity.Entity{
+					Exist: false,
+				}, err
+			}
+			println(pseudo)
+		} else {
+			latest, err := b.EntityVersion.Latest(entityVersionList)
+			if err != nil {
+				return entity.Entity{
+					Exist: false,
+				}, err
+			}
+			println(latest)
+		}
+
+		entityUrlPath = entityUri
 	}
 
 	entityPath := paths.EntityPath(paths.Collection, entityUrlPath)
