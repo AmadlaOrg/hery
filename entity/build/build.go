@@ -48,21 +48,14 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		return entityVals, err
 	}
 
-	var entityUriWithVersion string
-	var entityUrlPath string
-	var entityFullRepoUrl string
-	var entityVersion string
-	var originPath string
-	//var uriEntityVersion string
 	if strings.Contains(entityUri, "@") {
-		entityUriWithVersion = entityUri
-		uriEntityVersion, err := b.EntityVersion.Extract(entityUri)
+		entityVersion, err := b.EntityVersion.Extract(entityUri)
 		if err != nil {
 			return entityVals, fmt.Errorf("error extracting version: %v", err)
 		}
 
-		entityUrlPath = url.EntityPathUrl(entityUri, uriEntityVersion)
-		entityFullRepoUrl = url.EntityFullRepoUrl(entityUrlPath)
+		entityVals.RepoUrl = url.EntityPathUrl(entityUri, entityVersion)
+		entityVals.RepoUrl = url.EntityFullRepoUrl(entityUrlPath)
 
 		entityVersionList, err := b.EntityVersion.List(entityFullRepoUrl)
 		if err != nil {
@@ -70,7 +63,7 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		}
 
 		//var versionExists = false
-		if uriEntityVersion == "latest" {
+		if entityVersion == "latest" {
 			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {
 				return entityVals, fmt.Errorf("error finding latest version: %v", err)
@@ -86,14 +79,16 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		}*/
 		// TODO: Check with git if the version actually exists
 	} else {
-		entityVals.Uri = url.EntityFullRepoUrl(entityUri)
+		entityVals.RepoUrl = url.EntityFullRepoUrl(entityUri)
+		entityVals.Name = filepath.Base(entityUri)
+
 		entityVersionList, err := b.EntityVersion.List(entityVals.Uri)
 		if err != nil {
 			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
-
+		var entityVersion string
 		if len(entityVersionList) == 0 {
-			entityVersion, err = b.EntityVersion.GeneratePseudo(entityFullRepoUrl)
+			entityVersion, err = b.EntityVersion.GeneratePseudo(entityVals.RepoUrl)
 			if err != nil {
 				return entityVals, err
 			}
@@ -105,27 +100,21 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		}
 
 		entityVals.Version = entityVersion
-		entityUrlPath = entityUri
-		entityUriWithVersion = fmt.Sprintf("%s@%s", entityFullRepoUrl, entityVersion)
-
+		entityVals.DirName = fmt.Sprintf("%s@%s", entityVals.Name, entityVersion)
+		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
 	}
 
-	entityPath := paths.EntityPath(paths.Entities, entityUrlPath)
-	entityDirName := filepath.Base(entityPath)
+	entityVals.AbsPath = paths.EntityPath(paths.Entities, entityVals.Uri)
+	entityVals.Id = uuid.New().String()
+	entityVals.Exist = true
 
-	return entity.Entity{
-		Id:      uuid.New().String(),
-		Entity:  entityUriWithVersion,
-		Name:    "",
+	return entityVals, nil
+
+	/*return entity.Entity{
 		DirName: entityDirName,
 		Uri:     entityUri,
 		Origin:  originPath,
-		Version: entityVersion,
-		AbsPath: entityPath,
-		Have:    false,
-		Hash:    "",
-		Exist:   true,
-	}, nil
+	}, nil*/
 }
 
 // MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI passed to
