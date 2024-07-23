@@ -17,6 +17,9 @@ const (
 // There are multiple attributes that are attached to an Entity. They are used for selecting and working with entities.
 type Entity struct {
 	Name    string // The simple name of an entity
+	Entity  string // Reserved
+	Id      string //
+	DirName string //
 	Uri     string //
 	Origin  string // The entity URL path (it can also be used as a relative path)
 	Version string // The entity version (what is after `@`)

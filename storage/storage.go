@@ -107,7 +107,6 @@ func (d *AbsPaths) cachePath(collectionName, collectionPath string) string {
 }
 
 // EntityPath returns the absolute path to a specific entity
-func (d *AbsPaths) EntityPath(collectionPath, entityRelativePath string) string {
-	entitiesPath := d.entitiesPath(collectionPath)
+func (d *AbsPaths) EntityPath(entitiesPath, entityRelativePath string) string {
 	return filepath.Join(entitiesPath, entityRelativePath)
 }

@@ -3,6 +3,8 @@ package build
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
+	"path/filepath"
 	"strings"
 
 	"github.com/AmadlaOrg/hery/entity"
@@ -32,27 +34,31 @@ type Builder struct {
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
 // Entity struct. It also validates values that are passed to it.
 func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entity, error) {
+	var entityVals = entity.Entity{
+		Have:  false,
+		Exist: false,
+	}
+
 	if !b.EntityValidation.EntityUrl(entityUri) {
-		return entity.Entity{
-			Exist: false,
-		}, errors.New("invalid entity url")
+		return entityVals, errors.New("invalid entity url")
 	}
 
 	paths, err := b.Storage.Paths(collectionName)
 	if err != nil {
-		return entity.Entity{}, err
+		return entityVals, err
 	}
 
+	var entityUriWithVersion string
 	var entityUrlPath string
 	var entityFullRepoUrl string
 	var entityVersion string
+	var originPath string
 	//var uriEntityVersion string
 	if strings.Contains(entityUri, "@") {
+		entityUriWithVersion = entityUri
 		uriEntityVersion, err := b.EntityVersion.Extract(entityUri)
 		if err != nil {
-			return entity.Entity{
-				Exist: false,
-			}, fmt.Errorf("error extracting version: %v", err)
+			return entityVals, fmt.Errorf("error extracting version: %v", err)
 		}
 
 		entityUrlPath = url.EntityPathUrl(entityUri, uriEntityVersion)
@@ -60,64 +66,60 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 
 		entityVersionList, err := b.EntityVersion.List(entityFullRepoUrl)
 		if err != nil {
-			return entity.Entity{
-				Exist: false,
-			}, fmt.Errorf("error listing versions: %v", err)
+			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
 
 		//var versionExists = false
 		if uriEntityVersion == "latest" {
 			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {
-				return entity.Entity{
-					Exist: false,
-				}, fmt.Errorf("error finding latest version: %v", err)
+				return entityVals, fmt.Errorf("error finding latest version: %v", err)
 			}
 		} else if !b.EntityVersionValidation.Format(uriEntityVersion) {
-			return entity.Entity{
-				Exist: false,
-			}, nil
+			return entityVals, nil
 		}
+
+		entityVals.Uri = entityUrlPath
+		entityVals.Version = uriEntityVersion
 		/*if b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
 
 		}*/
 		// TODO: Check with git if the version actually exists
 	} else {
-		entityFullRepoUrl := url.EntityFullRepoUrl(entityUri)
-		entityVersionList, err := b.EntityVersion.List(entityFullRepoUrl)
+		entityVals.Uri = url.EntityFullRepoUrl(entityUri)
+		entityVersionList, err := b.EntityVersion.List(entityVals.Uri)
 		if err != nil {
-			return entity.Entity{
-				Exist: false,
-			}, fmt.Errorf("error listing versions: %v", err)
+			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
 
 		if len(entityVersionList) == 0 {
-			pseudo, err := b.EntityVersion.GeneratePseudo(entityFullRepoUrl)
+			entityVersion, err = b.EntityVersion.GeneratePseudo(entityFullRepoUrl)
 			if err != nil {
-				return entity.Entity{
-					Exist: false,
-				}, err
+				return entityVals, err
 			}
-			println(pseudo)
 		} else {
-			latest, err := b.EntityVersion.Latest(entityVersionList)
+			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {
-				return entity.Entity{
-					Exist: false,
-				}, err
+				return entityVals, err
 			}
-			println(latest)
 		}
 
+		entityVals.Version = entityVersion
 		entityUrlPath = entityUri
+		entityUriWithVersion = fmt.Sprintf("%s@%s", entityFullRepoUrl, entityVersion)
+
 	}
 
-	entityPath := paths.EntityPath(paths.Collection, entityUrlPath)
+	entityPath := paths.EntityPath(paths.Entities, entityUrlPath)
+	entityDirName := filepath.Base(entityPath)
 
 	return entity.Entity{
+		Id:      uuid.New().String(),
+		Entity:  entityUriWithVersion,
 		Name:    "",
+		DirName: entityDirName,
 		Uri:     entityUri,
-		Origin:  entityUrlPath,
+		Origin:  originPath,
 		Version: entityVersion,
 		AbsPath: entityPath,
 		Have:    false,
@@ -134,6 +136,7 @@ func (b *Builder) MetaFromLocal(entityUri string) entity.Entity {
 	return entity.Entity{
 		Name:    "",
 		Uri:     entityUri,
+		Id:      uuid.New().String(),
 		Origin:  "",
 		Version: "",
 		AbsPath: "",

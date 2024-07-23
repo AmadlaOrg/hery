@@ -5,6 +5,7 @@ go 1.22.5
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/go-git/go-git/v5 v5.12.0
+	github.com/google/uuid v1.6.0
 	github.com/itchyny/gojq v0.12.16
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/olekukonko/tablewriter v0.0.5
