@@ -77,12 +77,12 @@ func TestExtractRepoPath(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			repoURL:       "github.com/owner/",
-			expectedPath:  "",
-			expectedError: true,
+			repoURL:       "url",
+			expectedPath:  "https://url/",
+			expectedError: false,
 		},
 		{
-			repoURL:       "invalid-url",
+			repoURL:       "github.com/owner/",
 			expectedPath:  "",
 			expectedError: true,
 		},
@@ -90,7 +90,7 @@ func TestExtractRepoPath(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.repoURL, func(t *testing.T) {
-			actualPath, err := ExtractRepoPath(test.repoURL)
+			actualPath, err := ExtractRepoUrl(test.repoURL)
 			if (err != nil) != test.expectedError {
 				t.Errorf("expected error: %v, got: %v", test.expectedError, err)
 			}

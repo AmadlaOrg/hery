@@ -16,8 +16,11 @@ func EntityFullRepoUrl(entityUrl string) string {
 	return fmt.Sprintf("https://%s", entityUrl)
 }
 
-// ExtractRepoPath
-func ExtractRepoPath(repoURL string) (string, error) {
+// ExtractRepoUrl adds https:// to the repository URL pass by param
+//
+// It also checks if the repoURL is of `github.com` and if it is it then does a specific validation on top of an extractions
+// meaning if there are more path parts then it only returns the full URL for the repository itself.
+func ExtractRepoUrl(repoURL string) (string, error) {
 	// Ensure the URL starts with a scheme for proper parsing
 	if !strings.HasPrefix(repoURL, "http://") && !strings.HasPrefix(repoURL, "https://") {
 		repoURL = "https://" + repoURL

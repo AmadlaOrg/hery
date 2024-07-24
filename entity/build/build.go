@@ -43,10 +43,10 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	paths, err := b.Storage.Paths(collectionName)
+	/*paths, err := b.Storage.Paths(collectionName)
 	if err != nil {
 		return entityVals, err
-	}
+	}*/
 
 	if strings.Contains(entityUri, "@") {
 		entityVersion, err := b.EntityVersion.Extract(entityUri)
@@ -54,10 +54,13 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 			return entityVals, fmt.Errorf("error extracting version: %v", err)
 		}
 
-		entityVals.RepoUrl = url.EntityPathUrl(entityUri, entityVersion)
-		entityVals.RepoUrl = url.EntityFullRepoUrl(entityUrlPath)
+		//entityVals.RepoUrl = url.EntityPathUrl(entityUri, entityVersion)
+		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUri)
+		if err != nil {
+			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+		}
 
-		entityVersionList, err := b.EntityVersion.List(entityFullRepoUrl)
+		entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
 		if err != nil {
 			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
@@ -68,18 +71,21 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 			if err != nil {
 				return entityVals, fmt.Errorf("error finding latest version: %v", err)
 			}
-		} else if !b.EntityVersionValidation.Format(uriEntityVersion) {
+		} else if !b.EntityVersionValidation.Format(entityUri) {
 			return entityVals, nil
 		}
 
-		entityVals.Uri = entityUrlPath
-		entityVals.Version = uriEntityVersion
+		entityVals.Version = entityVersion
 		/*if b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
 
 		}*/
 		// TODO: Check with git if the version actually exists
 	} else {
-		entityVals.RepoUrl = url.EntityFullRepoUrl(entityUri)
+		repoUrl, err := url.ExtractRepoUrl(entityUri)
+		if err != nil {
+			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+		}
+		entityVals.RepoUrl = repoUrl
 		entityVals.Name = filepath.Base(entityUri)
 
 		entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
@@ -104,7 +110,7 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
 	}
 
-	entityVals.AbsPath = paths.EntityPath(paths.Entities, entityVals.Uri)
+	//entityVals.AbsPath = paths.EntityPath(paths.Entities, entityVals.Uri)
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
 
