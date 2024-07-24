@@ -82,7 +82,7 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		entityVals.RepoUrl = url.EntityFullRepoUrl(entityUri)
 		entityVals.Name = filepath.Base(entityUri)
 
-		entityVersionList, err := b.EntityVersion.List(entityVals.Uri)
+		entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
 		if err != nil {
 			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
@@ -100,7 +100,7 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		}
 
 		entityVals.Version = entityVersion
-		entityVals.DirName = fmt.Sprintf("%s@%s", entityVals.Name, entityVersion)
+		//entityVals.DirName = fmt.Sprintf("%s@%s", entityVals.Name, entityVersion)
 		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
 	}
 
@@ -124,7 +124,6 @@ func (b *Builder) MetaFromLocal(entityUri string) entity.Entity {
 
 	return entity.Entity{
 		Name:    "",
-		Uri:     entityUri,
 		Id:      uuid.New().String(),
 		Origin:  "",
 		Version: "",

@@ -44,3 +44,59 @@ func TestEntityFullRepoUrl(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractRepoPath(t *testing.T) {
+	tests := []struct {
+		repoURL       string
+		expectedPath  string
+		expectedError bool
+	}{
+		{
+			repoURL:       "github.com/AmadlaOrg/EntityApplication/Network/Web/Server",
+			expectedPath:  "https://github.com/AmadlaOrg/EntityApplication",
+			expectedError: false,
+		},
+		{
+			repoURL:       "github.com/AmadlaOrg/EntityApplication/WebServer",
+			expectedPath:  "https://github.com/AmadlaOrg/EntityApplication",
+			expectedError: false,
+		},
+		{
+			repoURL:       "git.suckless.org/st/",
+			expectedPath:  "https://git.suckless.org/st",
+			expectedError: false,
+		},
+		{
+			repoURL:       "github.com/owner/repo",
+			expectedPath:  "https://github.com/owner/repo",
+			expectedError: false,
+		},
+		{
+			repoURL:       "github.com/owner/repo/",
+			expectedPath:  "https://github.com/owner/repo",
+			expectedError: false,
+		},
+		{
+			repoURL:       "github.com/owner/",
+			expectedPath:  "",
+			expectedError: true,
+		},
+		{
+			repoURL:       "invalid-url",
+			expectedPath:  "",
+			expectedError: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.repoURL, func(t *testing.T) {
+			actualPath, err := ExtractRepoPath(test.repoURL)
+			if (err != nil) != test.expectedError {
+				t.Errorf("expected error: %v, got: %v", test.expectedError, err)
+			}
+			if actualPath != test.expectedPath {
+				t.Errorf("expected path: %v, got: %v", test.expectedPath, actualPath)
+			}
+		})
+	}
+}
