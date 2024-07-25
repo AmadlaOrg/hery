@@ -45,6 +45,16 @@ hery entity --collection {collection name} query 'entities'
 ### More...
 To get more details on the functioning and commands: [.docs](.docs).
 
+## Dev
+### Check dependencies
+Useful to check that libraries for testing and development don't find themselves in the build version of the project: 
+```bash
+go list -f '{{.Deps}}' ./main.go
+```
+
+> TODO: Create a script to blacklist certain libraries.
+> Also useful for security.
+
 ## ©️ Copyright
 - "[The Bear and Honey.](https://www.flickr.com/photos/97123293@N07/29003630251)" by [Swallowtail Garden Seeds](https://www.flickr.com/photos/97123293@N07) is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/?ref=openverse).
 
