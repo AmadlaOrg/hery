@@ -3,6 +3,7 @@ package build
 import (
 	"errors"
 	"fmt"
+	string2 "github.com/AmadlaOrg/hery/util/string"
 	"github.com/google/uuid"
 	"path/filepath"
 	"strings"
@@ -54,7 +55,6 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 			return entityVals, fmt.Errorf("error extracting version: %v", err)
 		}
 
-		//entityVals.RepoUrl = url.EntityPathUrl(entityUri, entityVersion)
 		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUri)
 		if err != nil {
 			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
@@ -71,15 +71,14 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 			if err != nil {
 				return entityVals, fmt.Errorf("error finding latest version: %v", err)
 			}
-		} else if !b.EntityVersionValidation.Format(entityUri) {
-			return entityVals, nil
+		} else if !b.EntityVersionValidation.Format(entityVersion) {
+			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
+		} else if !string2.ExistInStringArr(entityVersion, entityVersionList) {
+			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
 		}
 
 		entityVals.Version = entityVersion
-		/*if b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
 
-		}*/
-		// TODO: Check with git if the version actually exists
 	} else {
 		repoUrl, err := url.ExtractRepoUrl(entityUri)
 		if err != nil {
@@ -115,7 +114,6 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
 	}
 
-	//entityVals.AbsPath = paths.EntityPath(paths.Entities, entityVals.Uri)
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
 
