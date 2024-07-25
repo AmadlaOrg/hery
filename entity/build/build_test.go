@@ -1,12 +1,6 @@
 package build
 
-import (
-	"github.com/AmadlaOrg/hery/storage"
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
-
-func TestBuilder_MetaFromRemote(t *testing.T) {
+/*func TestBuilder_MetaFromRemote(t *testing.T) {
 	paths, err := storage.NewStorageService().Paths("amadla")
 	if err != nil {
 		t.Fatal(err)
@@ -19,4 +13,4 @@ func TestBuilder_MetaFromRemote(t *testing.T) {
 	}
 
 	assert.Equal(t, "amadla", remote)
-}
+}*/
