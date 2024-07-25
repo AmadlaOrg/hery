@@ -20,7 +20,6 @@ import (
 // MetaBuilder to help with mocking and to gather metadata from remote and local sources.
 type MetaBuilder interface {
 	MetaFromRemote(collectionName, entityUri string) (entity.Entity, error)
-	MetaFromLocal(entityUri string) entity.Entity
 }
 
 // Builder struct implements the MetaBuilder interface.
@@ -29,7 +28,6 @@ type Builder struct {
 	EntityValidation        validation.Interface
 	EntityVersion           version.Manager
 	EntityVersionValidation versionValidationPkg.VersionValidation
-	Storage                 storage.AbsPaths
 }
 
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
@@ -61,7 +59,6 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
 
-		//var versionExists = false
 		if entityVersion == "latest" {
 			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {
@@ -113,21 +110,4 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 	entityVals.Exist = true
 
 	return entityVals, nil
-}
-
-// MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI passed to
-// populate the Entity struct. It also validates values that are passed to it and what is set in storage.
-func (b *Builder) MetaFromLocal(entityUri string) entity.Entity {
-	// Implementation logic for MetaFromLocal
-
-	return entity.Entity{
-		Name:    "",
-		Id:      uuid.New().String(),
-		Origin:  "",
-		Version: "",
-		AbsPath: "",
-		Have:    false,
-		Hash:    "",
-		Exist:   true,
-	}
 }

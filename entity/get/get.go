@@ -1,8 +1,8 @@
 package get
 
 import (
-	"errors"
-	"fmt"
+	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/build"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
@@ -25,16 +25,15 @@ type GetterService struct {
 }
 
 // Get retrieves entities based on the provided collection name and arguments.
-func (gs *GetterService) Get(collectionName string, storagePath *storage.AbsPaths, args []string) error {
-	// Validate that all the URLs passed in the arguments are valid
-	if len(args) == 0 {
-		return errors.New("no entity URL(s) specified")
-	}
-
-	for _, arg := range args {
-		if !gs.EntityValidation.EntityUrl(arg) {
-			return fmt.Errorf("invalid entity URL: %s", arg)
+func (gs *GetterService) Get(storagePaths *storage.AbsPaths, args []string) error {
+	entityBuilder := build.NewEntityBuildService()
+	entityBuilds := make(map[int]entity.Entity)
+	for i, arg := range args {
+		entityMeta, err := entityBuilder.MetaFromRemote(*storagePaths, arg)
+		if err != nil {
+			return err
 		}
+		entityBuilds[i] = entityMeta
 	}
 
 	return nil
