@@ -34,7 +34,7 @@ type Builder struct {
 
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
 // Entity struct. It also validates values that are passed to it.
-func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entity, error) {
+func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
 	var entityVals = entity.Entity{
 		Have:  false,
 		Exist: false,
@@ -44,11 +44,7 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	paths, err := b.Storage.Paths(collectionName)
-	if err != nil {
-		return entityVals, err
-	}
-
+	var entityVersion string
 	if strings.Contains(entityUri, "@") {
 		entityVersion, err := b.EntityVersion.Extract(entityUri)
 		if err != nil {
@@ -77,21 +73,19 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
 		}
 
-		entityVals.Version = entityVersion
-
+		entityVals.Entity = entityUri
 	} else {
 		repoUrl, err := url.ExtractRepoUrl(entityUri)
 		if err != nil {
 			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
 		}
 		entityVals.RepoUrl = repoUrl
-		entityVals.Name = filepath.Base(entityUri)
 
 		entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
 		if err != nil {
 			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
-		var entityVersion string
+
 		if len(entityVersionList) == 0 {
 			entityVersion, err = b.EntityVersion.GeneratePseudo(entityVals.RepoUrl)
 			if err != nil {
@@ -104,16 +98,17 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 			}
 		}
 
-		entityVals.Version = entityVersion
 		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
-		entityVals.Origin = strings.Replace(
-			entityVals.Entity,
-			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
-			"",
-			1)
-		entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
 	}
 
+	entityVals.Name = filepath.Base(entityUri)
+	entityVals.Version = entityVersion
+	entityVals.Origin = strings.Replace(
+		entityVals.Entity,
+		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
+		"",
+		1)
+	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
 

@@ -1,13 +1,19 @@
 package build
 
 import (
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestBuilder_MetaFromRemote(t *testing.T) {
+	paths, err := storage.NewStorageService().Paths("amadla")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	entityBuildService := NewEntityBuildService()
-	remote, err := entityBuildService.MetaFromRemote("amadla", "github.com/AmadlaOrg/EntityApplication")
+	remote, err := entityBuildService.MetaFromRemote(*paths, "github.com/AmadlaOrg/EntityApplication")
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}
