@@ -70,8 +70,24 @@ func (gr *GitRemote) CommitHeadHash(url string) (string, error) {
 		return "", fmt.Errorf("HEAD reference not found")
 	}
 
-	// Get the commit object for the HEAD reference
-	commitHash := headRef.Hash()
+	var commitHash plumbing.Hash
+
+	// Resolve symbolic reference if HEAD is symbolic
+	if headRef.Type() == plumbing.SymbolicReference {
+		// Find the reference that HEAD points to
+		for _, ref := range refs {
+			if ref.Name() == headRef.Target() {
+				commitHash = ref.Hash()
+				break
+			}
+		}
+	} else {
+		commitHash = headRef.Hash()
+	}
+
+	if commitHash.IsZero() {
+		return "", fmt.Errorf("commit hash not found")
+	}
 
 	return commitHash.String(), nil
 }

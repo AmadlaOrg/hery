@@ -7,7 +7,7 @@ import (
 
 func TestBuilder_MetaFromRemote(t *testing.T) {
 	entityBuildService := NewEntityBuildService()
-	remote, err := entityBuildService.MetaFromRemote("amadla", "github.com/AmadlaOrg/Entity")
+	remote, err := entityBuildService.MetaFromRemote("amadla", "github.com/AmadlaOrg/EntityApplication")
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}

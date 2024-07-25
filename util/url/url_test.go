@@ -20,26 +20,7 @@ func TestEntityPathUrl(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.entityUrl, func(t *testing.T) {
-			result := EntityPathUrl(test.entityUrl, test.version)
-			assert.Equal(t, test.expected, result)
-		})
-	}
-}
-
-func TestEntityFullRepoUrl(t *testing.T) {
-	tests := []struct {
-		entityUrl string
-		expected  string
-	}{
-		{"github.com/user/repo", "https://github.com/user/repo"},
-		{"gitlab.com/user/repo", "https://gitlab.com/user/repo"},
-		{"bitbucket.org/user/repo", "https://bitbucket.org/user/repo"},
-		{"example.com/user/repo", "https://example.com/user/repo"},
-	}
-
-	for _, test := range tests {
-		t.Run(test.entityUrl, func(t *testing.T) {
-			result := EntityFullRepoUrl(test.entityUrl)
+			result := TrimVersion(test.entityUrl, test.version)
 			assert.Equal(t, test.expected, result)
 		})
 	}

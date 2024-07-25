@@ -6,14 +6,9 @@ import (
 	"strings"
 )
 
-// EntityPathUrl removes the version in the Entity URI
-func EntityPathUrl(entityUrl, version string) string {
+// TrimVersion removes the version in the Entity URI
+func TrimVersion(entityUrl, version string) string {
 	return strings.Replace(entityUrl, fmt.Sprintf("@%s", version), "", 1)
-}
-
-// EntityFullRepoUrl adds the protocol for a full URL to the repository in Git
-func EntityFullRepoUrl(entityUrl string) string {
-	return fmt.Sprintf("https://%s", entityUrl)
 }
 
 // ExtractRepoUrl adds https:// to the repository URL pass by param
@@ -21,9 +16,8 @@ func EntityFullRepoUrl(entityUrl string) string {
 // It also checks if the repoURL is of `github.com` and if it is it then does a specific validation on top of an extractions
 // meaning if there are more path parts then it only returns the full URL for the repository itself.
 func ExtractRepoUrl(repoURL string) (string, error) {
-	// Ensure the URL starts with a scheme for proper parsing
 	if !strings.HasPrefix(repoURL, "http://") && !strings.HasPrefix(repoURL, "https://") {
-		repoURL = "https://" + repoURL
+		repoURL = fmt.Sprintf("https://%s", repoURL)
 	}
 
 	u, err := url.Parse(repoURL)
@@ -47,5 +41,5 @@ func ExtractRepoUrl(repoURL string) (string, error) {
 		repoPath = strings.Join(parts[:2], "/")
 	}
 
-	return "https://" + u.Host + "/" + repoPath, nil
+	return fmt.Sprintf("https://%s/%s", u.Host, repoPath), nil
 }

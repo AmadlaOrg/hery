@@ -43,10 +43,10 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	/*paths, err := b.Storage.Paths(collectionName)
+	paths, err := b.Storage.Paths(collectionName)
 	if err != nil {
 		return entityVals, err
-	}*/
+	}
 
 	if strings.Contains(entityUri, "@") {
 		entityVersion, err := b.EntityVersion.Extract(entityUri)
@@ -106,8 +106,13 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 		}
 
 		entityVals.Version = entityVersion
-		//entityVals.DirName = fmt.Sprintf("%s@%s", entityVals.Name, entityVersion)
 		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
+		entityVals.Origin = strings.Replace(
+			entityVals.Entity,
+			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
+			"",
+			1)
+		entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
 	}
 
 	//entityVals.AbsPath = paths.EntityPath(paths.Entities, entityVals.Uri)
@@ -115,12 +120,6 @@ func (b *Builder) MetaFromRemote(collectionName, entityUri string) (entity.Entit
 	entityVals.Exist = true
 
 	return entityVals, nil
-
-	/*return entity.Entity{
-		DirName: entityDirName,
-		Uri:     entityUri,
-		Origin:  originPath,
-	}, nil*/
 }
 
 // MetaFromLocal gathers as many details about an Entity as possible from the local storage and from the URI passed to
