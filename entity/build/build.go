@@ -3,7 +3,6 @@ package build
 import (
 	"errors"
 	"fmt"
-	string2 "github.com/AmadlaOrg/hery/util/string"
 	"github.com/google/uuid"
 	"path/filepath"
 	"strings"
@@ -66,7 +65,7 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			}
 		} else if !b.EntityVersionValidation.Format(entityVersion) {
 			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
-		} else if !string2.ExistInStringArr(entityVersion, entityVersionList) {
+		} else if !b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
 			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
 		}
 
