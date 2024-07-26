@@ -108,5 +108,12 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
 
+	entityAbsOrigin := filepath.Join(paths.Entities, entityVals.Origin)
+
+	dir, err := entity.FindEntityDir(paths, entityVals)
+	if err != nil {
+		return entity.Entity{}, err
+	}
+
 	return entityVals, nil
 }

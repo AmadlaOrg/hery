@@ -16,10 +16,10 @@ func Test_Integration_Get(t *testing.T) {
 		{
 			name: "Get One",
 			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery", "testone"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "testone", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "testone", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "testone", "test.cache"),
+				Storage:    filepath.Join(os.TempDir(), ".hery"),
+				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
+				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testone", "entity"),
+				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testone", "test.cache"),
 			},
 			entityUri: []string{
 				"github.com/AmadlaOrg/EntityApplication",
@@ -28,10 +28,10 @@ func Test_Integration_Get(t *testing.T) {
 		{
 			name: "Get Multiple Paths",
 			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery", "testmultiple"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "testmultiple", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "testmultiple", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "testmultiple", "test.cache"),
+				Storage:    filepath.Join(os.TempDir(), ".hery"),
+				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
+				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
+				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
 			},
 			entityUri: []string{
 				"github.com/AmadlaOrg/Entity",
