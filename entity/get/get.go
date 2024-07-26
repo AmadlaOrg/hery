@@ -38,8 +38,9 @@ func (gs *GetterService) Get(storagePaths *storage.AbsPaths, entities []string) 
 		}
 		entityBuilds[i] = entityMeta
 	}
-	//return gs.download(entityBuilds)
-	return nil
+
+	return gs.download(entityBuilds)
+	//return nil
 }
 
 // download retrieves entities in parallel.

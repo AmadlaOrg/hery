@@ -2,7 +2,7 @@ package validation
 
 import (
 	versionPkg "github.com/AmadlaOrg/hery/entity/version"
-	utilString "github.com/AmadlaOrg/hery/util/string"
+	"github.com/AmadlaOrg/hery/util/str"
 	"regexp"
 )
 
@@ -20,7 +20,7 @@ type VersionValidation struct {
 
 // Exists checks if a specific version exists in the list of versions.
 func (vs *VersionValidation) Exists(version string, versions []string) bool {
-	return utilString.ExistInStringArr(version, versions)
+	return str.ExistInStringArr(version, versions)
 }
 
 // Format validates that the version follows one of these formats: `v1.0.0`, `v1.0`, or `v1`.

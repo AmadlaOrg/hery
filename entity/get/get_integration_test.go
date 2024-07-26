@@ -12,6 +12,8 @@ func Test_Integration_Get(t *testing.T) {
 		name      string
 		paths     storage.AbsPaths
 		entityUri []string
+		collision bool
+		hasError  bool
 	}{
 		{
 			name: "Get One",

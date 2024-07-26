@@ -1,8 +1,10 @@
 package entity
 
 import (
+	"errors"
 	"fmt"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	"github.com/AmadlaOrg/hery/errtypes"
 	"github.com/AmadlaOrg/hery/storage"
 	"os"
 	"path/filepath"
@@ -16,7 +18,9 @@ func FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 
 		// Check if the directory exists
 		if _, err := os.Stat(exactPath); os.IsNotExist(err) {
-			return "", fmt.Errorf("no matching directory found for exact version: %s", exactPath)
+			return "", errors.Join(
+				errtypes.NotFoundError,
+				fmt.Errorf("no matching directory found for exact version: %s", exactPath))
 		} else if err != nil {
 			return "", err
 		}
@@ -26,7 +30,10 @@ func FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	}
 
 	// Construct the pattern
-	pattern := filepath.Join(paths.Entities, entityVals.Origin, fmt.Sprintf("%s@%s-*-*-%s", entityVals.Name, entityVals.Version[:8], entityVals.Version[16:]))
+	pattern := filepath.Join(
+		paths.Entities,
+		entityVals.Origin,
+		fmt.Sprintf("%s@%s-*-*-%s", entityVals.Name, entityVals.Version[:8], entityVals.Version[16:]))
 
 	// Use Glob to find directories matching the pattern
 	matches, err := filepath.Glob(pattern)
@@ -35,11 +42,15 @@ func FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	}
 
 	if len(matches) == 0 {
-		return "", fmt.Errorf("no matching directories found for pattern: %s", pattern)
+		return "", errors.Join(
+			errtypes.NotFoundError,
+			fmt.Errorf("no matching directories found for pattern: %s", pattern))
 	}
 
 	if len(matches) > 1 {
-		return "", fmt.Errorf("multiple matching directories found for pattern: %s", pattern)
+		return "", errors.Join(
+			errtypes.MultipleFoundError,
+			fmt.Errorf("multiple matching directories found for pattern: %s", pattern))
 	}
 
 	// Return the matched directory

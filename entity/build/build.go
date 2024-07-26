@@ -3,6 +3,7 @@ package build
 import (
 	"errors"
 	"fmt"
+	"github.com/AmadlaOrg/hery/errtypes"
 	"github.com/google/uuid"
 	"path/filepath"
 	"strings"
@@ -108,11 +109,16 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
 
-	entityAbsOrigin := filepath.Join(paths.Entities, entityVals.Origin)
-
 	dir, err := entity.FindEntityDir(paths, entityVals)
-	if err != nil {
-		return entity.Entity{}, err
+	if errors.Is(err, errtypes.MultipleFoundError) {
+		return entityVals, err
+	} else if !errors.Is(err, errtypes.NotFoundError) && err != nil {
+		return entityVals, err
+	}
+
+	if err == nil {
+		entityVals.AbsPath = dir
+		entityVals.Have = true
 	}
 
 	return entityVals, nil
