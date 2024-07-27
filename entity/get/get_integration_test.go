@@ -9,11 +9,11 @@ import (
 
 func Test_Integration_Get(t *testing.T) {
 	tests := []struct {
-		name      string
-		paths     storage.AbsPaths
-		entityUri []string
-		collision bool
-		hasError  bool
+		name       string
+		paths      storage.AbsPaths
+		entityURIs []string
+		collision  bool
+		hasError   bool
 	}{
 		{
 			name: "Get One",
@@ -23,7 +23,7 @@ func Test_Integration_Get(t *testing.T) {
 				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testone", "entity"),
 				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testone", "test.cache"),
 			},
-			entityUri: []string{
+			entityURIs: []string{
 				"github.com/AmadlaOrg/EntityApplication",
 			},
 		},
@@ -35,7 +35,7 @@ func Test_Integration_Get(t *testing.T) {
 				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
 				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
 			},
-			entityUri: []string{
+			entityURIs: []string{
 				"github.com/AmadlaOrg/Entity",
 				"github.com/AmadlaOrg/EntityApplication",
 			},
@@ -46,7 +46,7 @@ func Test_Integration_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			entityBuild := NewGetService()
-			err := entityBuild.Get(&test.paths, test.entityUri)
+			err := entityBuild.Get(&test.paths, test.entityURIs)
 			if err != nil {
 				t.Fatalf("Get failed: %v", err)
 			}

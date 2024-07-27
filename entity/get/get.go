@@ -36,6 +36,11 @@ func (gs *GetterService) Get(storagePaths *storage.AbsPaths, entities []string) 
 		if err != nil {
 			return err
 		}
+
+		if err = entity.CheckDuplicateEntity(entityBuilds, entityMeta); err != nil {
+			return err
+		}
+
 		entityBuilds[i] = entityMeta
 	}
 

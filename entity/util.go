@@ -31,9 +31,7 @@ func FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 
 	// Construct the pattern
 	pattern := filepath.Join(
-		paths.Entities,
-		entityVals.Origin,
-		fmt.Sprintf("%s@%s-*-*-%s", entityVals.Name, entityVals.Version[:8], entityVals.Version[16:]))
+		paths.Entities, entityVals.Origin, GeneratePseudoVersionPattern(entityVals.Name, entityVals.Version))
 
 	// Use Glob to find directories matching the pattern
 	matches, err := filepath.Glob(pattern)
@@ -55,4 +53,31 @@ func FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 
 	// Return the matched directory
 	return matches[0], nil
+}
+
+// CheckDuplicateEntity checks if entityMeta is already in entityBuilds.
+func CheckDuplicateEntity(entities []Entity, entityMeta Entity) error {
+	entityVersionValidation := versionValidationPkg.NewEntityVersionValidationService()
+
+	for _, existingEntity := range entities {
+		if existingEntity.Origin == entityMeta.Origin &&
+			existingEntity.Name == entityMeta.Name {
+			if entityVersionValidation.PseudoFormat(existingEntity.Version) &&
+				entityVersionValidation.PseudoFormat(entityMeta.Version) {
+				// Check pseudo versions
+				if GeneratePseudoVersionPattern(existingEntity.Name, existingEntity.Version) == GeneratePseudoVersionPattern(entityMeta.Name, entityMeta.Version) {
+					return fmt.Errorf("duplicate entity found: %v", entityMeta)
+				}
+			} else if existingEntity.Version == entityMeta.Version {
+				// Exact version match
+				return fmt.Errorf("duplicate entity found: %v", entityMeta)
+			}
+		}
+	}
+	return nil
+}
+
+// GeneratePseudoVersionPattern generates a pattern string for pseudo-versioned entities based on their name and version.
+func GeneratePseudoVersionPattern(name, version string) string {
+	return fmt.Sprintf("%s@%s-*-%s", name, version[:6], version[22:])
 }
