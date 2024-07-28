@@ -28,7 +28,7 @@ func Test_Integration_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "Get Multiple Paths",
+			name: "Get Multiple different URIs",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -40,7 +40,45 @@ func Test_Integration_Get(t *testing.T) {
 				"github.com/AmadlaOrg/EntityApplication",
 			},
 		},
-		// Add more test cases as needed
+		{
+			name: "Get Multiple identical URIs (pseudo versions)",
+			paths: storage.AbsPaths{
+				Storage:    filepath.Join(os.TempDir(), ".hery"),
+				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
+				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
+				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
+			},
+			entityURIs: []string{
+				"github.com/AmadlaOrg/Entity",
+				"github.com/AmadlaOrg/Entity",
+			},
+		},
+		{
+			name: "Get Multiple identical URIs (static versions)",
+			paths: storage.AbsPaths{
+				Storage:    filepath.Join(os.TempDir(), ".hery"),
+				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
+				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
+				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
+			},
+			entityURIs: []string{
+				"github.com/AmadlaOrg/Entity@v1.0.0",
+				"github.com/AmadlaOrg/Entity@v1.0.0",
+			},
+		},
+		{
+			name: "Get Multiple different URIs (static versions)",
+			paths: storage.AbsPaths{
+				Storage:    filepath.Join(os.TempDir(), ".hery"),
+				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
+				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
+				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
+			},
+			entityURIs: []string{
+				"github.com/AmadlaOrg/Entity@v1.0.0",
+				"github.com/AmadlaOrg/Entity@v2.0.0",
+			},
+		},
 	}
 
 	for _, test := range tests {
