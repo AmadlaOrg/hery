@@ -75,8 +75,8 @@ func Test_Integration_Get(t *testing.T) {
 				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
 			},
 			entityURIs: []string{
-				"github.com/AmadlaOrg/Entity@v1.0.0",
-				"github.com/AmadlaOrg/Entity@v2.0.0",
+				"github.com/AmadlaOrg/QAFixturesEntityPseudoVersion@v1.0.0",
+				"github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.0.0",
 			},
 		},
 	}
