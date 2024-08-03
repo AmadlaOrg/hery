@@ -45,7 +45,6 @@ func (gs *GetterService) Get(storagePaths *storage.AbsPaths, entities []string) 
 	}
 
 	return gs.download(entityBuilds)
-	//return nil
 }
 
 // download retrieves entities in parallel.
@@ -53,14 +52,17 @@ func (gs *GetterService) download(entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
 
-	errCh := make(chan error, len(entitiesMeta)) // Channel to collect errors
-	//TODO: entityPaths := make([]string, len(entityUrls)) Maybe check with directories
+	// Channel to collect errors
+	errCh := make(chan error, len(entitiesMeta))
 
 	for _, entityMeta := range entitiesMeta {
+		// Skips if it is already there
+		if entityMeta.Have {
+			continue
+		}
+
 		go func(entityMeta entity.Entity) {
 			defer wg.Done()
-
-			// TODO: skip (continue) loop-iteration if entity with same version was already downloaded/installed maybe make a Map
 
 			// Create the directory if it does not exist
 			err := os.MkdirAll(entityMeta.AbsPath, os.ModePerm)

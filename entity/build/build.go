@@ -49,7 +49,8 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			return entityVals, fmt.Errorf("error extracting version: %v", err)
 		}
 
-		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUri)
+		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
+		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
 		if err != nil {
 			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
 		}
@@ -70,7 +71,14 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
 		}
 
+		entityVals.Name = filepath.Base(entityUriWithoutVersion)
+		entityVals.Version = entityVersion
 		entityVals.Entity = entityUri
+		entityVals.Origin = strings.Replace(
+			entityVals.Entity,
+			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
+			"",
+			1)
 	} else {
 		repoUrl, err := url.ExtractRepoUrl(entityUri)
 		if err != nil {
@@ -95,16 +103,16 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			}
 		}
 
+		entityVals.Name = filepath.Base(entityUri)
+		entityVals.Version = entityVersion
 		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
+		entityVals.Origin = strings.Replace(
+			entityVals.Entity,
+			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
+			"",
+			1)
 	}
 
-	entityVals.Name = filepath.Base(entityUri)
-	entityVals.Version = entityVersion
-	entityVals.Origin = strings.Replace(
-		entityVals.Entity,
-		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
-		"",
-		1)
 	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
