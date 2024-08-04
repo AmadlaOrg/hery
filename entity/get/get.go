@@ -82,34 +82,53 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 
 			read, err := yaml.Read(entityMeta.AbsPath, collectionName)
 			if err != nil {
+				errCh <- fmt.Errorf("error reading yaml: %v", err)
 				return
 			}
 
+			var subEntitiesMeta []entity.Entity
 			for key, value := range read {
 				if key == "_entity" {
-					subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, value)
-					if err != nil {
+					entityPath, ok := value.(string)
+					if !ok {
+						errCh <- fmt.Errorf("error converting yaml entity to string: %v", value)
 						return
 					}
-					err = gs.download(collectionName, storagePaths, subEntityMeta)
+					subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, entityPath)
 					if err != nil {
+						errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
 						return
 					}
-				}
-
-				if key == "_self" {
-					for selfKey, selfValue := range value {
-						if key == "_entity" {
-							subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, value)
-							if err != nil {
+					subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
+				} else if key == "_self" {
+					selfMap, ok := value.(map[string]interface{})
+					if !ok {
+						errCh <- fmt.Errorf("error converting yaml entity to string: %v", value)
+						return
+					}
+					for selfKey, selfValue := range selfMap {
+						if selfKey == "_entity" {
+							entityPath, ok := selfValue.(string)
+							if !ok {
+								errCh <- fmt.Errorf("error converting yaml entity to string: %v", selfValue)
 								return
 							}
-							err = gs.download(collectionName, storagePaths, subEntityMeta)
+							subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, entityPath)
 							if err != nil {
+								errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
 								return
 							}
+							subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
 						}
 					}
+				}
+			}
+
+			if len(subEntitiesMeta) > 0 {
+				err = gs.download(collectionName, storagePaths, subEntitiesMeta)
+				if err != nil {
+					errCh <- fmt.Errorf("error downloading sub entities: %v", err)
+					return
 				}
 			}
 
