@@ -9,6 +9,7 @@ import (
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/git"
+	"github.com/AmadlaOrg/hery/util/yaml"
 	"os"
 	"sync"
 )
@@ -16,7 +17,7 @@ import (
 // EntityGetter is an interface for getting entities.
 type EntityGetter interface {
 	Get(collectionName string, storagePath string, args []string) error
-	download(collectionName string, entityUrls []string, collectionStoragePath string) error
+	download(collectionName string, storagePaths *storage.AbsPaths, entityUrls []string, collectionStoragePath string) error
 }
 
 // GetterService struct implements the EntityGetter interface.
@@ -25,14 +26,14 @@ type GetterService struct {
 	EntityValidation        validation.Interface
 	EntityVersion           *version.Service
 	EntityVersionValidation versionValidationPkg.VersionValidator
+	Builder                 build.MetaBuilder
 }
 
 // Get retrieves entities based on the provided collection name and arguments.
 func (gs *GetterService) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
-	entityBuilder := build.NewEntityBuildService()
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
-		entityMeta, err := entityBuilder.MetaFromRemote(*storagePaths, e)
+		entityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, e)
 		if err != nil {
 			return err
 		}
@@ -44,11 +45,11 @@ func (gs *GetterService) Get(collectionName string, storagePaths *storage.AbsPat
 		entityBuilds[i] = entityMeta
 	}
 
-	return gs.download(collectionName, entityBuilds)
+	return gs.download(collectionName, storagePaths, entityBuilds)
 }
 
 // download retrieves entities in parallel.
-func (gs *GetterService) download(collectionName string, entitiesMeta []entity.Entity) error {
+func (gs *GetterService) download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
 
@@ -76,6 +77,39 @@ func (gs *GetterService) download(collectionName string, entitiesMeta []entity.E
 			} else if !entityMeta.IsPseudoVersion {
 				if err := gs.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
 					errCh <- fmt.Errorf("error checking out version: %v", err)
+				}
+			}
+
+			read, err := yaml.Read(entityMeta.AbsPath, collectionName)
+			if err != nil {
+				return
+			}
+
+			for key, value := range read {
+				if key == "_entity" {
+					subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, value)
+					if err != nil {
+						return
+					}
+					err = gs.download(collectionName, storagePaths, subEntityMeta)
+					if err != nil {
+						return
+					}
+				}
+
+				if key == "_self" {
+					for selfKey, selfValue := range value {
+						if key == "_entity" {
+							subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, value)
+							if err != nil {
+								return
+							}
+							err = gs.download(collectionName, storagePaths, subEntityMeta)
+							if err != nil {
+								return
+							}
+						}
+					}
 				}
 			}
 

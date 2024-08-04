@@ -1,6 +1,7 @@
 package get
 
 import (
+	"github.com/AmadlaOrg/hery/entity/build"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
@@ -14,5 +15,6 @@ func NewGetService() *GetterService {
 		EntityValidation:        validation.NewEntityValidationService(),
 		EntityVersion:           version.NewEntityVersionService(),
 		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
+		Builder:                 build.NewEntityBuildService(),
 	}
 }

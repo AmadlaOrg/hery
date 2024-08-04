@@ -19,7 +19,7 @@ import (
 
 // MetaBuilder to help with mocking and to gather metadata from remote and local sources.
 type MetaBuilder interface {
-	MetaFromRemote(collectionName, entityUri string) (entity.Entity, error)
+	MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error)
 }
 
 // Builder struct implements the MetaBuilder interface.
