@@ -19,7 +19,7 @@ var GetCmd = &cobra.Command{
 			}
 
 			getService := get.NewGetService()
-			err := getService.Get(paths, args)
+			err := getService.Get(collectionName, paths, args)
 			if err != nil {
 				log.Fatalf("Error getting entity: %s", err)
 			}

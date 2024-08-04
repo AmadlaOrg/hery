@@ -1,7 +1,9 @@
 package git
 
 import (
+	"fmt"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"os"
 )
 
@@ -9,6 +11,7 @@ import (
 type RepoManager interface {
 	FetchRepo(url, dest string) error
 	CommitHeadHash(repoPath string) (string, error)
+	CheckoutTag(repoPath, tagName string) error
 }
 
 type Git struct{}
@@ -49,4 +52,64 @@ func (g *Git) CommitHeadHash(repoPath string) (string, error) {
 	}
 
 	return commit.Hash.String(), nil
+}
+
+// CheckoutTag checks out the specified branch or tag in the repository.
+func (g *Git) CheckoutTag(repoPath, tagName string) error {
+	// Open the repository
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return err
+	}
+
+	// Get the working tree
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	// Attempt to checkout the reference as a branch
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/tags/%s", tagName)), //plumbing.NewBranchReferenceName(refName),
+	})
+	if err != nil {
+		return err
+	}
+
+	/*err = tree.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName("refs/tags/" + tagName),
+	})*/
+
+	//if err != nil {
+	// If it fails, try to checkout as a tag or commit hash
+	/*err = worktree.Checkout(&git.CheckoutOptions{
+		Hash:  plumbing.NewHash(refName),
+		Force: true,
+	})*/
+
+	//if err != nil {
+	// Try to resolve the refName as a tag
+	/*tagRef, err := repo.Tag(refName)
+	if err != nil {
+		return err
+	}
+
+	// Get the commit object of the tag
+	tagCommit, err := repo.CommitObject(tagRef.Hash())
+	if err != nil {
+		return err
+	}
+
+	// Checkout the commit
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Hash:  tagCommit.Hash,
+		Force: true,
+	})
+	if err != nil {
+		return err
+	}*/
+	//}
+	//}
+
+	return nil
 }

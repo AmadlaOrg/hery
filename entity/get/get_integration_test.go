@@ -10,14 +10,16 @@ import (
 
 func Test_Integration_Get(t *testing.T) {
 	tests := []struct {
-		name       string
-		paths      storage.AbsPaths
-		entityURIs []string
-		collision  bool
-		hasError   bool
+		name           string
+		collectionName string
+		paths          storage.AbsPaths
+		entityURIs     []string
+		collision      bool
+		hasError       bool
 	}{
 		{
-			name: "Get One",
+			name:           "Get One",
+			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -29,7 +31,8 @@ func Test_Integration_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "Get Multiple different URIs",
+			name:           "Get Multiple different URIs",
+			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -42,7 +45,8 @@ func Test_Integration_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "Get Multiple identical URIs (pseudo versions)",
+			name:           "Get Multiple identical URIs (pseudo versions)",
+			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -55,7 +59,8 @@ func Test_Integration_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "Get Multiple identical URIs (static versions)",
+			name:           "Get Multiple identical URIs (static versions)",
+			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -68,7 +73,8 @@ func Test_Integration_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "Get Multiple different URIs (with none-existing version for QAFixturesEntityPseudoVersion)",
+			name:           "Get Multiple different URIs (with none-existing version for QAFixturesEntityPseudoVersion)",
+			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -82,7 +88,8 @@ func Test_Integration_Get(t *testing.T) {
 			hasError: true,
 		},
 		{
-			name: "Get Multiple different URIs",
+			name:           "Get Multiple different URIs",
+			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
 				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
@@ -100,7 +107,7 @@ func Test_Integration_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			entityBuild := NewGetService()
-			err := entityBuild.Get(&test.paths, test.entityURIs)
+			err := entityBuild.Get(test.collectionName, &test.paths, test.entityURIs)
 			if test.hasError {
 				assert.Error(t, err)
 			} else {

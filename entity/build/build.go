@@ -79,6 +79,7 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
 			"",
 			1)
+		entityVals.IsPseudoVersion = false
 	} else {
 		repoUrl, err := url.ExtractRepoUrl(entityUri)
 		if err != nil {
@@ -111,6 +112,7 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
 			"",
 			1)
+		entityVals.IsPseudoVersion = true
 	}
 
 	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)

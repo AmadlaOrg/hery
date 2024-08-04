@@ -15,8 +15,8 @@ import (
 
 // EntityGetter is an interface for getting entities.
 type EntityGetter interface {
-	Get(collectionName, storagePath string, args []string) error
-	download(entityUrls []string, collectionStoragePath string) error
+	Get(collectionName string, storagePath string, args []string) error
+	download(collectionName string, entityUrls []string, collectionStoragePath string) error
 }
 
 // GetterService struct implements the EntityGetter interface.
@@ -28,7 +28,7 @@ type GetterService struct {
 }
 
 // Get retrieves entities based on the provided collection name and arguments.
-func (gs *GetterService) Get(storagePaths *storage.AbsPaths, entities []string) error {
+func (gs *GetterService) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilder := build.NewEntityBuildService()
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
@@ -44,11 +44,11 @@ func (gs *GetterService) Get(storagePaths *storage.AbsPaths, entities []string) 
 		entityBuilds[i] = entityMeta
 	}
 
-	return gs.download(entityBuilds)
+	return gs.download(collectionName, entityBuilds)
 }
 
 // download retrieves entities in parallel.
-func (gs *GetterService) download(entitiesMeta []entity.Entity) error {
+func (gs *GetterService) download(collectionName string, entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
 
@@ -73,7 +73,12 @@ func (gs *GetterService) download(entitiesMeta []entity.Entity) error {
 			// Download the Entity with `git clone`
 			if err := gs.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
 				errCh <- fmt.Errorf("error fetching repo: %v", err)
+			} else if !entityMeta.IsPseudoVersion {
+				if err := gs.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
+					errCh <- fmt.Errorf("error checking out version: %v", err)
+				}
 			}
+
 		}(entityMeta)
 	}
 
