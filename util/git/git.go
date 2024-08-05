@@ -76,40 +76,5 @@ func (g *Git) CheckoutTag(repoPath, tagName string) error {
 		return err
 	}
 
-	/*err = tree.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName("refs/tags/" + tagName),
-	})*/
-
-	//if err != nil {
-	// If it fails, try to checkout as a tag or commit hash
-	/*err = worktree.Checkout(&git.CheckoutOptions{
-		Hash:  plumbing.NewHash(refName),
-		Force: true,
-	})*/
-
-	//if err != nil {
-	// Try to resolve the refName as a tag
-	/*tagRef, err := repo.Tag(refName)
-	if err != nil {
-		return err
-	}
-
-	// Get the commit object of the tag
-	tagCommit, err := repo.CommitObject(tagRef.Hash())
-	if err != nil {
-		return err
-	}
-
-	// Checkout the commit
-	err = worktree.Checkout(&git.CheckoutOptions{
-		Hash:  tagCommit.Hash,
-		Force: true,
-	})
-	if err != nil {
-		return err
-	}*/
-	//}
-	//}
-
 	return nil
 }

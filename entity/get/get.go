@@ -17,7 +17,7 @@ import (
 // EntityGetter is an interface for getting entities.
 type EntityGetter interface {
 	Get(collectionName string, storagePath string, args []string) error
-	download(collectionName string, storagePaths *storage.AbsPaths, entityUrls []string, collectionStoragePath string) error
+	download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
 }
 
 // GetterService struct implements the EntityGetter interface.

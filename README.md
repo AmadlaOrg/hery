@@ -3,10 +3,12 @@
 # hery 🐻
 🐻 Hierarchical Entity Relational YAML (HERY) 🐻
 
-Is an extension to YAML that uses the concept of entities that are YAML groupings that can be interconnected similarly 
-to an RDBMS.
+HERY is an extension to [YAML](https://yaml.org/), leveraging the concept of entities—[YAML](https://yaml.org/) 
+groupings that can be interconnected similarly to an RDBMS. This CLI utility facilitates the use of HERY, enabling 
+efficient data organization and interaction.
 
-This cli utility makes it possible to use HERY.
+Additionally, the term "hery" in British English, pronounced /ˈhɛrɪ/, is an obsolete verb meaning "to glorify; praise." 
+This name reflects the utility's aim to elevate and celebrate structured data management.
 
 ## Install
 ### Build
@@ -46,6 +48,16 @@ hery entity --collection {collection name} query 'entities'
 To get more details on the functioning and commands: [.docs](.docs).
 
 ## Dev
+### IDEs
+- [Vim](.editor/.vimrc)
+- [Visual Studio Code](.editor/code.yml)
+- [JetBrains](.editor/jetbrains.yml)
+- [Zed](.editor/zed.yml)
+- [Sublime Text](.editor/sublime.yml)
+- [GNU Emacs](.editor/emacs.yml)
+- [Brackets](.editor/brackets.yml)
+- [Atom](.editor/atom.yml)
+
 ### Check dependencies
 Useful to check that libraries for testing and development don't find themselves in the build version of the project: 
 ```bash

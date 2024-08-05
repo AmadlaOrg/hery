@@ -38,17 +38,17 @@ func Schema() *jsonschema.Schema {
 }*/
 
 // Entity validates the YAML content against the JSON schema
-func (v *Validation) Entity(entityPath string) error {
-	schemaPath := filepath.Join(entityPath, ".amadla", "schema.json")
+func (v *Validation) Entity(collectionName, entityPath string) error {
+	schemaPath := filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), "schema.json")
 	schema, err := schemaPkg.Load(schemaPath)
 	if err != nil {
 		return fmt.Errorf("error loading JSON schema: %w", err)
 	}
 
-	yamlFilePath := filepath.Join(entityPath, "entity.yaml") // Assume the YAML file name
-	if !file.Exists(yamlFilePath) {
-		yamlFilePath = filepath.Join(entityPath, "entity.yml")
-	}
+	yamlFilePath := filepath.Join(entityPath, fmt.Sprintf("%s.hery", collectionName)) // Assume the YAML file name
+	/*if !file.Exists(yamlFilePath) {
+		yamlFilePath = filepath.Join(entityPath, fmt.Sprintf("%s.yml", collectionName))
+	}*/
 	if !file.Exists(yamlFilePath) {
 		return fmt.Errorf("YAML file not found in entity: %s", entityPath)
 	}
