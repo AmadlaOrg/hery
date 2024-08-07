@@ -58,6 +58,37 @@ To get more details on the functioning and commands: [.docs](.docs).
 - [Brackets](.editor/brackets.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-brackets-editor-plugin))
 - [Atom](.editor/atom.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-atom-editor-plugin))
 
+### Create Entity
+1. Create repository
+2. Make a dot directory with the collection name at the root of the repository: 
+   - `mkdir -p .<collection name>`
+3. Make `.hery` configuration file with the collection name at the root of the repository
+   - `touch <collection name>.hery`
+4. Make a `schema.json` configuration file in the `.<collection name>` directory
+   - `touch ./.<collection name>/schema.json`
+5. Add the content in `.hery` configuration file and the `schema.json` [JSON-Schema](https://json-schema.org/)
+6. Add it in git:
+   - `git add .`
+   - `git commit -m "Batman"`
+
+### Manage Tag Versioning
+Steps to add a tag: 
+```bash
+git tag -a v1.0.0-alpha.1
+git push --tags
+```
+
+### Entity version numbering
+HERY follows the same [versioning standard as Golang](https://go.dev/doc/modules/version-numbers).
+
+| Version stage                         | Example                                                              | Description                                                                                                                                                       |
+|---------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| In development                        | Automatic pseudo-version number `v0.0.0-20170915032832-14c0d48ead0c` | Indicates that the module is currently **in development and is considered unstable**. This release does not offer backward compatibility or stability assurances. |
+| Major version                         | `v1.x.x`                                                             | Indicates **public API changes that are not backward-compatible**. This release does not guarantee compatibility with previous major versions.                    |
+| Minor version                         | `vx.4.x`                                                             | Indicates **public API changes that are backward-compatible**. This release guarantees both backward compatibility and stability.                                 |
+| Patch version                         | `vx.x.1`                                                             | Indicates **changes that do not impact the module's public API or its dependencies**. This release ensures backward compatibility and stability.                  |
+| Pre-release version (alpha, beta, rc) | `vx.x.x-beta.2`                                                      | Indicates that this is a **pre-release milestone, such as an alpha or beta version**. This release does not offer any stability guarantees.                       |
+
 ### Check dependencies
 Useful to check that libraries for testing and development don't find themselves in the build version of the project: 
 ```bash
