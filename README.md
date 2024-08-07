@@ -48,15 +48,15 @@ hery entity --collection {collection name} query 'entities'
 To get more details on the functioning and commands: [.docs](.docs).
 
 ## Dev
-### IDEs
+### IDE Plugins
 - [Vim](.editor/.vimrc)
-- [Visual Studio Code](.editor/code.yml)
-- [JetBrains](.editor/jetbrains.yml)
-- [Zed](.editor/zed.yml)
-- [Sublime Text](.editor/sublime.yml)
-- [GNU Emacs](.editor/emacs.yml)
-- [Brackets](.editor/brackets.yml)
-- [Atom](.editor/atom.yml)
+- [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
+- [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
+- [Zed](.editor/zed.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-zed-editor-plugin))
+- [Sublime Text](.editor/sublime.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-sublime-editor-plugin))
+- [GNU Emacs](.editor/emacs.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-emacs-editor-plugin))
+- [Brackets](.editor/brackets.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-brackets-editor-plugin))
+- [Atom](.editor/atom.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-atom-editor-plugin))
 
 ### Check dependencies
 Useful to check that libraries for testing and development don't find themselves in the build version of the project: 
