@@ -27,18 +27,24 @@ jobs:
       run: |
         for file in $(find ./.schema/test/ -name "*.hery"); do
           echo "Validating $file"
+          tmpfile="${file%.hery}.yaml"
+          mv "$file" "$tmpfile"
           if [[ $file == *invalid.hery ]]; then
-            if jv ./.schema/entity.schema.json "$file"; then
+            if jv ./.schema/entity.schema.json "$tmpfile"; then
               echo "Error: $file is invalid but passed validation"
+              mv "$tmpfile" "$file"
               exit 1
             else
               echo "$file correctly failed validation"
+              mv "$tmpfile" "$file"
             fi
           elif [[ $file == *valid.hery ]]; then
-            if jv ./.schema/entity.schema.json "$file"; then
+            if jv ./.schema/entity.schema.json "$tmpfile"; then
               echo "$file correctly passed validation"
+              mv "$tmpfile" "$file"
             else
               echo "Error: $file is valid but failed validation"
+              mv "$tmpfile" "$file"
               exit 1
             fi
           fi
