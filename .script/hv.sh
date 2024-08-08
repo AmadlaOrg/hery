@@ -7,6 +7,8 @@ hv() {
 
   cp "${heryfile}" "$tmpfile"
   jv "${schema}" "${tmpfile}"
+  result=$?
   rm "${tmpfile}"
+  return $result
 }
 hv "${@}"
