@@ -3,11 +3,11 @@
 # hery 🐻
 🐻 Hierarchical Entity Relational YAML (HERY) 🐻
 
-HERY is an extension to [YAML](https://yaml.org/), leveraging the concept of entities—[YAML](https://yaml.org/) 
-groupings that can be interconnected similarly to an RDBMS. This CLI utility facilitates the use of HERY, enabling 
+HERY is an extension to [YAML](https://yaml.org/), leveraging the concept of entities—[YAML](https://yaml.org/)
+groupings that can be interconnected similarly to an RDBMS. This CLI utility facilitates the use of HERY, enabling
 efficient data organization and interaction.
 
-Additionally, the term "hery" in British English, pronounced /ˈhɛrɪ/, is an obsolete verb meaning "to glorify; praise." 
+Additionally, the term "hery" in British English, pronounced /ˈhɛrɪ/, is an obsolete verb meaning "to glorify; praise."
 This name reflects the utility's aim to elevate and celebrate structured data management.
 
 ## Install
@@ -17,7 +17,7 @@ go build -o hery
 ```
 
 ## Quickstart
-To verify that it was installed properly: 
+To verify that it was installed properly:
 ```bash
 hery --version
 ```
@@ -60,7 +60,7 @@ To get more details on the functioning and commands: [.docs](.docs).
 
 ### Create Entity
 1. Create repository
-2. Make a dot directory with the collection name at the root of the repository: 
+2. Make a dot directory with the collection name at the root of the repository:
    - `mkdir -p .<collection name>`
 3. Make `.hery` configuration file with the collection name at the root of the repository
    - `touch <collection name>.hery`
@@ -72,7 +72,7 @@ To get more details on the functioning and commands: [.docs](.docs).
    - `git commit -m "Batman"`
 
 ### Manage Tag Versioning
-Steps to add a tag: 
+Steps to add a tag:
 ```bash
 git tag -a v1.0.0-alpha.1
 git push --tags
@@ -89,8 +89,12 @@ HERY follows the same [versioning standard as Golang](https://go.dev/doc/modules
 | Patch version                         | `vx.x.1`                                                             | Indicates **changes that do not impact the module's public API or its dependencies**. This release ensures backward compatibility and stability.                  |
 | Pre-release version (alpha, beta, rc) | `vx.x.x-beta.2`                                                      | Indicates that this is a **pre-release milestone, such as an alpha or beta version**. This release does not offer any stability guarantees.                       |
 
+### Giving Credit
+The `.pairs` file is a great way to add details about the people that contributed to the entity. There is one used in
+this repository that can be used as reference.
+
 ### Check dependencies
-Useful to check that libraries for testing and development don't find themselves in the build version of the project: 
+Useful to check that libraries for testing and development don't find themselves in the build version of the project:
 ```bash
 go list -f '{{.Deps}}' ./main.go
 ```

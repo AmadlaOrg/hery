@@ -1,0 +1,6 @@
+# For more information: https://github.com/pivotal/git_scripts
+pairs:
+    # <initials>: <Firstname> <Lastname>[; <email-id>]
+    jnbdz: Jean-Nicolas Boulay
+website:
+    jnbdz: https://github.com/jnbdz

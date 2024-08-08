@@ -1,0 +1,10 @@
+#  vim:ts=4:sts=4:sw=4:et
+#
+# This is the CODEOWNERS file. The syntax is as follows:
+# <path> <username1> [<username2> ...]
+
+# For the 'docs/' directory, @jnbdz is the code owner.
+/docs/ @jnbdz
+
+# For the rest of the repository, @jnbdz and @ianbenlolo are the code owners.
+* @jnbdz
