@@ -1,6 +1,5 @@
 ---
 _entity: "example.com/entity/12345"
-name: "SomeName"
 _self:
   _id: "self:id:1231243"
   property: Some Value!

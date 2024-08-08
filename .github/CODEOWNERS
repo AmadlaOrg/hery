@@ -4,7 +4,6 @@
 # <path> <username1> [<username2> ...]
 
 # For the 'docs/' directory, @jnbdz is the code owner.
-/docs/ @jnbdz
+/.docs/ @jnbdz
 
-# For the rest of the repository, @jnbdz and @ianbenlolo are the code owners.
 * @jnbdz
