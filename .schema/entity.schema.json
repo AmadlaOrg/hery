@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/entity.schema.json",
+  "id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/.schema/entity.schema.json",
   "title": "HERY basic configuration properties.",
   "description": "Defines the foundational HERY entity properties. This schema sets the foundational structure for entities in the HERY system, including reserved properties that are crucial for entity identification and referencing within the system.",
   "type": "object",
