@@ -22,7 +22,6 @@
     }
   },
   "required": ["_entity"],
-  "additionalProperties": true,
   "propertiesPattern": {
     "^[^_].*$": {
       "type": "any"
