@@ -16,7 +16,7 @@ import (
 )
 
 type Interface interface {
-	Entity(entityPath string) error
+	Entity(collectionName, entityPath string) error
 	EntityUrl(entityUrl string) bool
 }
 
@@ -50,22 +50,22 @@ func (v *Validation) Entity(collectionName, entityPath string) error {
 		yamlFilePath = filepath.Join(entityPath, fmt.Sprintf("%s.yml", collectionName))
 	}*/
 	if !file.Exists(yamlFilePath) {
-		return fmt.Errorf("YAML file not found in entity: %s", entityPath)
+		return fmt.Errorf("HERY file not found in entity: %s", entityPath)
 	}
 
 	yamlContent, err := os.ReadFile(yamlFilePath)
 	if err != nil {
-		return fmt.Errorf("error reading YAML file: %w", err)
+		return fmt.Errorf("error reading HERY file: %w", err)
 	}
 
 	var yamlData map[string]interface{}
 	if err := yaml.Unmarshal(yamlContent, &yamlData); err != nil {
-		return fmt.Errorf("error unmarshalling YAML content: %w", err)
+		return fmt.Errorf("error unmarshalling HERY content: %w", err)
 	}
 
 	jsonData, err := json.Marshal(yamlData)
 	if err != nil {
-		return fmt.Errorf("error marshalling YAML content to JSON: %w", err)
+		return fmt.Errorf("error marshalling HERY content to JSON: %w", err)
 	}
 
 	var jsonDataInterface interface{}

@@ -18,6 +18,8 @@ var ValidateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
+			println(paths.Entities)
+
 			entityValidation := entityValidation.NewEntityValidationService()
 
 			for _, entity := range entityList {
@@ -26,6 +28,8 @@ var ValidateCmd = &cobra.Command{
 					log.Fatal(err)
 					return
 				}
+				println(entity.AbsPath)
+				println(entity.Name)
 			}
 
 			// Add your validation logic here
