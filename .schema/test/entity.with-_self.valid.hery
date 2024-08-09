@@ -1,0 +1,15 @@
+---
+_entity: "example.com/entity/12345"
+_self:
+  _id: "self:id:1231243"
+  property: Some Value!
+  array_property: ["Hello", "World!"]
+  obj_property:
+    sub_property_string: Some content!
+    sub_property_array: ["Another", "Hello", "World!"]
+    sub_property_object:
+      sub_sub_property_string: String string string...
+      sub_sub_property_object:
+        _entity: "example.com/entity/43593457"
+        _id: "self:subsubsub:id:1231243"
+        name: "Bob"
