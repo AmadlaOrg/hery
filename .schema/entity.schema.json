@@ -22,10 +22,10 @@
     }
   },
   "required": ["_entity"],
-  "additionalProperties": false,
   "propertiesPattern": {
     "^[^_].*$": {
       "type": "any"
     }
-  }
+  },
+  "additionalProperties": false
 }
