@@ -18,7 +18,7 @@ var ValidateCmd = &cobra.Command{
 	Use:   "valid",
 	Short: "Validate entity or schemas",
 	Run: func(cmd *cobra.Command, args []string) {
-		if !isValidateAll && (len(args) == 0 || (len(args) == 1 && isRm)) {
+		if !isValidateAll && (len(args) == 0 || (len(args) == 0 && isRm)) {
 			// Print the usage information (helper message)
 			err := cmd.Help()
 			if err != nil {
@@ -38,8 +38,28 @@ var ValidateCmd = &cobra.Command{
 					log.Fatal("too many entity URIs (the limit is 60)")
 				}
 
+				/*tmpPaths := *storage.AbsPaths{
+
+				}*/
+
+				// Replace paths with temporary directory before .<collectionName>
+				newPaths, err := storage.ReplaceWithTempDir(paths, collectionName)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				println(paths.Storage)
+				println(paths.Collection)
+				println(paths.Entities)
+				println(paths.Cache)
+				println("------------------")
+				println(newPaths.Storage)
+				println(newPaths.Collection)
+				println(newPaths.Entities)
+				println(newPaths.Cache)
+
 				getService := get.NewGetService()
-				err := getService.Get(collectionName, paths, args)
+				err = getService.Get(collectionName, paths, args)
 				if err != nil {
 					log.Fatalf("Error getting entity: %s", err)
 				}
