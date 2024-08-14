@@ -42,3 +42,10 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockYaml"
           inpackage: True
+  github.com/AmadlaOrg/hery/storage:
+    interfaces:
+      Storage:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockStorage"
+          inpackage: True

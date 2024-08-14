@@ -38,13 +38,10 @@ var ValidateCmd = &cobra.Command{
 					log.Fatal("too many entity URIs (the limit is 60)")
 				}
 
-				/*tmpPaths := *storage.AbsPaths{
-
-				}*/
-
 				// Replace paths with temporary directory before .<collectionName>
 				newPaths, err := storage.ReplaceWithTempDir(paths, collectionName)
 				if err != nil {
+					println("error")
 					log.Fatal(err)
 				}
 
