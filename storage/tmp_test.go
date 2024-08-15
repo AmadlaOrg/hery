@@ -11,7 +11,8 @@ func TestReplaceWithTempDir(t *testing.T) {
 	// Test input
 	paths := &AbsPaths{
 		Storage:    "/some/path/to/.hery/",
-		Collection: "/some/path/to/.hery/collection/",
+		Catalog:    "/some/path/to/.hery/collection",
+		Collection: "/some/path/to/.hery/collection/collectionName",
 		Entities:   "/some/path/to/.hery/collection/collectionName/entity",
 		Cache:      "/some/path/to/.hery/collection/collectionName/collectionName.cache",
 	}
@@ -53,10 +54,11 @@ func TestReplaceWithTempDir(t *testing.T) {
 
 	// Check for invalid collectionName case
 	invalidPaths := &AbsPaths{
-		Storage:    "/some/path/to/",
-		Collection: "/some/path/to/collection",
-		Entities:   "/some/path/to/entities",
-		Cache:      "/some/path/to/cache",
+		Storage:    "/some/path/to/.hery/",
+		Catalog:    "/some/path/to/.hery/collection",
+		Collection: "/some/path/to/.hery/collection/collectionName",
+		Entities:   "/some/path/to/.hery/collection/collectionName/entities",
+		Cache:      "/some/path/to/.hery/collection/collectionName/cache",
 	}
 
 	defer func() {

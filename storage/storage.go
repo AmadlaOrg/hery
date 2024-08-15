@@ -16,6 +16,7 @@ type Storage interface {
 
 type AbsPaths struct {
 	Storage    string
+	Catalog    string
 	Collection string
 	Entities   string
 	Cache      string
@@ -36,12 +37,14 @@ func (d *AbsPaths) Paths(collectionName string) (*AbsPaths, error) {
 		return &AbsPaths{}, err
 	}
 
-	collectionPath := d.collectionPath(mainPath, collectionName)
+	catalogPath := d.catalogPath(mainPath)
+	collectionPath := d.collectionPath(catalogPath, collectionName)
 	entityPath := d.entitiesPath(collectionPath)
 	cachePath := d.cachePath(collectionName, collectionPath)
 
 	return &AbsPaths{
 		Storage:    mainPath,
+		Catalog:    catalogPath,
 		Collection: collectionPath,
 		Entities:   entityPath,
 		Cache:      cachePath,
@@ -97,6 +100,10 @@ func (d *AbsPaths) Main() (string, error) {
 	}
 
 	return mainDir, nil
+}
+
+func (d *AbsPaths) catalogPath(mainPath string) string {
+	return filepathJoin(mainPath, "collection")
 }
 
 // collectionPath returns the collection absolute path
