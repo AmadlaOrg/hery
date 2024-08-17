@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/AmadlaOrg/hery/collection/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
 	"log"
-	"os"
 )
 
 var InitCmd = &cobra.Command{
@@ -18,33 +16,25 @@ var InitCmd = &cobra.Command{
 			log.Fatal("Missing collection name.")
 		}
 
-		arg := args[0]
+		collectionName := args[0]
 
 		// Validate the collection name that is pass in `arg`
-		if validation.Name(arg) {
+		if validation.Name(collectionName) {
 			log.Fatal("Collection name is required or is in the wrong format.")
 		}
 
 		// Retrieve storage path
 		storageService := storage.NewStorageService()
-		storagePath, err := storageService.Main()
+		paths, err := storageService.Paths(collectionName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// Full path to the target directory
-		targetDir := fmt.Sprintf("%s/%s", storagePath, arg)
-
-		// Check if the directory exists
-		if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-			// Create the directory
-			err = os.MkdirAll(fmt.Sprintf("%s/entity", targetDir), os.ModePerm)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Printf("Directory '%s' with subdirectory 'entity' created.\n", targetDir)
-		} else {
-			fmt.Printf("Directory '%s' already exists.\n", targetDir)
+		err = storageService.MakePaths(*paths)
+		if err != nil {
+			return
 		}
+
+		log.Printf("Collection '%s' created within the storage: '%s'.", collectionName, paths.Storage)
 	},
 }

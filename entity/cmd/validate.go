@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/AmadlaOrg/hery/entity"
-	"github.com/AmadlaOrg/hery/entity/get"
 	entityValidation "github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
@@ -25,6 +24,12 @@ var ValidateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 			return
+		} else if isValidateAll && isRm {
+			err := cmd.Help()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
 		}
 
 		concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
@@ -38,8 +43,10 @@ var ValidateCmd = &cobra.Command{
 					log.Fatal("too many entity URIs (the limit is 60)")
 				}
 
+				storageService := storage.NewStorageService()
+
 				// Replace paths with temporary directory before .<collectionName>
-				newPaths, err := storage.ReplaceWithTempDir(paths, collectionName)
+				newPaths, err := storageService.TmpPaths(collectionName)
 				if err != nil {
 					println("error")
 					log.Fatal(err)
@@ -55,11 +62,11 @@ var ValidateCmd = &cobra.Command{
 				println(newPaths.Entities)
 				println(newPaths.Cache)
 
-				getService := get.NewGetService()
+				/*getService := get.NewGetService()
 				err = getService.Get(collectionName, paths, args)
 				if err != nil {
 					log.Fatalf("Error getting entity: %s", err)
-				}
+				}*/
 			}
 
 			println(args)
