@@ -8,6 +8,22 @@ import (
 	"testing"
 )
 
+func Test_Integration_GetInTmp(t *testing.T) {
+	paths := storage.AbsPaths{
+		Storage:    filepath.Join(os.TempDir(), ".hery"),
+		Catalog:    filepath.Join(os.TempDir(), ".hery", "collection"),
+		Collection: filepath.Join(os.TempDir(), ".hery", "collection", "amadla"),
+		Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "entity"),
+		Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "test.cache"),
+	}
+	entities := []string{"github.com/AmadlaOrg/Entity"}
+	entityBuild := NewGetService()
+	err := entityBuild.GetInTmp("amadla", &paths, entities)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func Test_Integration_Get(t *testing.T) {
 	tests := []struct {
 		name           string

@@ -29,6 +29,29 @@ type GetterService struct {
 	Builder                 build.MetaBuilder
 }
 
+// GetInTmp
+func (gs *GetterService) GetInTmp(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
+	storageService := storage.NewStorageService()
+
+	// Replace paths with temporary directory before .<collectionName>
+	storagePaths, err := storageService.TmpPaths(collectionName)
+	if err != nil {
+		return err
+	}
+
+	err = storageService.MakePaths(*storagePaths)
+	if err != nil {
+		return err
+	}
+
+	err = gs.Get(collectionName, storagePaths, entities)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Get retrieves entities based on the provided collection name and arguments.
 func (gs *GetterService) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilds := make([]entity.Entity, len(entities))

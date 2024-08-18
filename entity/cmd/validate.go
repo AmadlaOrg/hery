@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/get"
 	entityValidation "github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
@@ -33,71 +36,54 @@ var ValidateCmd = &cobra.Command{
 		}
 
 		concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-			if !isValidateAll {
-				var argsLen = len(args)
-				if isRm {
-					argsLen = argsLen - 1
-				}
+			if isRm {
+				argsLen := len(args) - 1
 
-				if argsLen > 60 {
+				if len(args) == 0 {
+					log.Fatal("no entity URI specified")
+				} else if argsLen > 60 {
 					log.Fatal("too many entity URIs (the limit is 60)")
 				}
 
-				storageService := storage.NewStorageService()
-
-				// Replace paths with temporary directory before .<collectionName>
-				newPaths, err := storageService.TmpPaths(collectionName)
+				//err := TmpEntityCheck(collectionName, args)
+				getService := get.NewGetService()
+				err := getService.GetInTmp(collectionName, paths, args)
 				if err != nil {
-					println("error")
 					log.Fatal(err)
 				}
 
-				println(paths.Storage)
-				println(paths.Collection)
 				println(paths.Entities)
-				println(paths.Cache)
-				println("------------------")
-				println(newPaths.Storage)
-				println(newPaths.Collection)
-				println(newPaths.Entities)
-				println(newPaths.Cache)
+			} else {
+				println(args)
+				println(isValidateAll)
 
-				/*getService := get.NewGetService()
-				err = getService.Get(collectionName, paths, args)
-				if err != nil {
-					log.Fatalf("Error getting entity: %s", err)
-				}*/
-			}
+				for _, arg := range args {
+					println(arg)
+				}
 
-			println(args)
-			println(isValidateAll)
-
-			for _, arg := range args {
-				println(arg)
-			}
-
-			entityList, err := entity.CrawlDirectoriesParallel(paths.Entities)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if len(entityList) == 0 {
-				println("No entity")
-			}
-
-			//println(entityList)
-			//println(paths.Entities)
-
-			entityValidation := entityValidation.NewEntityValidationService()
-
-			for _, entity := range entityList {
-				err := entityValidation.Entity(collectionName, entity.AbsPath)
+				entityList, err := entity.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
 					log.Fatal(err)
-					return
 				}
-				println(entity.AbsPath)
-				println(entity.Name)
+
+				if len(entityList) == 0 {
+					println("No entity")
+				}
+
+				//println(entityList)
+				//println(paths.Entities)
+
+				entityValidation := entityValidation.NewEntityValidationService()
+
+				for _, entity := range entityList {
+					err := entityValidation.Entity(collectionName, entity.AbsPath)
+					if err != nil {
+						log.Fatal(err)
+						return
+					}
+					println(entity.AbsPath)
+					println(entity.Name)
+				}
 			}
 
 			// Add your validation logic here
@@ -127,4 +113,28 @@ func init() {
 		"rm",
 		false,
 		"Remove entity after validating if it wasn't already downloaded")
+}
+
+// TmpEntityCheck
+func TmpEntityCheck(collectionName string, entities []string) error {
+	storageService := storage.NewStorageService()
+
+	// Replace paths with temporary directory before .<collectionName>
+	tmpPaths, err := storageService.TmpPaths(collectionName)
+	if err != nil {
+		return err
+	}
+
+	err = storageService.MakePaths(*tmpPaths)
+	if err != nil {
+		return err
+	}
+
+	getService := get.NewGetService()
+	err = getService.Get(collectionName, tmpPaths, entities)
+	if err != nil {
+		return errors.New(fmt.Sprintf("error getting entity: %s", err))
+	}
+
+	return nil
 }
