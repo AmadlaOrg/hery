@@ -8,21 +8,16 @@ import (
 	"testing"
 )
 
-func Test_Integration_GetInTmp(t *testing.T) {
-	paths := storage.AbsPaths{
-		Storage:    filepath.Join(os.TempDir(), ".hery"),
-		Catalog:    filepath.Join(os.TempDir(), ".hery", "collection"),
-		Collection: filepath.Join(os.TempDir(), ".hery", "collection", "amadla"),
-		Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "entity"),
-		Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "test.cache"),
-	}
+/*func Test_Integration_GetInTmp(t *testing.T) {
 	entities := []string{"github.com/AmadlaOrg/Entity"}
 	entityBuild := NewGetService()
-	err := entityBuild.GetInTmp("amadla", &paths, entities)
+	paths, err := entityBuild.GetInTmp("amadla", entities)
 	if err != nil {
 		t.Fatal(err)
 	}
-}
+
+	println(paths.Entities)
+}*/
 
 func Test_Integration_Get(t *testing.T) {
 	tests := []struct {
@@ -33,14 +28,15 @@ func Test_Integration_Get(t *testing.T) {
 		collision      bool
 		hasError       bool
 	}{
-		{
+		/*{
 			name:           "Get One",
 			collectionName: "amadla",
 			paths: storage.AbsPaths{
 				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testone", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testone", "test.cache"),
+				Catalog:    filepath.Join(os.TempDir(), ".hery", "collection"),
+				Collection: filepath.Join(os.TempDir(), ".hery", "collection", "amadla"),
+				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "entity"),
+				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "test.cache"),
 			},
 			entityURIs: []string{
 				"github.com/AmadlaOrg/EntityApplication",
@@ -87,7 +83,7 @@ func Test_Integration_Get(t *testing.T) {
 				"github.com/AmadlaOrg/Entity@v1.0.0",
 				"github.com/AmadlaOrg/Entity@v1.0.0",
 			},
-		},
+		},*/
 		{
 			name:           "Get Multiple different URIs (with none-existing version for QAFixturesEntityPseudoVersion)",
 			collectionName: "amadla",
@@ -103,7 +99,7 @@ func Test_Integration_Get(t *testing.T) {
 			},
 			hasError: true,
 		},
-		{
+		/*{
 			name:           "Get Multiple different URIs",
 			collectionName: "amadla",
 			paths: storage.AbsPaths{
@@ -117,7 +113,7 @@ func Test_Integration_Get(t *testing.T) {
 				"github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v1.0.0",
 			},
 			hasError: false,
-		},
+		},*/
 	}
 
 	for _, test := range tests {

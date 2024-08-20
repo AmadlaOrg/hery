@@ -1,4 +1,4 @@
-package cmd
+package util
 
 import (
 	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
@@ -13,7 +13,7 @@ var (
 	newStorageService = storage.NewStorageService
 )
 
-// concoct sets up the necessary collection and storage paths and executes the provided handler function.
+// Concoct sets up the necessary collection and storage paths and executes the provided handler function.
 // It retrieves the collection name using the getCollectionFlag function,
 // initializes a new storage service, and gets the paths for the specified collection.
 // If any errors occur during these steps, they are logged and the handler is not called.
@@ -22,7 +22,7 @@ var (
 // - cmd: The cobra command that triggered this function.
 // - args: The arguments passed to the cobra command.
 // - handler: A function that takes the collection name, storage paths (AbsPaths), and arguments, and performs the main logic.
-func concoct(
+func Concoct(
 	cmd *cobra.Command,
 	args []string,
 	handler func(collectionName string, paths *storage.AbsPaths, args []string)) {

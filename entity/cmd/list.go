@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/cmd/util"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -13,7 +14,7 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all entities",
 	Run: func(cmd *cobra.Command, args []string) {
-		concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
+		util.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
 			entities, err := entity.CrawlDirectoriesParallel(paths.Entities)
 			if err != nil {
 				fmt.Println("Error crawling directories:", err)

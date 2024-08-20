@@ -68,7 +68,7 @@ func (g *Git) CheckoutTag(repoPath, tagName string) error {
 		return err
 	}
 
-	// Attempt to checkout the reference as a branch
+	// Attempt to check out the reference as a branch
 	err = worktree.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/tags/%s", tagName)), //plumbing.NewBranchReferenceName(refName),
 	})

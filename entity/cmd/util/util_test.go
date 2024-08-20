@@ -1,4 +1,4 @@
-package cmd
+package util
 
 /*type MockStorageService struct {
 	mock.Mock

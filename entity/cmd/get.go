@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/AmadlaOrg/hery/entity/cmd/util"
+	"github.com/AmadlaOrg/hery/entity/cmd/validation"
 	"github.com/AmadlaOrg/hery/entity/get"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
@@ -11,11 +13,9 @@ var GetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get entity and its dependencies",
 	Run: func(cmd *cobra.Command, args []string) {
-		concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-			if len(args) == 0 {
-				log.Fatal("no entity URI specified")
-			} else if len(args) > 60 {
-				log.Fatal("too many entity URIs (the limit is 60)")
+		util.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
+			if err := validation.Entities(args); err != nil {
+				log.Fatal(err)
 			}
 
 			getService := get.NewGetService()

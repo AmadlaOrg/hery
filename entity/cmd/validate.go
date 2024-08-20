@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"errors"
-	"fmt"
+	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
 	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/cmd/util"
+	"github.com/AmadlaOrg/hery/entity/cmd/validation"
 	"github.com/AmadlaOrg/hery/entity/get"
 	entityValidation "github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/storage"
@@ -12,55 +13,42 @@ import (
 )
 
 var (
-	isValidateAll bool
-	isRm          bool
+	isValidateAll     bool
+	isRm              bool
+	getCollectionFlag = collectionPkgCmd.GetCollectionFlag
 )
 
 var ValidateCmd = &cobra.Command{
 	Use:   "valid",
 	Short: "Validate entity or schemas",
 	Run: func(cmd *cobra.Command, args []string) {
-		if !isValidateAll && (len(args) == 0 || (len(args) == 0 && isRm)) {
-			// Print the usage information (helper message)
+		if (!isValidateAll && (len(args) == 0 || (len(args) == 0 && isRm))) || isValidateAll && isRm {
 			err := cmd.Help()
 			if err != nil {
 				log.Fatal(err)
 			}
 			return
-		} else if isValidateAll && isRm {
-			err := cmd.Help()
+		} else if isRm {
+			if err := validation.Entities(args); err != nil {
+				log.Fatal(err)
+			}
+
+			collectionName, err := getCollectionFlag()
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			//err := TmpEntityCheck(collectionName, args)
+			getService := get.NewGetService()
+			paths, err := getService.GetInTmp(collectionName, args)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			println(paths.Entities)
 			return
-		}
-
-		concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-			if isRm {
-				argsLen := len(args) - 1
-
-				if len(args) == 0 {
-					log.Fatal("no entity URI specified")
-				} else if argsLen > 60 {
-					log.Fatal("too many entity URIs (the limit is 60)")
-				}
-
-				//err := TmpEntityCheck(collectionName, args)
-				getService := get.NewGetService()
-				err := getService.GetInTmp(collectionName, paths, args)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				println(paths.Entities)
-			} else {
-				println(args)
-				println(isValidateAll)
-
-				for _, arg := range args {
-					println(arg)
-				}
-
+		} else if isValidateAll {
+			util.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
 				entityList, err := entity.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
 					log.Fatal(err)
@@ -84,20 +72,20 @@ var ValidateCmd = &cobra.Command{
 					println(entity.AbsPath)
 					println(entity.Name)
 				}
-			}
 
-			// Add your validation logic here
-			// entityDir, err := storage.Path()
-			// if err != nil {
-			//     fmt.Println("could not get the root storage directory:", err)
-			//     return
-			// }
-			// err = entity.Validate(entityDir)
-			// if err != nil {
-			//     fmt.Println("Error validating entities:", err)
-			//     return
-			// }
-		})
+				// Add your validation logic here
+				// entityDir, err := storage.Path()
+				// if err != nil {
+				//     fmt.Println("could not get the root storage directory:", err)
+				//     return
+				// }
+				// err = entity.Validate(entityDir)
+				// if err != nil {
+				//     fmt.Println("Error validating entities:", err)
+				//     return
+				// }
+			})
+		}
 	},
 }
 
@@ -113,28 +101,4 @@ func init() {
 		"rm",
 		false,
 		"Remove entity after validating if it wasn't already downloaded")
-}
-
-// TmpEntityCheck
-func TmpEntityCheck(collectionName string, entities []string) error {
-	storageService := storage.NewStorageService()
-
-	// Replace paths with temporary directory before .<collectionName>
-	tmpPaths, err := storageService.TmpPaths(collectionName)
-	if err != nil {
-		return err
-	}
-
-	err = storageService.MakePaths(*tmpPaths)
-	if err != nil {
-		return err
-	}
-
-	getService := get.NewGetService()
-	err = getService.Get(collectionName, tmpPaths, entities)
-	if err != nil {
-		return errors.New(fmt.Sprintf("error getting entity: %s", err))
-	}
-
-	return nil
 }

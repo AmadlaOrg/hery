@@ -16,6 +16,7 @@ import (
 
 // EntityGetter is an interface for getting entities.
 type EntityGetter interface {
+	GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error)
 	Get(collectionName string, storagePath string, args []string) error
 	download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
 }
@@ -29,30 +30,30 @@ type GetterService struct {
 	Builder                 build.MetaBuilder
 }
 
-// GetInTmp
-func (gs *GetterService) GetInTmp(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
+// GetInTmp retrieves entities based on the provided collection name and entities
+func (gs *GetterService) GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error) {
 	storageService := storage.NewStorageService()
 
 	// Replace paths with temporary directory before .<collectionName>
 	storagePaths, err := storageService.TmpPaths(collectionName)
 	if err != nil {
-		return err
+		return storage.AbsPaths{}, err
 	}
 
 	err = storageService.MakePaths(*storagePaths)
 	if err != nil {
-		return err
+		return *storagePaths, err
 	}
 
 	err = gs.Get(collectionName, storagePaths, entities)
 	if err != nil {
-		return err
+		return *storagePaths, err
 	}
 
-	return nil
+	return *storagePaths, nil
 }
 
-// Get retrieves entities based on the provided collection name and arguments.
+// Get retrieves entities based on the provided collection name and entities
 func (gs *GetterService) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
@@ -97,7 +98,10 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 			// Download the Entity with `git clone`
 			if err := gs.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
 				errCh <- fmt.Errorf("error fetching repo: %v", err)
-			} else if !entityMeta.IsPseudoVersion {
+			}
+
+			// Changes the repository to the tag (version) that was pass
+			if !entityMeta.IsPseudoVersion {
 				if err := gs.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
 					errCh <- fmt.Errorf("error checking out version: %v", err)
 				}
@@ -106,6 +110,12 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 			read, err := yaml.Read(entityMeta.AbsPath, collectionName)
 			if err != nil {
 				errCh <- fmt.Errorf("error reading yaml: %v", err)
+				return
+			}
+
+			err = gs.EntityValidation.Entity(collectionName, entityMeta.AbsPath)
+			if err != nil {
+				errCh <- fmt.Errorf("error validating entity: %v", err)
 				return
 			}
 

@@ -25,6 +25,12 @@ type Validation struct {
 	VersionValidation *versionValidationPkg.VersionValidation
 }
 
+var (
+	osReadFile    = os.ReadFile
+	jsonMarshal   = json.Marshal
+	jsonUnmarshal = json.Unmarshal
+)
+
 // Schema
 func Schema() *jsonschema.Schema {
 	return nil
@@ -53,7 +59,7 @@ func (v *Validation) Entity(collectionName, entityPath string) error {
 		return fmt.Errorf("HERY file not found in entity: %s", entityPath)
 	}
 
-	yamlContent, err := os.ReadFile(yamlFilePath)
+	yamlContent, err := osReadFile(yamlFilePath)
 	if err != nil {
 		return fmt.Errorf("error reading HERY file: %w", err)
 	}
@@ -63,13 +69,13 @@ func (v *Validation) Entity(collectionName, entityPath string) error {
 		return fmt.Errorf("error unmarshalling HERY content: %w", err)
 	}
 
-	jsonData, err := json.Marshal(yamlData)
+	jsonData, err := jsonMarshal(yamlData)
 	if err != nil {
 		return fmt.Errorf("error marshalling HERY content to JSON: %w", err)
 	}
 
 	var jsonDataInterface interface{}
-	if err := json.Unmarshal(jsonData, &jsonDataInterface); err != nil {
+	if err := jsonUnmarshal(jsonData, &jsonDataInterface); err != nil {
 		return fmt.Errorf("error unmarshalling JSON content: %w", err)
 	}
 
