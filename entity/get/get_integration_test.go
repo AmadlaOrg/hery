@@ -20,6 +20,27 @@ import (
 }*/
 
 func Test_Integration_Get(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "hery_test_*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Clean up after test
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(tempDir)
+
+	paths := storage.AbsPaths{
+		Storage:    filepath.Join(tempDir, ".hery"),
+		Catalog:    filepath.Join(tempDir, ".hery", "collection"),
+		Collection: filepath.Join(tempDir, ".hery", "collection", "amadla"),
+		Entities:   filepath.Join(tempDir, ".hery", "collection", "amadla", "entity"),
+		Cache:      filepath.Join(tempDir, ".hery", "collection", "amadla", "test.cache"),
+	}
+
 	tests := []struct {
 		name           string
 		collectionName string
@@ -28,16 +49,10 @@ func Test_Integration_Get(t *testing.T) {
 		collision      bool
 		hasError       bool
 	}{
-		/*{
+		{
 			name:           "Get One",
 			collectionName: "amadla",
-			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Catalog:    filepath.Join(os.TempDir(), ".hery", "collection"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection", "amadla"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "amadla", "test.cache"),
-			},
+			paths:          paths,
 			entityURIs: []string{
 				"github.com/AmadlaOrg/EntityApplication",
 			},
@@ -45,12 +60,7 @@ func Test_Integration_Get(t *testing.T) {
 		{
 			name:           "Get Multiple different URIs",
 			collectionName: "amadla",
-			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
-			},
+			paths:          paths,
 			entityURIs: []string{
 				"github.com/AmadlaOrg/Entity",
 				"github.com/AmadlaOrg/EntityApplication",
@@ -59,12 +69,7 @@ func Test_Integration_Get(t *testing.T) {
 		{
 			name:           "Get Multiple identical URIs (pseudo versions)",
 			collectionName: "amadla",
-			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
-			},
+			paths:          paths,
 			entityURIs: []string{
 				"github.com/AmadlaOrg/Entity",
 				"github.com/AmadlaOrg/Entity",
@@ -73,47 +78,32 @@ func Test_Integration_Get(t *testing.T) {
 		{
 			name:           "Get Multiple identical URIs (static versions)",
 			collectionName: "amadla",
-			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
-			},
+			paths:          paths,
 			entityURIs: []string{
 				"github.com/AmadlaOrg/Entity@v1.0.0",
 				"github.com/AmadlaOrg/Entity@v1.0.0",
 			},
-		},*/
+		},
 		{
 			name:           "Get Multiple different URIs (with none-existing version for QAFixturesEntityPseudoVersion)",
 			collectionName: "amadla",
-			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
-			},
+			paths:          paths,
 			entityURIs: []string{
 				"github.com/AmadlaOrg/QAFixturesEntityPseudoVersion@v1.0.0",
 				"github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.0.0",
 			},
 			hasError: true,
 		},
-		/*{
+		{
 			name:           "Get Multiple different URIs",
 			collectionName: "amadla",
-			paths: storage.AbsPaths{
-				Storage:    filepath.Join(os.TempDir(), ".hery"),
-				Collection: filepath.Join(os.TempDir(), ".hery", "collection"),
-				Entities:   filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "entity"),
-				Cache:      filepath.Join(os.TempDir(), ".hery", "collection", "testmultiple", "test.cache"),
-			},
+			paths:          paths,
 			entityURIs: []string{
 				"github.com/AmadlaOrg/QAFixturesEntityPseudoVersion",
 				"github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v1.0.0",
 			},
 			hasError: false,
-		},*/
+		},
 	}
 
 	for _, test := range tests {
