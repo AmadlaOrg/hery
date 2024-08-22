@@ -23,16 +23,13 @@ func (gr *GitRemote) Tags(url string) ([]string, error) {
 		URLs: []string{url},
 	})
 
-	// Retrieve all references from the remote repository
 	refs, err := rem.List(&git.ListOptions{
-		// Returns all references, including peeled references.
-		PeelingOption: git.AppendPeeled,
+		PeelingOption: git.IgnorePeeled,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// Filter the references list and only keep tags
 	var tags []string
 	for _, ref := range refs {
 		if ref.Name().IsTag() {

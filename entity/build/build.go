@@ -60,6 +60,7 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 			return entityVals, fmt.Errorf("error listing versions: %v", err)
 		}
 
+		// TODO: If no tags (version) found then use pseudo version
 		if entityVersion == "latest" {
 			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 			if err != nil {

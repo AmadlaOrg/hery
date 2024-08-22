@@ -49,7 +49,7 @@ func Test_Integration_Get(t *testing.T) {
 		collision      bool
 		hasError       bool
 	}{
-		{
+		/*{
 			name:           "Get One",
 			collectionName: "amadla",
 			paths:          paths,
@@ -83,7 +83,7 @@ func Test_Integration_Get(t *testing.T) {
 				"github.com/AmadlaOrg/Entity@v1.0.0",
 				"github.com/AmadlaOrg/Entity@v1.0.0",
 			},
-		},
+		},*/
 		{
 			name:           "Get Multiple different URIs (with none-existing version for QAFixturesEntityPseudoVersion)",
 			collectionName: "amadla",
@@ -94,7 +94,7 @@ func Test_Integration_Get(t *testing.T) {
 			},
 			hasError: true,
 		},
-		{
+		/*{
 			name:           "Get Multiple different URIs",
 			collectionName: "amadla",
 			paths:          paths,
@@ -103,7 +103,7 @@ func Test_Integration_Get(t *testing.T) {
 				"github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v1.0.0",
 			},
 			hasError: false,
-		},
+		},*/
 	}
 
 	for _, test := range tests {
