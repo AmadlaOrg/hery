@@ -93,17 +93,20 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 			err := os.MkdirAll(entityMeta.AbsPath, os.ModePerm)
 			if err != nil {
 				errCh <- err
+				return
 			}
 
 			// Download the Entity with `git clone`
 			if err := gs.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
 				errCh <- fmt.Errorf("error fetching repo: %v", err)
+				return
 			}
 
 			// Changes the repository to the tag (version) that was pass
 			if !entityMeta.IsPseudoVersion {
 				if err := gs.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
 					errCh <- fmt.Errorf("error checking out version: %v", err)
+					return
 				}
 			}
 

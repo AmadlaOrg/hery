@@ -1,5 +1,12 @@
 with-expecter: True
 packages:
+  github.com/AmadlaOrg/hery/entity/version:
+    interfaces:
+      Manager:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockVersion"
+          inpackage: True
   github.com/AmadlaOrg/hery/util/file:
     interfaces:
       File:
