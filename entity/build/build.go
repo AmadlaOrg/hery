@@ -42,78 +42,17 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	var entityVersion string
+	//var entityVersion string
 	if strings.Contains(entityUri, "@") {
-		entityVersion, err := b.EntityVersion.Extract(entityUri)
+		entityVals, err := b.metaFromRemoteWithVersion(entityUri)
 		if err != nil {
-			return entityVals, fmt.Errorf("error extracting version: %v", err)
+			return entityVals, err
 		}
-
-		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
-		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
-		if err != nil {
-			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
-		}
-
-		entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
-		if err != nil {
-			return entityVals, fmt.Errorf("error listing versions: %v", err)
-		}
-
-		// TODO: If no tags (version) found then use pseudo version
-		if entityVersion == "latest" {
-			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
-			if err != nil {
-				return entityVals, fmt.Errorf("error finding latest version: %v", err)
-			}
-		} else if !b.EntityVersionValidation.Format(entityVersion) {
-			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
-		} else if !b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
-			return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
-		}
-
-		entityVals.Name = filepath.Base(entityUriWithoutVersion)
-		entityVals.Version = entityVersion
-		entityVals.Entity = entityUri
-		entityVals.Origin = strings.Replace(
-			entityVals.Entity,
-			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
-			"",
-			1)
-		entityVals.IsPseudoVersion = false
 	} else {
-		repoUrl, err := url.ExtractRepoUrl(entityUri)
+		entityVals, err := b.metaFromRemoteWithoutVersion(entityUri)
 		if err != nil {
-			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+			return entityVals, err
 		}
-		entityVals.RepoUrl = repoUrl
-
-		entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
-		if err != nil {
-			return entityVals, fmt.Errorf("error listing versions: %v", err)
-		}
-
-		if len(entityVersionList) == 0 {
-			entityVersion, err = b.EntityVersion.GeneratePseudo(entityVals.RepoUrl)
-			if err != nil {
-				return entityVals, err
-			}
-		} else {
-			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
-			if err != nil {
-				return entityVals, err
-			}
-		}
-
-		entityVals.Name = filepath.Base(entityUri)
-		entityVals.Version = entityVersion
-		entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
-		entityVals.Origin = strings.Replace(
-			entityVals.Entity,
-			fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
-			"",
-			1)
-		entityVals.IsPseudoVersion = true
 	}
 
 	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
@@ -131,6 +70,97 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 		entityVals.AbsPath = dir
 		entityVals.Have = true
 	}
+
+	return entityVals, nil
+}
+
+func (b *Builder) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error) {
+	var entityVals = entity.Entity{
+		Have:  false,
+		Exist: false,
+	}
+	var entityVersion string
+
+	repoUrl, err := url.ExtractRepoUrl(entityUri)
+	if err != nil {
+		return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+	}
+	entityVals.RepoUrl = repoUrl
+
+	entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
+	if err != nil {
+		return entityVals, fmt.Errorf("error listing versions: %v", err)
+	}
+
+	if len(entityVersionList) == 0 {
+		entityVersion, err = b.EntityVersion.GeneratePseudo(entityVals.RepoUrl)
+		if err != nil {
+			return entityVals, err
+		}
+	} else {
+		entityVersion, err = b.EntityVersion.Latest(entityVersionList)
+		if err != nil {
+			return entityVals, err
+		}
+	}
+
+	entityVals.Name = filepath.Base(entityUri)
+	entityVals.Version = entityVersion
+	entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
+	entityVals.Origin = strings.Replace(
+		entityVals.Entity,
+		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
+		"",
+		1)
+	entityVals.IsPseudoVersion = true
+
+	return entityVals, nil
+}
+
+func (b *Builder) metaFromRemoteWithVersion(entityUri string) (entity.Entity, error) {
+	var entityVals = entity.Entity{
+		Have:  false,
+		Exist: false,
+	}
+	var entityVersion string
+
+	entityVersion, err := b.EntityVersion.Extract(entityUri)
+	if err != nil {
+		return entityVals, fmt.Errorf("error extracting version: %v", err)
+	}
+
+	entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
+	entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
+	if err != nil {
+		return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+	}
+
+	entityVersionList, err := b.EntityVersion.List(entityVals.RepoUrl)
+	if err != nil {
+		return entityVals, fmt.Errorf("error listing versions: %v", err)
+	}
+
+	// TODO: If no tags (version) found then use pseudo version
+	if entityVersion == "latest" {
+		entityVersion, err = b.EntityVersion.Latest(entityVersionList)
+		if err != nil {
+			return entityVals, fmt.Errorf("error finding latest version: %v", err)
+		}
+	} else if !b.EntityVersionValidation.Format(entityVersion) {
+		return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
+	} else if !b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
+		return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
+	}
+
+	entityVals.Name = filepath.Base(entityUriWithoutVersion)
+	entityVals.Version = entityVersion
+	entityVals.Entity = entityUri
+	entityVals.Origin = strings.Replace(
+		entityVals.Entity,
+		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
+		"",
+		1)
+	entityVals.IsPseudoVersion = false
 
 	return entityVals, nil
 }

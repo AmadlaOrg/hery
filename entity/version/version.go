@@ -19,7 +19,7 @@ type Manager interface {
 
 // Service struct implements the Manager interface.
 type Service struct {
-	GitRemote *remote.GitRemote
+	GitRemote remote.RepoRemoteManager
 }
 
 // Extract extracts the version from a go get URI.
