@@ -1,6 +1,7 @@
 package build
 
 import (
+	"errors"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/version"
 	"github.com/stretchr/testify/assert"
@@ -63,6 +64,40 @@ func TestMetaFromRemoteWithoutVersion(t *testing.T) {
 				Exist:           false,
 			},
 			hasError: false,
+		},
+		//
+		// Error
+		//
+		{
+			name:                                   "Error with entity URI",
+			entityUri:                              "github.com",
+			internalEntityVersionList:              []string{},
+			internalEntityVersionListErr:           nil,
+			internalEntityVersionGeneratePseudo:    "",
+			internalEntityVersionGeneratePseudoErr: nil,
+			internalEntityVersionLatest:            "",
+			internalEntityVersionLatestErr:         nil,
+			expectEntity: entity.Entity{
+				Have:  false,
+				Exist: false,
+			},
+			hasError: true,
+		},
+		{
+			name:                                   "Error from entity version List",
+			entityUri:                              "github.com/AmadlaOrg/Entity",
+			internalEntityVersionList:              []string{},
+			internalEntityVersionListErr:           errors.New("error from List"),
+			internalEntityVersionGeneratePseudo:    "",
+			internalEntityVersionGeneratePseudoErr: nil,
+			internalEntityVersionLatest:            "",
+			internalEntityVersionLatestErr:         nil,
+			expectEntity: entity.Entity{
+				RepoUrl: "https://github.com/AmadlaOrg/Entity",
+				Have:    false,
+				Exist:   false,
+			},
+			hasError: true,
 		},
 	}
 

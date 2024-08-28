@@ -97,11 +97,13 @@ func (b *Builder) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity,
 		if err != nil {
 			return entityVals, err
 		}
+		entityVals.IsPseudoVersion = true
 	} else {
 		entityVersion, err = b.EntityVersion.Latest(entityVersionList)
 		if err != nil {
 			return entityVals, err
 		}
+		entityVals.IsPseudoVersion = false
 	}
 
 	entityVals.Name = filepath.Base(entityUri)
@@ -112,7 +114,6 @@ func (b *Builder) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity,
 		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
 		"",
 		1)
-	entityVals.IsPseudoVersion = true
 
 	return entityVals, nil
 }
