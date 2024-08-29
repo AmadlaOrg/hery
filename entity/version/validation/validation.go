@@ -35,3 +35,11 @@ func (vs *VersionValidation) PseudoFormat(pseudoVersion string) bool {
 	re := regexp.MustCompile(pseudoVersionPattern)
 	return re.MatchString(pseudoVersion)
 }
+
+// AnyFormat validates that the version pass is in standard format or pseudo format or `latest` word.
+func (vs *VersionValidation) AnyFormat(version string) bool {
+	if !vs.Format(version) && !vs.PseudoFormat(version) && version != "latest" {
+		return false
+	}
+	return true
+}

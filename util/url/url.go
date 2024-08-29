@@ -8,6 +8,18 @@ import (
 
 // TrimVersion removes the version in the Entity URI
 func TrimVersion(entityUrl, version string) string {
+	// error)
+	/*if version == "" {
+		return entityUrl, errors.New("empty version")
+	}
+	entityVersionValidationService := validation.NewEntityVersionValidationService()
+	isVersionFormat := entityVersionValidationService.Format(version)
+	isPseudoVersionFormat := entityVersionValidationService.PseudoFormat(version)
+
+	if !isVersionFormat && !isPseudoVersionFormat && version != "latest" {
+		return entityUrl, errors.New("invalid version")
+	}*/
+
 	return strings.Replace(entityUrl, fmt.Sprintf("@%s", version), "", 1)
 }
 
