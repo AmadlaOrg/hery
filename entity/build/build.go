@@ -141,11 +141,19 @@ func (b *Builder) metaFromRemoteWithVersion(entityUri string) (entity.Entity, er
 		return entityVals, fmt.Errorf("error listing versions: %v", err)
 	}
 
-	// TODO: If no tags (version) found then use pseudo version
 	if entityVersion == "latest" {
-		entityVersion, err = b.EntityVersion.Latest(entityVersionList)
-		if err != nil {
-			return entityVals, fmt.Errorf("error finding latest version: %v", err)
+		if len(entityVersionList) == 0 {
+			entityVersion, err = b.EntityVersion.GeneratePseudo(entityVals.RepoUrl)
+			if err != nil {
+				return entityVals, err
+			}
+			entityVals.IsPseudoVersion = true
+		} else {
+			entityVersion, err = b.EntityVersion.Latest(entityVersionList)
+			if err != nil {
+				return entityVals, fmt.Errorf("error finding latest version: %v", err)
+			}
+			entityVals.IsPseudoVersion = false
 		}
 	} else if !b.EntityVersionValidation.Format(entityVersion) {
 		return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
@@ -161,7 +169,6 @@ func (b *Builder) metaFromRemoteWithVersion(entityUri string) (entity.Entity, er
 		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
 		"",
 		1)
-	entityVals.IsPseudoVersion = false
 
 	return entityVals, nil
 }
