@@ -38,23 +38,23 @@ func TestExtract(t *testing.T) {
 		assert.Equal(t, "v1.2.3-beta.1", version)
 	})
 
-	// FIXME:
 	// Scenario 4: URL with multiple '@' characters
-	/*t.Run("URL with multiple '@' characters", func(t *testing.T) {
+	t.Run("URL with multiple '@' characters", func(t *testing.T) {
 		url := "https://example.com/repo@branch@v1.0.0"
 		version, err := service.Extract(url)
-		assert.NoError(t, err)
-		assert.Equal(t, "v1.0.0", version)
-	})*/
+		assert.Error(t, err)
+		assert.ErrorContains(t, err, "invalid URI, contains more than one '@':")
+		assert.Empty(t, version)
+	})
 
-	// FIXME:
 	// Scenario 5: URL with version not at the end
-	/*t.Run("URL with version not at the end", func(t *testing.T) {
+	t.Run("URL with version not at the end", func(t *testing.T) {
 		url := "https://example.com/repo@v1.0.0/extra"
 		version, err := service.Extract(url)
-		assert.NoError(t, err)
-		assert.Equal(t, "v1.0.0", version)
-	})*/
+		assert.Error(t, err)
+		assert.ErrorContains(t, err, "invalid version format:")
+		assert.Empty(t, version)
+	})
 }
 
 func TestList(t *testing.T) {
@@ -72,7 +72,7 @@ func TestList(t *testing.T) {
 		entityUrlPath := "https://example.com/repo.git"
 
 		// Define the expected tags and the result we want from the mock
-		expectedTags := []string{"v1.0.0", "v2.0", "not-a-version", "v1"}
+		expectedTags := []string{"v1.0.0", "v2.0.0", "not-a-version", "v1"}
 		mockGitRemote.On("Tags", entityUrlPath).Return(expectedTags, nil)
 
 		// Call the List method
@@ -82,7 +82,7 @@ func TestList(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Define the expected result after filtering
-		expectedVersions := []string{"v1.0.0", "v2.0", "v1"}
+		expectedVersions := []string{"v1.0.0", "v2.0.0"}
 
 		// Assert that the result matches the expected versions
 		assert.Equal(t, expectedVersions, result)
@@ -150,42 +150,13 @@ func TestList(t *testing.T) {
 	})
 }
 
-func TestExists(t *testing.T) {
-	// Mock the remote.Tags function
-	/*remote.Tags = func(entityUrlPath string) ([]string, error) {
-		return []string{"v1.0.0", "v2.0.0", "v1.1.0"}, nil
-	}
-
-	tests := []struct {
-		entityUrlPath string
-		version       string
-		expected      bool
-		err           bool
-	}{
-		{"some/url", "v1.0.0", true, false},
-		{"some/url", "v2.0.0", true, false},
-		{"some/url", "v3.0.0", false, false},
-		{"some/url", "v1.1.0", true, false},
-	}
-
-	for _, test := range tests {
-		result, err := Exists(test.entityUrlPath, test.version)
-		if (err != nil) != test.err {
-			t.Errorf("Exists(%v, %v) unexpected error: %v", test.entityUrlPath, test.version, err)
-		}
-		if result != test.expected {
-			t.Errorf("Exists(%v, %v) = %v; want %v", test.entityUrlPath, test.version, result, test.expected)
-		}
-	}*/
-}
-
 func TestLatest(t *testing.T) {
 	// Initialize the service
 	service := &Service{}
 
 	// Scenario 1: No versions provided
 	t.Run("No versions provided", func(t *testing.T) {
-		versions := []string{}
+		var versions []string
 		_, err := service.Latest(versions)
 		assert.Error(t, err)
 		assert.Equal(t, "no versions found", err.Error())
@@ -215,12 +186,26 @@ func TestLatest(t *testing.T) {
 		assert.Equal(t, "v1.0.0", latest)
 	})
 
+	t.Run("Pre-release versions", func(t *testing.T) {
+		versions := []string{"v1.0.0-alpha.1", "v1.0.0-beta.1"}
+		latest, err := service.Latest(versions)
+		assert.NoError(t, err)
+		assert.Equal(t, "v1.0.0-beta.1", latest)
+	})
+
 	// Scenario 5: Complex versions with pre-releases
 	t.Run("Complex versions with pre-releases", func(t *testing.T) {
 		versions := []string{"v1.0.0-beta.2", "v1.0.0-alpha.1", "v1.0.0-beta.1", "v1.0.0"}
 		latest, err := service.Latest(versions)
 		assert.NoError(t, err)
 		assert.Equal(t, "v1.0.0", latest)
+	})
+
+	t.Run("Complex versions with pre-releases", func(t *testing.T) {
+		versions := []string{"v1.0.0-beta.2", "v1.0.0-alpha.1", "v1.0.0-beta.1"}
+		latest, err := service.Latest(versions)
+		assert.NoError(t, err)
+		assert.Equal(t, "v1.0.0-beta.2", latest)
 	})
 }
 
@@ -311,8 +296,8 @@ func TestParseVersion(t *testing.T) {
 	// Scenario 3: Parse incomplete version
 	t.Run("Parse incomplete version", func(t *testing.T) {
 		parts, pre := service.parseVersion("v1.0")
-		assert.Equal(t, []int{1, 0}, parts)
-		assert.Equal(t, "", pre)
+		assert.Nil(t, parts)
+		assert.Empty(t, pre)
 	})
 }
 

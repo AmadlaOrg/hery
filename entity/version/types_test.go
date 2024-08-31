@@ -40,8 +40,8 @@ func TestFormat(t *testing.T) {
 		{"v2.3.4-beta.2", true},
 		{"v0.0.0-20170915032832-14c0d48ead0c", false}, // Not a valid semantic version
 		{"v1.2.3", true},
-		{"v1", true},
-		{"v1.0", true},
+		{"v1", false},
+		{"v1.0", false},
 		{"v1.0.0-rc.1", true},
 		{"v1.0.0.0", false},
 	}

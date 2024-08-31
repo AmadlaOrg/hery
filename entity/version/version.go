@@ -5,6 +5,7 @@ import (
 	"github.com/AmadlaOrg/hery/util/git/remote"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -24,11 +25,23 @@ type Service struct {
 
 // Extract extracts the version from a go get URI.
 func (v *Service) Extract(url string) (string, error) {
-	re := regexp.MustCompile(`@(.+)$`)
+	versionAnnotationCount := strings.Count(url, "@")
+	if versionAnnotationCount > 1 {
+		return "", fmt.Errorf("invalid URI, contains more than one '@': %s", url)
+	} else if versionAnnotationCount == 0 {
+		return "", fmt.Errorf("no version found in URI: %s", url)
+	}
+
+	re := regexp.MustCompile(`@([^@]+)$`)
 	matches := re.FindStringSubmatch(url)
 	if len(matches) < 2 {
 		return "", fmt.Errorf("no version found in URI: %s", url)
 	}
+
+	if !regexp.MustCompile(Format).MatchString(matches[1]) {
+		return "", fmt.Errorf("invalid version format: %s", matches[1])
+	}
+
 	return matches[1], nil
 }
 
@@ -81,7 +94,8 @@ func (v *Service) compareVersions(v1, v2 string) int {
 	parts1, pre1 := v.parseVersion(v1)
 	parts2, pre2 := v.parseVersion(v2)
 
-	for i := 0; i < len(parts1) && i < len(parts2); i++ {
+	// Compare major, minor, patch
+	for i := 0; i < len(parts1); i++ {
 		if parts1[i] < parts2[i] {
 			return -1
 		} else if parts1[i] > parts2[i] {
@@ -89,31 +103,31 @@ func (v *Service) compareVersions(v1, v2 string) int {
 		}
 	}
 
-	// Compare lengths if one version has more parts
-	if len(parts1) < len(parts2) {
-		return -1
-	} else if len(parts1) > len(parts2) {
-		return 1
-	}
-
-	// Compare pre-release versions if they exist
-	if pre1 == "" && pre2 != "" {
-		return 1
-	} else if pre1 != "" && pre2 == "" {
-		return -1
-	} else if pre1 != "" && pre2 != "" {
+	// Compare pre-release versions if both exist
+	if pre1 != "" && pre2 != "" {
 		return v.comparePreRelease(pre1, pre2)
 	}
 
+	// If only one has a pre-release version, it should be considered less
+	if pre1 != "" {
+		return -1
+	}
+	if pre2 != "" {
+		return 1
+	}
+
+	// Versions are identical
 	return 0
 }
 
 // comparePreRelease compares pre-release versions and returns -1, 0, or 1 if pre1 < pre2, pre1 == pre2, or pre1 > pre2.
 func (v *Service) comparePreRelease(pre1, pre2 string) int {
 	preOrder := map[string]int{"alpha": 0, "beta": 1, "rc": 2}
+
 	parts1 := strings.Split(pre1, ".")
 	parts2 := strings.Split(pre2, ".")
 
+	// Compare pre-release type (alpha, beta, rc)
 	order1 := preOrder[parts1[0]]
 	order2 := preOrder[parts2[0]]
 
@@ -123,45 +137,46 @@ func (v *Service) comparePreRelease(pre1, pre2 string) int {
 		return 1
 	}
 
-	num1, num2 := 0, 0
-	_, err := fmt.Sscanf(parts1[1], "%d", &num1)
-	if err != nil {
-		return 0
-	}
-	_, err = fmt.Sscanf(parts2[1], "%d", &num2)
-	if err != nil {
-		return 0
+	// Compare numeric suffix
+	if len(parts1) > 1 && len(parts2) > 1 {
+		num1, err1 := strconv.Atoi(parts1[1])
+		num2, err2 := strconv.Atoi(parts2[1])
+
+		if err1 == nil && err2 == nil {
+			if num1 < num2 {
+				return -1
+			} else if num1 > num2 {
+				return 1
+			}
+		}
 	}
 
-	if num1 < num2 {
-		return -1
-	} else if num1 > num2 {
-		return 1
-	}
-
+	// If no numeric suffix or they are the same
 	return 0
 }
 
 // parseVersion parses a version string into its components and a pre-release identifier.
 func (v *Service) parseVersion(version string) ([]int, string) {
-	re := regexp.MustCompile(Format)
+	re := regexp.MustCompile(`^v(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc)\.(\d+))?$`)
 	matches := re.FindStringSubmatch(version)
 
-	var nums []int
-	for i := 1; i <= 3; i++ {
-		if matches[i] != "" {
-			var num int
-			_, err := fmt.Sscanf(strings.TrimPrefix(matches[i], "."), "%d", &num)
-			if err != nil {
-				return nil, ""
-			}
-			nums = append(nums, num)
+	if len(matches) == 0 {
+		return nil, ""
+	}
+
+	nums := make([]int, 3)
+	for i := 0; i < 3; i++ {
+		var num int
+		_, err := fmt.Sscanf(matches[i+1], "%d", &num)
+		if err != nil {
+			return nil, ""
 		}
+		nums[i] = num
 	}
 
 	pre := ""
-	if matches[4] != "" {
-		pre = matches[4][1:] // Remove leading '-'
+	if len(matches[4]) > 0 && len(matches[5]) > 0 {
+		pre = matches[4] + "." + matches[5] // Ensures format like "beta.2"
 	}
 
 	return nums, pre

@@ -52,12 +52,12 @@ func TestVersionValidation_Format(t *testing.T) {
 		{
 			name:     "Valid version v1.0",
 			version:  "v1.0",
-			expected: true,
+			expected: false,
 		},
 		{
 			name:     "Valid version v1",
 			version:  "v1",
-			expected: true,
+			expected: false,
 		},
 		{
 			name:     "Invalid version format",
