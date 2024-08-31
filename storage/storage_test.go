@@ -3,11 +3,117 @@ package storage
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
+
+type MockFile struct {
+	mock.Mock
+}
+
+func (m *MockFile) Exists(path string) bool {
+	args := m.Called(path)
+	return args.Bool(0)
+}
+
+// Setup test suite
+func setup() {
+	// Mock os and filepath functions as needed
+	osGetwd = func() (string, error) {
+		return "/mock/path", nil
+	}
+	filepathAbs = func(path string) (string, error) {
+		return "/abs/mock/path/" + path, nil
+	}
+	filepathJoin = filepath.Join
+	fileExists = func(path string) bool {
+		return true
+	}
+	osMkdirAll = func(path string, perm os.FileMode) error {
+		return nil
+	}
+	osMkdirTemp = func(dir, pattern string) (string, error) {
+		return "/tmp/mock/hery", nil
+	}
+}
+
+// FIXME:
+/*func TestPaths(t *testing.T) {
+	setup()
+	d := &AbsPaths{}
+	paths, err := d.Paths("testCollection")
+	assert.NoError(t, err)
+	assert.Equal(t, "/mock/path/testCollection", paths.Storage)
+}*/
+
+// FIXME:
+/*func TestEntityPath(t *testing.T) {
+	setup()
+	d := &AbsPaths{}
+	entityPath := d.EntityPath("/mock/path/entities", "entity1.json")
+	assert.Equal(t, "/mock/path/entities/entity1.json", entityPath)
+}*/
+
+// FIXME:
+/*func TestTmpPaths(t *testing.T) {
+	setup()
+	d := &AbsPaths{}
+	paths, err := d.TmpPaths("testCollection")
+	assert.NoError(t, err)
+	assert.Equal(t, "/tmp/mock/hery/testCollection", paths.Storage)
+}*/
+
+func TestTmpMain(t *testing.T) {
+	setup()
+	d := &AbsPaths{}
+	mainPath, err := d.TmpMain()
+	assert.NoError(t, err)
+	assert.Equal(t, "/tmp/mock/hery/.hery", mainPath)
+}
+
+func TestMakePaths(t *testing.T) {
+	setup()
+	d := &AbsPaths{}
+	paths := AbsPaths{
+		Storage:    "/mock/path/storage",
+		Catalog:    "/mock/path/catalog",
+		Collection: "/mock/path/collection",
+		Entities:   "/mock/path/entities",
+		Cache:      "/mock/path/cache",
+	}
+	err := d.MakePaths(paths)
+	assert.NoError(t, err)
+}
+
+func TestTmpMain_MkdirTempError(t *testing.T) {
+	osMkdirTemp = func(dir, pattern string) (string, error) {
+		return "", errors.New("mock error")
+	}
+	d := &AbsPaths{}
+	_, err := d.TmpMain()
+	assert.Error(t, err)
+	assert.Equal(t, "mock error", err.Error())
+}
+
+func TestMakePaths_MkdirAllError(t *testing.T) {
+	osMkdirAll = func(path string, perm os.FileMode) error {
+		return errors.New("mock error")
+	}
+	d := &AbsPaths{}
+	paths := AbsPaths{
+		Storage:    "/mock/path/storage",
+		Catalog:    "/mock/path/catalog",
+		Collection: "/mock/path/collection",
+		Entities:   "/mock/path/entities",
+		Cache:      "/mock/path/cache",
+	}
+	err := d.MakePaths(paths)
+	assert.Error(t, err)
+	assert.Equal(t, "mock error", err.Error())
+}
 
 // TestMainPathUsingEnvVar tests the Main function using an environment variable for the storage path
 func TestMainPathUsingEnvVar(t *testing.T) {
