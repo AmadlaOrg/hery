@@ -243,8 +243,9 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			hasError: true,
 		},
 		{
-			name:                                   "Error with entity URI",
+			name:                                   "Error extracting repo url",
 			entityUri:                              "github.com/@v1.0.0", // TODO: Without the `/` the ExtractRepoUrl does not throw an error
+			internalEntityVersionExtract:           "",
 			internalEntityVersionList:              []string{},
 			internalEntityVersionListErr:           nil,
 			internalEntityVersionGeneratePseudo:    "",
@@ -274,9 +275,11 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			},
 			hasError: true,
 		},
-		/*{
+		{
 			name:                                   "Error from entity pseudo version generator",
-			entityUri:                              "github.com/AmadlaOrg/Entity",
+			entityUri:                              "github.com/AmadlaOrg/Entity@latest",
+			internalEntityVersionExtract:           "latest",
+			internalEntityVersionExtractErr:        nil,
 			internalEntityVersionList:              []string{},
 			internalEntityVersionListErr:           nil,
 			internalEntityVersionGeneratePseudo:    "",
@@ -292,7 +295,9 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 		},
 		{
 			name:                                   "Error from entity Latest",
-			entityUri:                              "github.com/AmadlaOrg/Entity",
+			entityUri:                              "github.com/AmadlaOrg/Entity@latest",
+			internalEntityVersionExtract:           "latest",
+			internalEntityVersionExtractErr:        nil,
 			internalEntityVersionList:              []string{""},
 			internalEntityVersionListErr:           nil,
 			internalEntityVersionGeneratePseudo:    "",
@@ -305,7 +310,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				Exist:   false,
 			},
 			hasError: true,
-		},*/
+		},
 	}
 
 	for _, tt := range tests {
