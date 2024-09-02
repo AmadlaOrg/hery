@@ -26,7 +26,7 @@ func TestExtract(t *testing.T) {
 		url := "https://example.com/repo.git"
 		version, err := service.Extract(url)
 		assert.Error(t, err)
-		assert.Equal(t, "no version found in URI: https://example.com/repo.git", err.Error())
+		assert.ErrorIs(t, err, ErrorExtractNoVersionFound)
 		assert.Equal(t, "", version)
 	})
 
@@ -43,7 +43,7 @@ func TestExtract(t *testing.T) {
 		url := "https://example.com/repo@branch@v1.0.0"
 		version, err := service.Extract(url)
 		assert.Error(t, err)
-		assert.ErrorContains(t, err, "invalid URI, contains more than one '@':")
+		assert.ErrorIs(t, err, ErrorExtractVersionAnnotationCountMoreThanOne)
 		assert.Empty(t, version)
 	})
 
@@ -159,7 +159,7 @@ func TestLatest(t *testing.T) {
 		var versions []string
 		_, err := service.Latest(versions)
 		assert.Error(t, err)
-		assert.Equal(t, "no versions found", err.Error())
+		assert.ErrorIs(t, err, ErrorLatestVersionsLenIsZero)
 	})
 
 	// Scenario 2: Single version

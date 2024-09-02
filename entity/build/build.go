@@ -20,6 +20,8 @@ import (
 // MetaBuilder to help with mocking and to gather metadata from remote and local sources.
 type MetaBuilder interface {
 	MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error)
+	metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error)
+	metaFromRemoteWithVersion(entityUri string) (entity.Entity, error)
 }
 
 // Builder struct implements the MetaBuilder interface.
@@ -29,6 +31,10 @@ type Builder struct {
 	EntityVersion           version.Manager
 	EntityVersionValidation versionValidationPkg.VersionValidation
 }
+
+var (
+	entityFindEntityDir = entity.FindEntityDir
+)
 
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
 // Entity struct. It also validates values that are passed to it.
@@ -59,7 +65,7 @@ func (b *Builder) MetaFromRemote(paths storage.AbsPaths, entityUri string) (enti
 	entityVals.Id = uuid.New().String()
 	entityVals.Exist = true
 
-	dir, err := entity.FindEntityDir(paths, entityVals)
+	dir, err := entityFindEntityDir(paths, entityVals)
 	if errors.Is(err, errtypes.MultipleFoundError) {
 		return entityVals, err
 	} else if !errors.Is(err, errtypes.NotFoundError) && err != nil {
@@ -127,7 +133,11 @@ func (b *Builder) metaFromRemoteWithVersion(entityUri string) (entity.Entity, er
 
 	entityVersion, err := b.EntityVersion.Extract(entityUri)
 	if err != nil {
-		return entityVals, fmt.Errorf("error extracting version: %v", err)
+		if !errors.Is(err, version.ErrorExtractNoVersionFound) {
+			return entityVals, fmt.Errorf("error extracting version: %v", err)
+		} else {
+			entityVersion = "latest"
+		}
 	}
 
 	entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
@@ -155,8 +165,9 @@ func (b *Builder) metaFromRemoteWithVersion(entityUri string) (entity.Entity, er
 			}
 			entityVals.IsPseudoVersion = false
 		}
-	} else if !b.EntityVersionValidation.Format(entityVersion) {
-		return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
+	} else if !b.EntityVersionValidation.Format(entityVersion) &&
+		!b.EntityVersionValidation.PseudoFormat(entityVersion) {
+		return entityVals, fmt.Errorf("invalid entity version format: %v", entityVersion)
 	} else if !b.EntityVersionValidation.Exists(entityVersion, entityVersionList) {
 		return entityVals, fmt.Errorf("invalid entity version: %v", entityVersion)
 	}

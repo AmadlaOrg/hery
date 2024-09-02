@@ -1,6 +1,7 @@
 package version
 
 import (
+	"errors"
 	"fmt"
 	"github.com/AmadlaOrg/hery/util/git/remote"
 	"regexp"
@@ -27,19 +28,19 @@ type Service struct {
 func (v *Service) Extract(url string) (string, error) {
 	versionAnnotationCount := strings.Count(url, "@")
 	if versionAnnotationCount > 1 {
-		return "", fmt.Errorf("invalid URI, contains more than one '@': %s", url)
+		return "", errors.Join(ErrorExtractVersionAnnotationCountMoreThanOne, fmt.Errorf("url: %s", url))
 	} else if versionAnnotationCount == 0 {
-		return "", fmt.Errorf("no version found in URI: %s", url)
+		return "", errors.Join(ErrorExtractNoVersionFound, fmt.Errorf("url: %s", url))
 	}
 
 	re := regexp.MustCompile(`@([^@]+)$`)
 	matches := re.FindStringSubmatch(url)
 	if len(matches) < 2 {
-		return "", fmt.Errorf("no version found in URI: %s", url)
+		return "", errors.Join(ErrorExtractNoVersionFound, fmt.Errorf("url: %s", url))
 	}
 
 	if !regexp.MustCompile(Format).MatchString(matches[1]) {
-		return "", fmt.Errorf("invalid version format: %s", matches[1])
+		return "", errors.Join(ErrorExtractInvalidVersion, fmt.Errorf("invalid version format: %s", matches[1]))
 	}
 
 	return matches[1], nil
@@ -49,7 +50,7 @@ func (v *Service) Extract(url string) (string, error) {
 func (v *Service) List(entityUrlPath string) ([]string, error) {
 	tags, err := v.GitRemote.Tags(entityUrlPath)
 	if err != nil {
-		return nil, fmt.Errorf("error getting tags: %v", err)
+		return nil, errors.Join(ErrorListGitRemoteTags, err)
 	}
 
 	if len(tags) == 0 {
@@ -74,7 +75,7 @@ func (v *Service) List(entityUrlPath string) ([]string, error) {
 // Latest returns the most recent version from the list of versions.
 func (v *Service) Latest(versions []string) (string, error) {
 	if len(versions) == 0 {
-		return "", fmt.Errorf("no versions found")
+		return "", ErrorLatestVersionsLenIsZero
 	}
 
 	sort.Slice(versions, func(i, j int) bool {
@@ -157,7 +158,7 @@ func (v *Service) comparePreRelease(pre1, pre2 string) int {
 
 // parseVersion parses a version string into its components and a pre-release identifier.
 func (v *Service) parseVersion(version string) ([]int, string) {
-	re := regexp.MustCompile(`^v(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc)\.(\d+))?$`)
+	re := regexp.MustCompile(ParseVersionFormat)
 	matches := re.FindStringSubmatch(version)
 
 	if len(matches) == 0 {
@@ -176,7 +177,7 @@ func (v *Service) parseVersion(version string) ([]int, string) {
 
 	pre := ""
 	if len(matches[4]) > 0 && len(matches[5]) > 0 {
-		pre = matches[4] + "." + matches[5] // Ensures format like "beta.2"
+		pre = fmt.Sprintf("%s.%s", matches[4], matches[5]) // Ensures format like "beta.2"
 	}
 
 	return nums, pre

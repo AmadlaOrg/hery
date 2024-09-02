@@ -1,5 +1,12 @@
 with-expecter: True
 packages:
+  github.com/AmadlaOrg/hery/entity/build:
+    interfaces:
+      MetaBuilder:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockBuild"
+          inpackage: True
   github.com/AmadlaOrg/hery/entity/version:
     interfaces:
       Manager:

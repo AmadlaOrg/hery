@@ -4,11 +4,44 @@ import (
 	"errors"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/version"
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"reflect"
 	"testing"
 )
+
+func TestMetaFromRemote(t *testing.T) {
+	tests := []struct {
+		name           string
+		inputPaths     storage.AbsPaths
+		inputEntityUri string
+		expectEntity   entity.Entity
+		hasError       bool
+	}{
+		{
+			name:           "",
+			inputPaths:     storage.AbsPaths{},
+			inputEntityUri: "testdata/entity_remote.txt",
+			expectEntity:   entity.Entity{},
+			hasError:       false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockBuilder := Builder{}
+			metaFromRemote, err := mockBuilder.MetaFromRemote(test.inputPaths, test.inputEntityUri)
+			if test.hasError {
+				assert.Error(t, err)
+			}
+
+			if !reflect.DeepEqual(metaFromRemote, test.expectEntity) {
+				t.Errorf("expected: %v, got: %v", test.expectEntity, metaFromRemote)
+			}
+		})
+	}
+}
 
 func TestMetaFromRemoteWithoutVersion(t *testing.T) {
 	tests := []struct {
@@ -200,9 +233,11 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			},
 			hasError: false,
 		},
-		/*{
+		{
 			name:                                   "Valid meta using pseudo version",
-			entityUri:                              "github.com/AmadlaOrg/Entity",
+			entityUri:                              "github.com/AmadlaOrg/Entity@latest",
+			internalEntityVersionExtract:           "latest",
+			internalEntityVersionExtractErr:        nil,
 			internalEntityVersionList:              []string{},
 			internalEntityVersionListErr:           nil,
 			internalEntityVersionGeneratePseudo:    "v0.0.0-20240823005443-9b4947da3948",
@@ -210,17 +245,86 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			internalEntityVersionLatest:            "",
 			internalEntityVersionLatestErr:         nil,
 			expectEntity: entity.Entity{
-				Entity:          "github.com/AmadlaOrg/Entity@v0.0.0-20240823005443-9b4947da3948",
+				Entity:          "github.com/AmadlaOrg/Entity@latest",
 				Name:            "Entity",
 				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-				Origin:          "github.com/AmadlaOrg/",
+				Origin:          "github.com/AmadlaOrg/Entity@latest",
 				Version:         "v0.0.0-20240823005443-9b4947da3948",
 				IsPseudoVersion: true,
 				Have:            false,
 				Exist:           false,
 			},
 			hasError: false,
-		},*/
+		},
+		{
+			name:                                   "Valid meta using latest version with latest tags",
+			entityUri:                              "github.com/AmadlaOrg/Entity@latest",
+			internalEntityVersionExtract:           "latest",
+			internalEntityVersionExtractErr:        nil,
+			internalEntityVersionList:              []string{"v1.0.0", "v2.0.0", "v3.0.0"},
+			internalEntityVersionListErr:           nil,
+			internalEntityVersionGeneratePseudo:    "",
+			internalEntityVersionGeneratePseudoErr: nil,
+			internalEntityVersionLatest:            "v3.0.0",
+			internalEntityVersionLatestErr:         nil,
+			expectEntity: entity.Entity{
+				Entity:          "github.com/AmadlaOrg/Entity@latest",
+				Name:            "Entity",
+				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
+				Origin:          "github.com/AmadlaOrg/Entity@latest",
+				Version:         "v3.0.0",
+				IsPseudoVersion: false,
+				Have:            false,
+				Exist:           false,
+			},
+			hasError: false,
+		},
+		{
+			name:                                   "Valid meta using no set version with version list",
+			entityUri:                              "github.com/AmadlaOrg/Entity",
+			internalEntityVersionExtract:           "",
+			internalEntityVersionExtractErr:        version.ErrorExtractNoVersionFound,
+			internalEntityVersionList:              []string{"v1.0.0", "v2.0.0", "v3.0.0"},
+			internalEntityVersionListErr:           nil,
+			internalEntityVersionGeneratePseudo:    "",
+			internalEntityVersionGeneratePseudoErr: nil,
+			internalEntityVersionLatest:            "v3.0.0",
+			internalEntityVersionLatestErr:         nil,
+			expectEntity: entity.Entity{
+				Entity:          "github.com/AmadlaOrg/Entity",
+				Name:            "Entity",
+				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
+				Origin:          "github.com/AmadlaOrg/Entity",
+				Version:         "v3.0.0",
+				IsPseudoVersion: false,
+				Have:            false,
+				Exist:           false,
+			},
+			hasError: false,
+		},
+		{
+			name:                                   "Valid meta using no set version with pseudo version",
+			entityUri:                              "github.com/AmadlaOrg/Entity",
+			internalEntityVersionExtract:           "",
+			internalEntityVersionExtractErr:        version.ErrorExtractNoVersionFound,
+			internalEntityVersionList:              []string{},
+			internalEntityVersionListErr:           nil,
+			internalEntityVersionGeneratePseudo:    "v0.0.0-20240823005443-9b4947da3948",
+			internalEntityVersionGeneratePseudoErr: nil,
+			internalEntityVersionLatest:            "",
+			internalEntityVersionLatestErr:         nil,
+			expectEntity: entity.Entity{
+				Entity:          "github.com/AmadlaOrg/Entity",
+				Name:            "Entity",
+				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
+				Origin:          "github.com/AmadlaOrg/Entity",
+				Version:         "v0.0.0-20240823005443-9b4947da3948",
+				IsPseudoVersion: true,
+				Have:            false,
+				Exist:           false,
+			},
+			hasError: false,
+		},
 		//
 		// Error
 		//
@@ -308,6 +412,29 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				RepoUrl: "https://github.com/AmadlaOrg/Entity",
 				Have:    false,
 				Exist:   false,
+			},
+			hasError: true,
+		},
+		{
+			name:                                   "Invalid pass version in the entity URI",
+			entityUri:                              "github.com/AmadlaOrg/Entity@v0.0",
+			internalEntityVersionExtract:           "v0.0",
+			internalEntityVersionExtractErr:        nil,
+			internalEntityVersionList:              []string{"v1.0.0", "v2.0.0", "v3.0.0"},
+			internalEntityVersionListErr:           nil,
+			internalEntityVersionGeneratePseudo:    "",
+			internalEntityVersionGeneratePseudoErr: nil,
+			internalEntityVersionLatest:            "",
+			internalEntityVersionLatestErr:         nil,
+			expectEntity: entity.Entity{
+				Entity:          "",
+				Name:            "",
+				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
+				Origin:          "",
+				Version:         "",
+				IsPseudoVersion: false,
+				Have:            false,
+				Exist:           false,
 			},
 			hasError: true,
 		},
