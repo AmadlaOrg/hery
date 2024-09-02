@@ -11,21 +11,21 @@ import (
 	"time"
 )
 
-// Manager is an interface for managing versions.
-type Manager interface {
+// IVersion is an interface for managing versions.
+type IVersion interface {
 	Extract(url string) (string, error)
 	List(entityUrlPath string) ([]string, error)
 	Latest(versions []string) (string, error)
 	GeneratePseudo(entityFullRepoUrl string) (string, error)
 }
 
-// Service struct implements the Manager interface.
-type Service struct {
+// SVersion struct implements the Manager interface.
+type SVersion struct {
 	GitRemote remote.RepoRemoteManager
 }
 
 // Extract extracts the version from a go get URI.
-func (v *Service) Extract(url string) (string, error) {
+func (s *SVersion) Extract(url string) (string, error) {
 	versionAnnotationCount := strings.Count(url, "@")
 	if versionAnnotationCount > 1 {
 		return "", errors.Join(ErrorExtractVersionAnnotationCountMoreThanOne, fmt.Errorf("url: %s", url))
@@ -47,8 +47,8 @@ func (v *Service) Extract(url string) (string, error) {
 }
 
 // List returns a list of all the versions in tags with the format `v1.0.0`, `v1.0`, or `v1`.
-func (v *Service) List(entityUrlPath string) ([]string, error) {
-	tags, err := v.GitRemote.Tags(entityUrlPath)
+func (s *SVersion) List(entityUrlPath string) ([]string, error) {
+	tags, err := s.GitRemote.Tags(entityUrlPath)
 	if err != nil {
 		return nil, errors.Join(ErrorListGitRemoteTags, err)
 	}
@@ -73,27 +73,27 @@ func (v *Service) List(entityUrlPath string) ([]string, error) {
 }
 
 // Latest returns the most recent version from the list of versions.
-func (v *Service) Latest(versions []string) (string, error) {
+func (s *SVersion) Latest(versions []string) (string, error) {
 	if len(versions) == 0 {
 		return "", ErrorLatestVersionsLenIsZero
 	}
 
 	sort.Slice(versions, func(i, j int) bool {
-		return v.versionLess(versions[i], versions[j])
+		return s.versionLess(versions[i], versions[j])
 	})
 
 	return versions[len(versions)-1], nil
 }
 
 // versionLess compares two version strings and returns true if v1 < v2.
-func (v *Service) versionLess(v1, v2 string) bool {
-	return v.compareVersions(v1, v2) < 0
+func (s *SVersion) versionLess(v1, v2 string) bool {
+	return s.compareVersions(v1, v2) < 0
 }
 
 // compareVersions compares two version strings and returns -1, 0, or 1 if v1 < v2, v1 == v2, or v1 > v2.
-func (v *Service) compareVersions(v1, v2 string) int {
-	parts1, pre1 := v.parseVersion(v1)
-	parts2, pre2 := v.parseVersion(v2)
+func (s *SVersion) compareVersions(v1, v2 string) int {
+	parts1, pre1 := s.parseVersion(v1)
+	parts2, pre2 := s.parseVersion(v2)
 
 	// Compare major, minor, patch
 	for i := 0; i < len(parts1); i++ {
@@ -106,7 +106,7 @@ func (v *Service) compareVersions(v1, v2 string) int {
 
 	// Compare pre-release versions if both exist
 	if pre1 != "" && pre2 != "" {
-		return v.comparePreRelease(pre1, pre2)
+		return s.comparePreRelease(pre1, pre2)
 	}
 
 	// If only one has a pre-release version, it should be considered less
@@ -122,7 +122,7 @@ func (v *Service) compareVersions(v1, v2 string) int {
 }
 
 // comparePreRelease compares pre-release versions and returns -1, 0, or 1 if pre1 < pre2, pre1 == pre2, or pre1 > pre2.
-func (v *Service) comparePreRelease(pre1, pre2 string) int {
+func (s *SVersion) comparePreRelease(pre1, pre2 string) int {
 	preOrder := map[string]int{"alpha": 0, "beta": 1, "rc": 2}
 
 	parts1 := strings.Split(pre1, ".")
@@ -157,7 +157,7 @@ func (v *Service) comparePreRelease(pre1, pre2 string) int {
 }
 
 // parseVersion parses a version string into its components and a pre-release identifier.
-func (v *Service) parseVersion(version string) ([]int, string) {
+func (s *SVersion) parseVersion(version string) ([]int, string) {
 	re := regexp.MustCompile(ParseVersionFormat)
 	matches := re.FindStringSubmatch(version)
 
@@ -184,8 +184,8 @@ func (v *Service) parseVersion(version string) ([]int, string) {
 }
 
 // GeneratePseudo generates a pseudo version to be used when there is no other source to identify the version of the entity.
-func (v *Service) GeneratePseudo(entityFullRepoUrl string) (string, error) {
-	commitHeadHash, err := v.GitRemote.CommitHeadHash(entityFullRepoUrl)
+func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
+	commitHeadHash, err := s.GitRemote.CommitHeadHash(entityFullRepoUrl)
 	if err != nil {
 		return "", err
 	}

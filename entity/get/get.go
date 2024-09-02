@@ -14,24 +14,25 @@ import (
 	"sync"
 )
 
-// EntityGetter is an interface for getting entities.
-type EntityGetter interface {
+// IGet is an interface for getting entities.
+type IGet interface {
 	GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error)
 	Get(collectionName string, storagePath string, args []string) error
 	download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
 }
 
-// GetterService struct implements the EntityGetter interface.
-type GetterService struct {
+// SGet struct implements the EntityGetter interface.
+type SGet struct {
 	Git                     git.RepoManager
+	Entity                  entity.IEntity
 	EntityValidation        validation.Interface
-	EntityVersion           *version.Service
+	EntityVersion           *version.SVersion
 	EntityVersionValidation versionValidationPkg.VersionValidator
-	Builder                 build.MetaBuilder
+	Build                   build.IBuild
 }
 
 // GetInTmp retrieves entities based on the provided collection name and entities
-func (gs *GetterService) GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error) {
+func (s *SGet) GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error) {
 	storageService := storage.NewStorageService()
 
 	// Replace paths with temporary directory before .<collectionName>
@@ -45,7 +46,7 @@ func (gs *GetterService) GetInTmp(collectionName string, entities []string) (sto
 		return *storagePaths, err
 	}
 
-	err = gs.Get(collectionName, storagePaths, entities)
+	err = s.Get(collectionName, storagePaths, entities)
 	if err != nil {
 		return *storagePaths, err
 	}
@@ -54,26 +55,26 @@ func (gs *GetterService) GetInTmp(collectionName string, entities []string) (sto
 }
 
 // Get retrieves entities based on the provided collection name and entities
-func (gs *GetterService) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
+func (s *SGet) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
-		entityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, e)
+		entityMeta, err := s.Build.MetaFromRemote(*storagePaths, e)
 		if err != nil {
 			return err
 		}
 
-		if err = entity.CheckDuplicateEntity(entityBuilds, entityMeta); err != nil {
+		if err = s.Entity.CheckDuplicateEntity(entityBuilds, entityMeta); err != nil {
 			return err
 		}
 
 		entityBuilds[i] = entityMeta
 	}
 
-	return gs.download(collectionName, storagePaths, entityBuilds)
+	return s.download(collectionName, storagePaths, entityBuilds)
 }
 
 // download retrieves entities in parallel.
-func (gs *GetterService) download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
+func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
 
@@ -97,14 +98,14 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 			}
 
 			// Download the Entity with `git clone`
-			if err := gs.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
+			if err := s.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
 				errCh <- fmt.Errorf("error fetching repo: %v", err)
 				return
 			}
 
 			// Changes the repository to the tag (version) that was pass
 			if !entityMeta.IsPseudoVersion {
-				if err := gs.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
+				if err := s.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
 					errCh <- fmt.Errorf("error checking out version: %v", err)
 					return
 				}
@@ -116,7 +117,7 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 				return
 			}
 
-			err = gs.EntityValidation.Entity(collectionName, entityMeta.AbsPath)
+			err = s.EntityValidation.Entity(collectionName, entityMeta.AbsPath)
 			if err != nil {
 				errCh <- fmt.Errorf("error validating entity: %v", err)
 				return
@@ -130,7 +131,7 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 						errCh <- fmt.Errorf("error converting yaml entity to string: %v", value)
 						return
 					}
-					subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, entityPath)
+					subEntityMeta, err := s.Build.MetaFromRemote(*storagePaths, entityPath)
 					if err != nil {
 						errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
 						return
@@ -149,7 +150,7 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 								errCh <- fmt.Errorf("error converting yaml entity to string: %v", selfValue)
 								return
 							}
-							subEntityMeta, err := gs.Builder.MetaFromRemote(*storagePaths, entityPath)
+							subEntityMeta, err := s.Build.MetaFromRemote(*storagePaths, entityPath)
 							if err != nil {
 								errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
 								return
@@ -161,7 +162,7 @@ func (gs *GetterService) download(collectionName string, storagePaths *storage.A
 			}
 
 			if len(subEntitiesMeta) > 0 {
-				err = gs.download(collectionName, storagePaths, subEntitiesMeta)
+				err = s.download(collectionName, storagePaths, subEntitiesMeta)
 				if err != nil {
 					errCh <- fmt.Errorf("error downloading sub entities: %v", err)
 					return

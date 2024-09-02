@@ -20,7 +20,7 @@ type EntityComposer interface {
 
 // Composer struct implements the EntityComposer interface.
 type Composer struct {
-	Storage storage.Storage
+	Storage storage.IStorage
 }
 
 // ComposeEntity gathers as many details about an Entity as possible and composes it.

@@ -15,7 +15,7 @@ type VersionValidator interface {
 
 // VersionValidation struct implements the VersionValidator interface.
 type VersionValidation struct {
-	Version versionPkg.Service
+	Version versionPkg.SVersion
 }
 
 // Exists checks if a specific version exists in the list of versions.

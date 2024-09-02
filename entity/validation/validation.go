@@ -21,7 +21,7 @@ type Interface interface {
 }
 
 type Validation struct {
-	Version           version.Manager
+	Version           version.IVersion
 	VersionValidation *versionValidationPkg.VersionValidation
 }
 

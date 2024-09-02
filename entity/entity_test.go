@@ -11,6 +11,8 @@ import (
 )
 
 func TestFindEntityDir(t *testing.T) {
+	entityService := NewEntityService()
+
 	// Setup test directories
 	basePath := "/tmp/.hery/test/entity"
 	err := os.MkdirAll(basePath, os.ModePerm)
@@ -139,7 +141,7 @@ func TestFindEntityDir(t *testing.T) {
 			// Setup test case
 			test.setupFunc()
 
-			result, err := FindEntityDir(test.paths, test.entityVals)
+			result, err := entityService.FindEntityDir(test.paths, test.entityVals)
 			if test.expectedErr == nil {
 				assert.NoError(t, err)
 			} else {
@@ -151,6 +153,8 @@ func TestFindEntityDir(t *testing.T) {
 }
 
 func TestCheckDuplicateEntity(t *testing.T) {
+	entityService := NewEntityService()
+
 	tests := []struct {
 		name       string
 		entities   []Entity
@@ -233,7 +237,7 @@ func TestCheckDuplicateEntity(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := CheckDuplicateEntity(test.entities, test.entityMeta)
+			err := entityService.CheckDuplicateEntity(test.entities, test.entityMeta)
 			if test.expected == nil {
 				assert.NoError(t, err)
 			} else {
@@ -244,6 +248,8 @@ func TestCheckDuplicateEntity(t *testing.T) {
 }
 
 func TestGeneratePseudoVersionPattern(t *testing.T) {
+	entityService := NewEntityService()
+
 	tests := []struct {
 		name         string
 		inputName    string
@@ -272,8 +278,47 @@ func TestGeneratePseudoVersionPattern(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result := GeneratePseudoVersionPattern(test.inputName, test.inputVersion)
+			result := entityService.GeneratePseudoVersionPattern(test.inputName, test.inputVersion)
 			assert.Equal(t, test.expected, result)
 		})
 	}
 }
+
+/*func createTestDirectoryStructure(t *testing.T, root string) {
+	// Create test directories and files
+	err := os.MkdirAll(filepath.Join(root, "origin1", "entity1@v1.0.0"), 0755)
+	assert.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(root, "origin1", "entity2@v2.1.0"), 0755)
+	assert.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(root, "origin2", "entity3@v0.9.1"), 0755)
+	assert.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(root, "origin2", "entity4@v1.1.0"), 0755)
+	assert.NoError(t, err)
+
+	// Create some files (to be ignored by the crawler)
+	_, err = os.Create(filepath.Join(root, "origin1", "file1.txt"))
+	assert.NoError(t, err)
+	_, err = os.Create(filepath.Join(root, "origin2", "file2.txt"))
+	assert.NoError(t, err)
+}
+
+func TestCrawlDirectoriesParallel(t *testing.T) {
+	// Create a temporary directory for testing
+	tmpDir := t.TempDir()
+
+	// Set up the test directory structure
+	createTestDirectoryStructure(t, tmpDir)
+
+	// Define the expected entities
+	expectedEntities := map[string]Entity{
+		"entity1": {Origin: "origin1", Version: "v1.0.0"},
+		"entity2": {Origin: "origin1", Version: "v2.1.0"},
+		"entity3": {Origin: "origin2", Version: "v0.9.1"},
+		"entity4": {Origin: "origin2", Version: "v1.1.0"},
+	}
+
+	// Run the function under test
+	entities, err := CrawlDirectoriesParallel(tmpDir)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedEntities, entities)
+}*/

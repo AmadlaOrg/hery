@@ -1,6 +1,7 @@
 package get
 
 import (
+	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/build"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -9,12 +10,13 @@ import (
 )
 
 // NewGetService to set up the Get service
-func NewGetService() GetterService {
-	return GetterService{
+func NewGetService() SGet {
+	return SGet{
 		Git:                     utilGit.NewGitService(),
+		Entity:                  entity.NewEntityService(),
 		EntityValidation:        validation.NewEntityValidationService(),
 		EntityVersion:           version.NewEntityVersionService(),
 		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
-		Builder:                 build.NewEntityBuildService(),
+		Build:                   build.NewEntityBuildService(),
 	}
 }

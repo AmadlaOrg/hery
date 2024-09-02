@@ -1,15 +1,22 @@
 with-expecter: True
 packages:
+  github.com/AmadlaOrg/hery/entity:
+    interfaces:
+      IEntity:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockEntity"
+          inpackage: True
   github.com/AmadlaOrg/hery/entity/build:
     interfaces:
-      MetaBuilder:
+      IBuild:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockBuild"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/version:
     interfaces:
-      Manager:
+      IVersion:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockVersion"
@@ -58,7 +65,7 @@ packages:
           inpackage: True
   github.com/AmadlaOrg/hery/storage:
     interfaces:
-      Storage:
+      IStorage:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockStorage"

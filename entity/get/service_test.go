@@ -1,14 +1,14 @@
-package version
+package get
 
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestNewEntityVersionService(t *testing.T) {
+func TestNewGetService(t *testing.T) {
 	t.Run("should return a new instance of Entity Version", func(t *testing.T) {
-		entityVersionService := NewEntityVersionService()
+		entityVersionService := NewGetService()
 		assert.NotNil(t, entityVersionService)
-		assert.IsType(t, &SVersion{}, entityVersionService)
+		assert.IsType(t, SGet{}, entityVersionService)
 	})
 }

@@ -15,7 +15,8 @@ var ListCmd = &cobra.Command{
 	Short: "List all entities",
 	Run: func(cmd *cobra.Command, args []string) {
 		util.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-			entities, err := entity.CrawlDirectoriesParallel(paths.Entities)
+			entityService := entity.NewEntityService()
+			entities, err := entityService.CrawlDirectoriesParallel(paths.Entities)
 			if err != nil {
 				fmt.Println("Error crawling directories:", err)
 				return

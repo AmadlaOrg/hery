@@ -11,7 +11,7 @@ import (
 
 func TestExtract(t *testing.T) {
 	// Initialize the service
-	service := &Service{}
+	service := &SVersion{}
 
 	// Scenario 1: Valid URL with a version
 	t.Run("Valid URL with a version", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestList(t *testing.T) {
 		mockGitRemote := new(remote.MockGitRemote)
 
 		// Create the service with the mocked GitRemote
-		entityVersionService := &Service{
+		entityVersionService := &SVersion{
 			GitRemote: mockGitRemote,
 		}
 
@@ -97,7 +97,7 @@ func TestList(t *testing.T) {
 		mockGitRemote := new(remote.MockGitRemote)
 
 		// Create the service with the mocked GitRemote
-		entityVersionService := &Service{
+		entityVersionService := &SVersion{
 			GitRemote: mockGitRemote,
 		}
 
@@ -126,7 +126,7 @@ func TestList(t *testing.T) {
 		mockGitRemote := new(remote.MockGitRemote)
 
 		// Create the service with the mocked GitRemote
-		entityVersionService := &Service{
+		entityVersionService := &SVersion{
 			GitRemote: mockGitRemote,
 		}
 
@@ -152,7 +152,7 @@ func TestList(t *testing.T) {
 
 func TestLatest(t *testing.T) {
 	// Initialize the service
-	service := &Service{}
+	service := &SVersion{}
 
 	// Scenario 1: No versions provided
 	t.Run("No versions provided", func(t *testing.T) {
@@ -210,7 +210,7 @@ func TestLatest(t *testing.T) {
 }
 
 func TestVersionLess(t *testing.T) {
-	service := &Service{}
+	service := &SVersion{}
 
 	// Scenario 1: Basic comparison
 	t.Run("Basic comparison", func(t *testing.T) {
@@ -234,7 +234,7 @@ func TestVersionLess(t *testing.T) {
 }
 
 func TestCompareVersions(t *testing.T) {
-	service := &Service{}
+	service := &SVersion{}
 
 	// Scenario 1: Equal versions
 	t.Run("Equal versions", func(t *testing.T) {
@@ -256,7 +256,7 @@ func TestCompareVersions(t *testing.T) {
 }
 
 func TestComparePreRelease(t *testing.T) {
-	service := &Service{}
+	service := &SVersion{}
 
 	// Scenario 1: Equal pre-release versions
 	t.Run("Equal pre-release versions", func(t *testing.T) {
@@ -277,7 +277,7 @@ func TestComparePreRelease(t *testing.T) {
 }
 
 func TestParseVersion(t *testing.T) {
-	service := &Service{}
+	service := &SVersion{}
 
 	// Scenario 1: Parse basic version
 	t.Run("Parse basic version", func(t *testing.T) {
@@ -308,7 +308,7 @@ func TestGeneratePseudo(t *testing.T) {
 		mockGitRemote := new(remote.MockGitRemote)
 
 		// Create the service with the mocked GitRemote
-		entityVersionService := &Service{
+		entityVersionService := &SVersion{
 			GitRemote: mockGitRemote,
 		}
 
@@ -342,7 +342,7 @@ func TestGeneratePseudo(t *testing.T) {
 		mockGitRemote := new(remote.MockGitRemote)
 
 		// Create the service with the mocked GitRemote
-		entityVersionService := &Service{
+		entityVersionService := &SVersion{
 			GitRemote: mockGitRemote,
 		}
 

@@ -1,14 +1,14 @@
-package build
+package entity
 
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestNewEntityBuildService(t *testing.T) {
+func TestNewEntityService(t *testing.T) {
 	t.Run("should return a new instance of Builder", func(t *testing.T) {
-		service := NewEntityBuildService()
+		service := NewEntityService()
 		assert.NotNil(t, service)
-		assert.IsType(t, &SBuild{}, service)
+		assert.IsType(t, &SEntity{}, service)
 	})
 }
