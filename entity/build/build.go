@@ -30,7 +30,7 @@ type SBuild struct {
 	Entity                  entity.IEntity
 	EntityValidation        validation.IValidation
 	EntityVersion           version.IVersion
-	EntityVersionValidation versionValidationPkg.VersionValidation
+	EntityVersionValidation versionValidationPkg.IValidation
 }
 
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the

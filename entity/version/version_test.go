@@ -61,7 +61,7 @@ func TestList(t *testing.T) {
 	// Scenario 1: Successful retrieval of tags
 	t.Run("Successful retrieval of tags", func(t *testing.T) {
 		// Create a new instance of the mocked GitRemote
-		mockGitRemote := new(remote.MockGitRemote)
+		mockGitRemote := new(remote.MockUtilGitRemote)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
@@ -94,7 +94,7 @@ func TestList(t *testing.T) {
 	// Scenario 2: Error scenario
 	t.Run("Tags method returns an error", func(t *testing.T) {
 		// Reinitialize the mock to clear the previous expectations
-		mockGitRemote := new(remote.MockGitRemote)
+		mockGitRemote := new(remote.MockUtilGitRemote)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
@@ -123,7 +123,7 @@ func TestList(t *testing.T) {
 	// Scenario 3: No tags found
 	t.Run("No tags found", func(t *testing.T) {
 		// Reinitialize the mock to clear the previous expectations
-		mockGitRemote := new(remote.MockGitRemote)
+		mockGitRemote := new(remote.MockUtilGitRemote)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
@@ -305,7 +305,7 @@ func TestGeneratePseudo(t *testing.T) {
 	// Scenario 1: Successful generation of pseudo-version
 	t.Run("Successful generation of pseudo-version", func(t *testing.T) {
 		// Create a new instance of the mocked GitRemote
-		mockGitRemote := new(remote.MockGitRemote)
+		mockGitRemote := new(remote.MockUtilGitRemote)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
@@ -339,7 +339,7 @@ func TestGeneratePseudo(t *testing.T) {
 	// Scenario 2: Error case when retrieving commit hash
 	t.Run("Error case when retrieving commit hash", func(t *testing.T) {
 		// Reinitialize the mock to clear the previous expectations
-		mockGitRemote := new(remote.MockGitRemote)
+		mockGitRemote := new(remote.MockUtilGitRemote)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{

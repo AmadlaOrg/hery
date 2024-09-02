@@ -9,12 +9,16 @@ import (
 	"os"
 )
 
-type Client interface {
+// IClient
+type IClient interface {
 	Connect() error
 }
 
+// SClient
+type SClient struct{}
+
 // Connect
-func Connect() {
+func (s *SClient) Connect() {
 	conn, err := net.Dial("unix", server.SocketPath)
 	if err != nil {
 		log.Fatalf("Dial error: %v", err)

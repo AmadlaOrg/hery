@@ -15,14 +15,16 @@ import (
 	"unicode"
 )
 
+// IValidation
 type IValidation interface {
 	Entity(collectionName, entityPath string) error
 	EntityUrl(entityUrl string) bool
 }
 
+// SValidation
 type SValidation struct {
 	Version           version.IVersion
-	VersionValidation *versionValidationPkg.VersionValidation
+	VersionValidation versionValidationPkg.IValidation
 }
 
 var (

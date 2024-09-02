@@ -9,6 +9,7 @@ var ConnectToServerCmd = &cobra.Command{
 	Use:   "connect",
 	Short: "Connect to HERY server",
 	Run: func(cmd *cobra.Command, args []string) {
-		client.Connect()
+		clientService := client.NewClientService()
+		clientService.Connect()
 	},
 }

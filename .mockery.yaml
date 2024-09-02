@@ -12,56 +12,70 @@ packages:
       IBuild:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockBuild"
+          mockName: "MockEntityBuild"
+          inpackage: True
+  github.com/AmadlaOrg/hery/entity/validation:
+    interfaces:
+      IValidation:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockEntityValidation"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/version:
     interfaces:
       IVersion:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockVersion"
+          mockName: "MockEntityVersion"
+          inpackage: True
+  github.com/AmadlaOrg/hery/entity/version/validation:
+    interfaces:
+      IValidation:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockEntityVersionValidation"
           inpackage: True
   github.com/AmadlaOrg/hery/util/file:
     interfaces:
       File:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockFile"
+          mockName: "MockUtilFile"
           inpackage: True
   github.com/AmadlaOrg/hery/util/git:
     interfaces:
       RepoManager:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockGit"
+          mockName: "MockUtilGit"
           inpackage: True
   github.com/AmadlaOrg/hery/util/git/remote:
     interfaces:
       RepoRemoteManager:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockGitRemote"
+          mockName: "MockUtilGitRemote"
           inpackage: True
   github.com/AmadlaOrg/hery/util/json:
     interfaces:
       Json:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockJson"
+          mockName: "MockUtilJson"
           inpackage: True
   github.com/AmadlaOrg/hery/util/json/schema:
     interfaces:
       Schema:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockJsonSchema"
+          mockName: "MockUtilJsonSchema"
           inpackage: True
   github.com/AmadlaOrg/hery/util/yaml:
     interfaces:
       Yaml:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockYaml"
+          mockName: "MockUtilYaml"
           inpackage: True
   github.com/AmadlaOrg/hery/storage:
     interfaces:

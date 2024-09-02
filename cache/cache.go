@@ -7,17 +7,22 @@ import (
 	"log"
 )
 
-type Cache interface {
+// ICache
+type ICache interface {
 	Create()
 	Insert()
 	Select()
 }
 
+// SCache
+type SCache struct{}
+
 // TODO: journal mode: wal
 // This will help with performance
 // https://stackoverflow.com/questions/57118674/go-sqlite3-with-journal-mode-wal-gives-database-is-locked-error
 
-func Create() {
+// Create
+func (s *SCache) Create() {
 	// Open an in-memory SQLite database
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
@@ -51,7 +56,8 @@ func Create() {
 	}
 }
 
-func Insert() {
+// Insert
+func (s *SCache) Insert() {
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)
@@ -74,7 +80,8 @@ func Insert() {
 	}
 }
 
-func Select() {
+// Select
+func (s *SCache) Select() {
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)

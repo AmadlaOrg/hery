@@ -6,7 +6,7 @@ import (
 )
 
 func TestVersionValidation_Exists(t *testing.T) {
-	vs := &VersionValidation{}
+	vs := SValidation{}
 
 	tests := []struct {
 		name     string
@@ -37,7 +37,7 @@ func TestVersionValidation_Exists(t *testing.T) {
 }
 
 func TestVersionValidation_Format(t *testing.T) {
-	vs := &VersionValidation{}
+	vs := SValidation{}
 
 	tests := []struct {
 		name     string
@@ -75,7 +75,7 @@ func TestVersionValidation_Format(t *testing.T) {
 }
 
 func TestVersionValidation_PseudoFormat(t *testing.T) {
-	vs := &VersionValidation{}
+	vs := SValidation{}
 
 	tests := []struct {
 		name          string
@@ -103,7 +103,7 @@ func TestVersionValidation_PseudoFormat(t *testing.T) {
 }
 
 func TestVersionValidation_AnyFormat(t *testing.T) {
-	vs := &VersionValidation{}
+	vs := SValidation{}
 
 	tests := []struct {
 		name     string

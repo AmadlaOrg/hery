@@ -8,13 +8,13 @@ import (
 	"github.com/AmadlaOrg/hery/util/git"
 )
 
-// NewEntityBuildService to set up the entity build service
+// NewEntityBuildService to set up the entity Build service
 func NewEntityBuildService() *SBuild {
 	return &SBuild{
 		Git:                     git.NewGitService(),
 		Entity:                  entity.NewEntityService(),
 		EntityValidation:        entityValidation.NewEntityValidationService(),
 		EntityVersion:           version.NewEntityVersionService(),
-		EntityVersionValidation: *entityVersionValidation.NewEntityVersionValidationService(),
+		EntityVersionValidation: entityVersionValidation.NewEntityVersionValidationService(),
 	}
 }

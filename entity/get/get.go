@@ -26,8 +26,8 @@ type SGet struct {
 	Git                     git.RepoManager
 	Entity                  entity.IEntity
 	EntityValidation        validation.IValidation
-	EntityVersion           *version.SVersion
-	EntityVersionValidation versionValidationPkg.VersionValidator
+	EntityVersion           version.IVersion
+	EntityVersionValidation versionValidationPkg.IValidation
 	Build                   build.IBuild
 }
 
