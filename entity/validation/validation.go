@@ -15,12 +15,12 @@ import (
 	"unicode"
 )
 
-type Interface interface {
+type IValidation interface {
 	Entity(collectionName, entityPath string) error
 	EntityUrl(entityUrl string) bool
 }
 
-type Validation struct {
+type SValidation struct {
 	Version           version.IVersion
 	VersionValidation *versionValidationPkg.VersionValidation
 }
@@ -44,7 +44,7 @@ func Schema() *jsonschema.Schema {
 }*/
 
 // Entity validates the YAML content against the JSON schema
-func (v *Validation) Entity(collectionName, entityPath string) error {
+func (s *SValidation) Entity(collectionName, entityPath string) error {
 	schemaPath := filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), "schema.json")
 	schema, err := schemaPkg.Load(schemaPath)
 	if err != nil {
@@ -87,7 +87,7 @@ func (v *Validation) Entity(collectionName, entityPath string) error {
 }
 
 // EntityUrl validates the module path for go get
-func (v *Validation) EntityUrl(entityUrl string) bool {
+func (s *SValidation) EntityUrl(entityUrl string) bool {
 	if strings.Contains(entityUrl, "://") {
 		return false
 	}

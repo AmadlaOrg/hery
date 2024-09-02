@@ -10,27 +10,130 @@ import (
 	"testing"
 )
 
-// FIXME:
 /*func TestMetaFromRemote(t *testing.T) {
 	tests := []struct {
-		name           string
-		inputPaths     storage.AbsPaths
-		inputEntityUri string
-		expectEntity   entity.Entity
-		hasError       bool
+		name                 string
+		inputPaths           storage.AbsPaths
+		inputEntityUri       string
+		internalEntityDir    string
+		internalEntityDirErr error
+		mockValidation       func(*validation.MockInterface)
+		mockEntityVersion    func(*version.MockIVersion)
+		mockEntityVersionVal func(*versionValidationPkg.MockVersionValidation)
+		expectEntity         entity.Entity
+		hasError             bool
 	}{
 		{
-			name:           "",
-			inputPaths:     storage.AbsPaths{},
-			inputEntityUri: "testdata/entity_remote.txt",
-			expectEntity:   entity.Entity{},
-			hasError:       false,
+			name:              "Valid Entity URI Without Version",
+			inputPaths:        storage.AbsPaths{Entities: "testdata"},
+			inputEntityUri:    "https://github.com/example/entity",
+			internalEntityDir: "testdata/entity_remote.txt",
+			mockValidation: func(mockValidation *validation.MockInterface) {
+				mockValidation.EXPECT().EntityUrl("https://github.com/example/entity").Return(true)
+			},
+			mockEntityVersion: func(mockEntityVersion *version.MockIVersion) {
+				mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0"}, nil)
+				mockEntityVersion.EXPECT().Latest([]string{"v1.0.0"}).Return("v1.0.0", nil)
+			},
+			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockVersionValidation) {
+				// No specific mocks needed for validation in this case
+			},
+			expectEntity: entity.Entity{
+				RepoUrl:         "https://github.com/example/entity",
+				Name:            "entity",
+				Version:         "v1.0.0",
+				Entity:          "https://github.com/example/entity@v1.0.0",
+				Origin:          "",
+				AbsPath:         "testdata/entity_remote.txt",
+				Have:            true,
+				Exist:           true,
+				IsPseudoVersion: false,
+			},
+			hasError: false,
+		},
+		{
+			name:              "Invalid Entity URI",
+			inputPaths:        storage.AbsPaths{Entities: "testdata"},
+			inputEntityUri:    "invalid_uri",
+			internalEntityDir: "",
+			mockValidation: func(mockValidation *validation.MockInterface) {
+				mockValidation.EXPECT().EntityUrl("invalid_uri").Return(false)
+			},
+			mockEntityVersion:    func(mockEntityVersion *version.MockIVersion) {},
+			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockVersionValidation) {},
+			expectEntity: entity.Entity{
+				Have:  false,
+				Exist: false,
+			},
+			hasError: true,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mockBuilder := SBuild{}
+			mockEntity := entity.MockEntity{}
+			mockEntity.EXPECT().FindEntityDir(mock.Anything, mock.Anything).Return(
+				test.internalEntityDir, test.internalEntityDirErr)
+
+			mockValidation := validation.NewMockInterface(t)
+			test.mockValidation(mockValidation)
+
+			mockEntityVersion := version.NewMockIVersion(t)
+			test.mockEntityVersion(mockEntityVersion)
+
+			mockEntityVersionVal := versionValidationPkg.NewMockVersionValidation(t)
+			test.mockEntityVersionVal(mockEntityVersionVal)
+
+			mockBuilder := SBuild{
+				Entity:                  &mockEntity,
+				EntityValidation:        mockValidation,
+				EntityVersion:           mockEntityVersion,
+				EntityVersionValidation: mockEntityVersionVal,
+			}
+
+			metaFromRemote, err := mockBuilder.MetaFromRemote(test.inputPaths, test.inputEntityUri)
+			if test.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			if !reflect.DeepEqual(metaFromRemote, test.expectEntity) {
+				t.Errorf("expected: %v, got: %v", test.expectEntity, metaFromRemote)
+			}
+		})
+	}
+}*/
+
+/*func TestMetaFromRemote(t *testing.T) {
+	tests := []struct {
+		name                 string
+		inputPaths           storage.AbsPaths
+		inputEntityUri       string
+		internalEntityDir    string
+		internalEntityDirErr error
+		expectEntity         entity.Entity
+		hasError             bool
+	}{
+		{
+			name:              "",
+			inputPaths:        storage.AbsPaths{},
+			inputEntityUri:    "testdata/entity_remote.txt",
+			internalEntityDir: "testdata/internal_remote.txt",
+			expectEntity:      entity.Entity{},
+			hasError:          false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockEntity := entity.MockEntity{}
+			mockEntity.EXPECT().FindEntityDir(mock.Anything, mock.Anything).Return(
+				test.internalEntityDir, test.internalEntityDirErr)
+
+			mockBuilder := SBuild{
+				Entity: &mockEntity,
+			}
 			metaFromRemote, err := mockBuilder.MetaFromRemote(test.inputPaths, test.inputEntityUri)
 			if test.hasError {
 				assert.Error(t, err)

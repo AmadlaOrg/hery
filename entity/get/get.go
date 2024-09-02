@@ -25,7 +25,7 @@ type IGet interface {
 type SGet struct {
 	Git                     git.RepoManager
 	Entity                  entity.IEntity
-	EntityValidation        validation.Interface
+	EntityValidation        validation.IValidation
 	EntityVersion           *version.SVersion
 	EntityVersionValidation versionValidationPkg.VersionValidator
 	Build                   build.IBuild

@@ -28,7 +28,7 @@ type IBuild interface {
 type SBuild struct {
 	Git                     git.RepoManager
 	Entity                  entity.IEntity
-	EntityValidation        validation.Interface
+	EntityValidation        validation.IValidation
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.VersionValidation
 }
@@ -45,7 +45,6 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	//var entityVersion string
 	if strings.Contains(entityUri, "@") {
 		entityVals, err := s.metaFromRemoteWithVersion(entityUri)
 		if err != nil {
