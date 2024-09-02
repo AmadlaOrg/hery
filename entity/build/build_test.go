@@ -6,22 +6,32 @@ import (
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	"github.com/AmadlaOrg/hery/storage"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"reflect"
 	"testing"
 )
 
-/*func TestMetaFromRemote(t *testing.T) {
+func TestMetaFromRemote(t *testing.T) {
+	// Mocking UUID generation for consistent results
+	originalUUIDNew := uuidNew
+	defer func() { uuidNew = originalUUIDNew }() // Restore original function after test
+
+	uuidNew = func() uuid.UUID {
+		return uuid.MustParse("dca736d3-26c4-46b2-be5a-dfbdc09cff6d")
+	}
+
 	tests := []struct {
 		name                 string
 		inputPaths           storage.AbsPaths
 		inputEntityUri       string
 		internalEntityDir    string
 		internalEntityDirErr error
-		mockValidation       func(*validation.MockInterface)
-		mockEntityVersion    func(*version.MockIVersion)
-		mockEntityVersionVal func(*versionValidationPkg.MockVersionValidation)
+		mockValidation       func(entityValidation *validation.MockEntityValidation)
+		mockEntityVersion    func(entityVersion *version.MockEntityVersion)
+		mockEntityVersionVal func(versionValidation *versionValidationPkg.MockEntityVersionValidation)
 		expectEntity         entity.Entity
 		hasError             bool
 	}{
@@ -30,26 +40,27 @@ import (
 			inputPaths:        storage.AbsPaths{Entities: "testdata"},
 			inputEntityUri:    "https://github.com/example/entity",
 			internalEntityDir: "testdata/entity_remote.txt",
-			mockValidation: func(mockValidation *validation.MockInterface) {
+			mockValidation: func(mockValidation *validation.MockEntityValidation) {
 				mockValidation.EXPECT().EntityUrl("https://github.com/example/entity").Return(true)
 			},
-			mockEntityVersion: func(mockEntityVersion *version.MockIVersion) {
+			mockEntityVersion: func(mockEntityVersion *version.MockEntityVersion) {
 				mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0"}, nil)
 				mockEntityVersion.EXPECT().Latest([]string{"v1.0.0"}).Return("v1.0.0", nil)
 			},
-			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockVersionValidation) {
+			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockEntityVersionValidation) {
 				// No specific mocks needed for validation in this case
 			},
 			expectEntity: entity.Entity{
-				RepoUrl:         "https://github.com/example/entity",
-				Name:            "entity",
-				Version:         "v1.0.0",
+				Id:              "dca736d3-26c4-46b2-be5a-dfbdc09cff6d",
 				Entity:          "https://github.com/example/entity@v1.0.0",
-				Origin:          "",
-				AbsPath:         "testdata/entity_remote.txt",
-				Have:            true,
-				Exist:           true,
+				Name:            "entity",
+				RepoUrl:         "https://github.com/example/entity",
+				Origin:          "https://github.com/example/",
+				Version:         "v1.0.0",
 				IsPseudoVersion: false,
+				AbsPath:         "testdata/entity_remote.txt",
+				Have:            true, // TODO: Double check
+				Exist:           true,
 			},
 			hasError: false,
 		},
@@ -58,11 +69,11 @@ import (
 			inputPaths:        storage.AbsPaths{Entities: "testdata"},
 			inputEntityUri:    "invalid_uri",
 			internalEntityDir: "",
-			mockValidation: func(mockValidation *validation.MockInterface) {
+			mockValidation: func(mockValidation *validation.MockEntityValidation) {
 				mockValidation.EXPECT().EntityUrl("invalid_uri").Return(false)
 			},
-			mockEntityVersion:    func(mockEntityVersion *version.MockIVersion) {},
-			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockVersionValidation) {},
+			mockEntityVersion:    func(mockEntityVersion *version.MockEntityVersion) {},
+			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockEntityVersionValidation) {},
 			expectEntity: entity.Entity{
 				Have:  false,
 				Exist: false,
@@ -77,13 +88,13 @@ import (
 			mockEntity.EXPECT().FindEntityDir(mock.Anything, mock.Anything).Return(
 				test.internalEntityDir, test.internalEntityDirErr)
 
-			mockValidation := validation.NewMockInterface(t)
+			mockValidation := validation.NewMockEntityValidation(t) //validation.NewMockInterface(t)
 			test.mockValidation(mockValidation)
 
-			mockEntityVersion := version.NewMockIVersion(t)
+			mockEntityVersion := version.NewMockEntityVersion(t) //version.NewMockIVersion(t)
 			test.mockEntityVersion(mockEntityVersion)
 
-			mockEntityVersionVal := versionValidationPkg.NewMockVersionValidation(t)
+			mockEntityVersionVal := versionValidationPkg.NewMockEntityVersionValidation(t) //versionValidationPkg.NewMockVersionValidation(t)
 			test.mockEntityVersionVal(mockEntityVersionVal)
 
 			mockBuilder := SBuild{
@@ -105,7 +116,7 @@ import (
 			}
 		})
 	}
-}*/
+}
 
 /*func TestMetaFromRemote(t *testing.T) {
 	tests := []struct {
@@ -315,8 +326,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 		expectEntity                           entity.Entity
 		hasError                               bool
 	}{
-		// FIXME:
-		/*{
+		{
 			name:                                   "Valid meta using multiple entity versions",
 			entityUri:                              "github.com/AmadlaOrg/Entity@v1.0.0",
 			internalEntityVersionExtract:           "v1.0.0",
@@ -338,7 +348,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				Exist:           false,
 			},
 			hasError: false,
-		},*/
+		},
 		{
 			name:                                   "Valid meta using pseudo version",
 			entityUri:                              "github.com/AmadlaOrg/Entity@latest",
@@ -521,8 +531,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			},
 			hasError: true,
 		},
-		// FIXME:
-		/*{
+		{
 			name:                                   "Invalid pass version in the entity URI",
 			entityUri:                              "github.com/AmadlaOrg/Entity@v0.0",
 			internalEntityVersionExtract:           "v0.0",
@@ -544,7 +553,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				Exist:           false,
 			},
 			hasError: true,
-		},*/
+		},
 	}
 
 	for _, tt := range tests {
@@ -565,13 +574,12 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 
 			mockEntityValidation := &validation.MockEntityValidation{}
 			mockEntity := &entity.MockEntity{}
-			mockEntityVersionValidation := &versionValidationPkg.MockEntityVersionValidation{}
 
 			mockBuilder := SBuild{
 				EntityVersion:           mockVersion,
 				EntityValidation:        mockEntityValidation,
 				Entity:                  mockEntity,
-				EntityVersionValidation: mockEntityVersionValidation,
+				EntityVersionValidation: &versionValidationPkg.SValidation{},
 			}
 
 			entityMeta, err := mockBuilder.metaFromRemoteWithVersion(tt.entityUri)

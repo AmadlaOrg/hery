@@ -33,32 +33,40 @@ type SBuild struct {
 	EntityVersionValidation versionValidationPkg.IValidation
 }
 
+// Help with mocking
+var (
+	uuidNew = uuid.New
+)
+
 // MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
 // Entity struct. It also validates values that are passed to it.
 func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
-	var entityVals = entity.Entity{
-		Have:  false,
-		Exist: false,
-	}
+	var (
+		entityVals = entity.Entity{
+			Have:  false,
+			Exist: false,
+		}
+		err error
+	)
 
 	if !s.EntityValidation.EntityUrl(entityUri) {
 		return entityVals, errors.New("invalid entity url")
 	}
 
 	if strings.Contains(entityUri, "@") {
-		entityVals, err := s.metaFromRemoteWithVersion(entityUri)
+		entityVals, err = s.metaFromRemoteWithVersion(entityUri)
 		if err != nil {
 			return entityVals, err
 		}
 	} else {
-		entityVals, err := s.metaFromRemoteWithoutVersion(entityUri)
+		entityVals, err = s.metaFromRemoteWithoutVersion(entityUri)
 		if err != nil {
 			return entityVals, err
 		}
 	}
 
 	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
-	entityVals.Id = uuid.New().String()
+	entityVals.Id = uuidNew().String()
 	entityVals.Exist = true
 
 	dir, err := s.Entity.FindEntityDir(paths, entityVals)
@@ -76,6 +84,7 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 	return entityVals, nil
 }
 
+// metaFromRemoteWithoutVersion
 func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error) {
 	var entityVals = entity.Entity{
 		Have:  false,
@@ -120,12 +129,15 @@ func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, 
 	return entityVals, nil
 }
 
+// metaFromRemoteWithVersion
 func (s *SBuild) metaFromRemoteWithVersion(entityUri string) (entity.Entity, error) {
-	var entityVals = entity.Entity{
-		Have:  false,
-		Exist: false,
-	}
-	var entityVersion string
+	var (
+		entityVals = entity.Entity{
+			Have:  false,
+			Exist: false,
+		}
+		entityVersion string
+	)
 
 	entityVersion, err := s.EntityVersion.Extract(entityUri)
 	if err != nil {
