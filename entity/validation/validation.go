@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	schemaPkg "github.com/AmadlaOrg/hery/heryext/schema"
 	"github.com/AmadlaOrg/hery/util/file"
-	schemaPkg "github.com/AmadlaOrg/hery/util/json/schema"
 	"github.com/santhosh-tekuri/jsonschema"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -25,6 +25,7 @@ type IValidation interface {
 type SValidation struct {
 	Version           version.IVersion
 	VersionValidation versionValidationPkg.IValidation
+	Schema            schemaPkg.ISchema
 }
 
 var (
@@ -48,7 +49,7 @@ func Schema() *jsonschema.Schema {
 // Entity validates the YAML content against the JSON schema
 func (s *SValidation) Entity(collectionName, entityPath string) error {
 	schemaPath := filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), "schema.json")
-	schema, err := schemaPkg.Load(schemaPath)
+	schema, err := s.Schema.Load(schemaPath)
 	if err != nil {
 		return fmt.Errorf("error loading JSON schema: %w", err)
 	}

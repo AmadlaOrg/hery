@@ -7,9 +7,9 @@ import (
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	"github.com/AmadlaOrg/hery/heryext"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/git"
-	"github.com/AmadlaOrg/hery/util/yaml"
 	"os"
 	"sync"
 )
@@ -29,6 +29,7 @@ type SGet struct {
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.IValidation
 	Build                   build.IBuild
+	HeryExt                 heryext.IHeryExt
 }
 
 // GetInTmp retrieves entities based on the provided collection name and entities
@@ -111,7 +112,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 				}
 			}
 
-			read, err := yaml.Read(entityMeta.AbsPath, collectionName)
+			read, err := s.HeryExt.Read(entityMeta.AbsPath, collectionName)
 			if err != nil {
 				errCh <- fmt.Errorf("error reading yaml: %v", err)
 				return

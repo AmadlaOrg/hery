@@ -18,6 +18,8 @@ func TestBuildEntity(t *testing.T) {
 }
 
 func TestParseEntityArg(t *testing.T) {
+	composeService := NewComposeService()
+
 	tests := []struct {
 		name        string
 		entityArg   string
@@ -71,7 +73,7 @@ func TestParseEntityArg(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotName, gotVersion, err := parseEntityArg(tt.entityArg)
+			gotName, gotVersion, err := composeService.parseEntityArg(tt.entityArg)
 			if tt.wantErr {
 				assert.Error(t, err, fmt.Sprintf("expected error but got none for %v", tt.entityArg))
 			} else {
@@ -84,6 +86,8 @@ func TestParseEntityArg(t *testing.T) {
 }
 
 func TestFindEntityDirParallel(t *testing.T) {
+	composeService := NewComposeService()
+
 	tests := []struct {
 		name        string
 		rootSetup   func(root string) error
@@ -173,7 +177,7 @@ func TestFindEntityDirParallel(t *testing.T) {
 				tt.expectedDir = filepath.Join(tmpDir, tt.expectedDir)
 			}
 
-			gotDir, err := findEntityDirParallel(tmpDir, tt.entityName, tt.version)
+			gotDir, err := composeService.findEntityDirParallel(tmpDir, tt.entityName, tt.version)
 			if tt.expectedErr {
 				assert.Error(t, err, "expected error but got none")
 			} else {
@@ -295,8 +299,9 @@ key3: value3
 		assert.NoError(t, err, "Failed to write file %s", filename)
 	}
 
+	composeService := NewComposeService()
 	// Call mergeYamlFiles function
-	mergedContent, err := mergeYamlFiles(tempDir)
+	mergedContent, err := composeService.mergeYamlFiles(tempDir)
 	assert.NoError(t, err, "mergeYamlFiles returned an error")
 
 	// Unmarshal merged content

@@ -35,13 +35,6 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityVersionValidation"
           inpackage: True
-  github.com/AmadlaOrg/hery/util/file:
-    interfaces:
-      File:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockUtilFile"
-          inpackage: True
   github.com/AmadlaOrg/hery/util/git:
     interfaces:
       RepoManager:
@@ -56,26 +49,19 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockUtilGitRemote"
           inpackage: True
-  github.com/AmadlaOrg/hery/util/json:
-    interfaces:
-      Json:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockUtilJson"
-          inpackage: True
-  github.com/AmadlaOrg/hery/util/json/schema:
+  github.com/AmadlaOrg/hery/heryext/schema:
     interfaces:
       Schema:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockUtilJsonSchema"
+          mockName: "MockHeryExtSchema"
           inpackage: True
-  github.com/AmadlaOrg/hery/util/yaml:
+  github.com/AmadlaOrg/hery/heryext:
     interfaces:
-      Yaml:
+      IHeryExt:
         config:
           dir: "{{.InterfaceDir}}"
-          mockName: "MockUtilYaml"
+          mockName: "MockHeryExt"
           inpackage: True
   github.com/AmadlaOrg/hery/storage:
     interfaces:

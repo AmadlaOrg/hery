@@ -9,6 +9,7 @@ import (
 )
 
 func TestLoadJSONSchema(t *testing.T) {
+	schemaService := NewSchemaService()
 	tmpDir := t.TempDir()
 
 	t.Run("load valid schema", func(t *testing.T) {
@@ -25,7 +26,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Load schema and check
-		schema, err := Load(schemaPath)
+		schema, err := schemaService.Load(schemaPath)
 		assert.NoError(t, err)
 		assert.NotNil(t, schema)
 	})
@@ -35,7 +36,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		schemaPath := filepath.Join(tmpDir, "nonexistent.json")
 
 		// Load schema and check
-		schema, err := Load(schemaPath)
+		schema, err := schemaService.Load(schemaPath)
 		assert.Error(t, err)
 		assert.Nil(t, schema)
 	})
@@ -53,7 +54,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Load schema and check
-		schema, err := Load(schemaPath)
+		schema, err := schemaService.Load(schemaPath)
 		assert.Error(t, err)
 		assert.Nil(t, schema)
 	})
@@ -71,7 +72,7 @@ func TestLoadJSONSchema(t *testing.T) {
 		}(schemaPath, 0644) // Ensure the file can be removed after the test
 
 		// Load schema and check
-		schema, err := Load(schemaPath)
+		schema, err := schemaService.Load(schemaPath)
 		assert.Error(t, err)
 		assert.Nil(t, schema)
 	})

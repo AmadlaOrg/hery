@@ -6,6 +6,7 @@ import (
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	"github.com/AmadlaOrg/hery/heryext"
 	utilGit "github.com/AmadlaOrg/hery/util/git"
 )
 
@@ -18,5 +19,6 @@ func NewGetService() *SGet {
 		EntityVersion:           version.NewEntityVersionService(),
 		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
 		Build:                   build.NewEntityBuildService(),
+		HeryExt:                 heryext.NewHeryExtService(),
 	}
 }

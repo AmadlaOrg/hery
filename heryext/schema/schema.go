@@ -6,11 +6,14 @@ import (
 	"os"
 )
 
-type Schema interface {
+type ISchema interface {
+	Load(schemaPath string) (*jsonschema.Schema, error)
 }
 
+type SSchema struct{}
+
 // Load loads the JSON schema from a file
-func Load(schemaPath string) (*jsonschema.Schema, error) {
+func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	compiler := jsonschema.NewCompiler()
 	openSchemaPath, err := os.Open(schemaPath)
 	if err != nil {

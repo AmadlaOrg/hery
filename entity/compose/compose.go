@@ -3,9 +3,9 @@ package compose
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/heryext"
 	"github.com/AmadlaOrg/hery/storage"
 	utilObjectPkg "github.com/AmadlaOrg/hery/util/object"
-	utilYamlPkg "github.com/AmadlaOrg/hery/util/yaml"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -13,24 +13,28 @@ import (
 	"sync"
 )
 
-// EntityComposer is an interface for composing entities.
-type EntityComposer interface {
+// IComposer is an interface for composing entities.
+type IComposer interface {
 	ComposeEntity(entityArg string, printToScreen bool) error
+	parseEntityArg(entityArg string) (string, string, error)
+	findEntityDirParallel(root, name, version string) (string, error)
+	mergeYamlFiles(dir string) ([]byte, error)
 }
 
-// Composer struct implements the EntityComposer interface.
-type Composer struct {
+// SComposer struct implements the EntityComposer interface.
+type SComposer struct {
 	Storage storage.IStorage
+	HeryExt heryext.IHeryExt
 }
 
 // ComposeEntity gathers as many details about an Entity as possible and composes it.
-func (c *Composer) ComposeEntity(entityArg string, printToScreen bool) error {
-	root, err := c.Storage.Main()
+func (s *SComposer) ComposeEntity(entityArg string, printToScreen bool) error {
+	root, err := s.Storage.Main()
 	if err != nil {
 		return err
 	}
 
-	entityName, version, err := parseEntityArg(entityArg)
+	entityName, version, err := s.parseEntityArg(entityArg)
 	if err != nil {
 		return err
 	}
@@ -41,7 +45,7 @@ func (c *Composer) ComposeEntity(entityArg string, printToScreen bool) error {
 	}*/
 
 	// Find the directory
-	entityDir, err := findEntityDirParallel(root, entityName, version)
+	entityDir, err := s.findEntityDirParallel(root, entityName, version)
 	if err != nil {
 		return err
 	}
@@ -49,7 +53,7 @@ func (c *Composer) ComposeEntity(entityArg string, printToScreen bool) error {
 	fmt.Println("entityDir: " + entityDir)
 
 	// Read and merge the YAML files
-	/*mergedYaml, err := mergeYamlFiles(entityDir)
+	mergedYaml, err := s.mergeYamlFiles(entityDir)
 	if err != nil {
 		return err
 	}
@@ -61,12 +65,12 @@ func (c *Composer) ComposeEntity(entityArg string, printToScreen bool) error {
 		if err != nil {
 			return err
 		}
-	}*/
+	}
 
 	return nil
 }
 
-func parseEntityArg(entityArg string) (string, string, error) {
+func (s *SComposer) parseEntityArg(entityArg string) (string, string, error) {
 	entityNamePattern := regexp.MustCompile(entity.EntityNameMatch)
 	entityWithVersionPattern := regexp.MustCompile(entity.EntityNameAndVersionMatch)
 
@@ -80,7 +84,7 @@ func parseEntityArg(entityArg string) (string, string, error) {
 	return "", "", fmt.Errorf("invalid entity argument: %s", entityArg)
 }
 
-func findEntityDirParallel(root, name, version string) (string, error) {
+func (s *SComposer) findEntityDirParallel(root, name, version string) (string, error) {
 	var matchedDir string
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -111,7 +115,7 @@ func findEntityDirParallel(root, name, version string) (string, error) {
 						if version == "" || info.Name() == name+version {
 							mu.Lock()
 							matchedDir = path
-							readYaml, err := utilYamlPkg.Read(path, "amadla")
+							readYaml, err := s.HeryExt.Read(path, "amadla")
 							if err != nil {
 								mu.Unlock()
 								return
@@ -163,7 +167,7 @@ func findEntityDirParallel(root, name, version string) (string, error) {
 	return matchedDir, nil
 }
 
-func mergeYamlFiles(dir string) ([]byte, error) {
+func (s *SComposer) mergeYamlFiles(dir string) ([]byte, error) {
 	var merged map[string]interface{}
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
