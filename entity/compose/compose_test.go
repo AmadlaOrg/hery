@@ -115,7 +115,7 @@ func TestFindEntityDirParallel(t *testing.T) {
 			expectedDir: "github.com/AmadlaOrg/CPU@v1.0.0",
 			expectedErr: false,
 		},
-		/*{
+		{
 			name: "Find latest version",
 			rootSetup: func(root string) error {
 				testDir := filepath.Join(root, "github.com", "AmadlaOrg")
@@ -133,7 +133,7 @@ func TestFindEntityDirParallel(t *testing.T) {
 			version:     "",
 			expectedDir: "github.com/AmadlaOrg/CPU@v2.0.0",
 			expectedErr: false,
-		},*/
+		},
 		{
 			name: "Entity not found",
 			rootSetup: func(root string) error {

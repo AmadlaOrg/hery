@@ -115,17 +115,20 @@ func (s *SComposer) findEntityDirParallel(root, name, version string) (string, e
 						if version == "" || info.Name() == name+version {
 							mu.Lock()
 							matchedDir = path
-							readYaml, err := s.HeryExt.Read(path, "amadla")
-							if err != nil {
-								mu.Unlock()
-								return
+							// Check if s.HeryExt is nil to avoid nil pointer dereference
+							if s.HeryExt != nil {
+								readYaml, err := s.HeryExt.Read(path, "amadla")
+								if err != nil {
+									mu.Unlock()
+									return
+								}
+								marshalled, err := yaml.Marshal(readYaml)
+								if err != nil {
+									mu.Unlock()
+									return
+								}
+								fmt.Printf("%s\n", marshalled)
 							}
-							marshalled, err := yaml.Marshal(readYaml)
-							if err != nil {
-								mu.Unlock()
-								return
-							}
-							fmt.Printf("%s\n", marshalled)
 							mu.Unlock()
 							once.Do(func() { close(done) })
 							return
