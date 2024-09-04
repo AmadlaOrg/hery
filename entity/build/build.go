@@ -53,33 +53,31 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	if strings.Contains(entityUri, "@") {
-		entityVals, err = s.metaFromRemoteWithVersion(entityUri)
-		if err != nil {
-			return entityVals, err
-		}
-	} else {
-		entityVals, err = s.metaFromRemoteWithoutVersion(entityUri)
-		if err != nil {
-			return entityVals, err
+	dir, err := s.Entity.FindEntityDir(paths, entityVals)
+	if errors.Is(err, errtypes.MultipleFoundError) {
+		return entityVals, err
+	} else if !errors.Is(err, errtypes.NotFoundError) && err != nil {
+		return entityVals, err
+	} else if err == nil {
+		entityVals.AbsPath = dir
+		entityVals.Have = true
+	} else if errors.Is(err, errtypes.NotFoundError) {
+		if strings.Contains(entityUri, "@") {
+			entityVals, err = s.metaFromRemoteWithVersion(entityUri)
+			if err != nil {
+				return entityVals, err
+			}
+		} else {
+			entityVals, err = s.metaFromRemoteWithoutVersion(entityUri)
+			if err != nil {
+				return entityVals, err
+			}
 		}
 	}
 
 	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
 	entityVals.Id = uuidNew().String()
 	entityVals.Exist = true
-
-	dir, err := s.Entity.FindEntityDir(paths, entityVals)
-	if errors.Is(err, errtypes.MultipleFoundError) {
-		return entityVals, err
-	} else if !errors.Is(err, errtypes.NotFoundError) && err != nil {
-		return entityVals, err
-	}
-
-	if err == nil {
-		entityVals.AbsPath = dir
-		entityVals.Have = true
-	}
 
 	return entityVals, nil
 }

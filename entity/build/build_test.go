@@ -37,9 +37,11 @@ func TestMetaFromRemote(t *testing.T) {
 		hasError             bool
 	}{
 		{
-			name:              "Valid Entity URI Without Version",
-			inputPaths:        storage.AbsPaths{Entities: "testdata"},
-			inputEntityUri:    "https://github.com/example/entity",
+			name: "Valid Entity URI Without Version",
+			inputPaths: storage.AbsPaths{
+				Entities: "testdata",
+			},
+			inputEntityUri:    "github.com/example/entity",
 			internalEntityDir: "testdata/entity_remote.txt",
 			mockValidation: func(mockValidation *validation.MockEntityValidation) {
 				mockValidation.EXPECT().EntityUri("https://github.com/example/entity").Return(true)
