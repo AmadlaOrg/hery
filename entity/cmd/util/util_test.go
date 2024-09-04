@@ -1,10 +1,13 @@
 package util
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"log"
 	"testing"
 )
 
@@ -39,6 +42,41 @@ func TestConcoct_Success(t *testing.T) {
 	mockSUtil.Concoct(&cobra.Command{}, []string{}, handler)
 
 	require.True(t, handlerCalled)
+	mockStorage.AssertExpectations(t)
+}
+
+func TestConcoct_StoragePathsError(t *testing.T) {
+	// Capture log output
+	var logBuffer bytes.Buffer
+	log.SetOutput(&logBuffer)
+	defer log.SetOutput(nil) // Reset log output after test
+
+	// Mock getCollectionFlag to return a valid collection name
+	getCollectionFlag = func() (string, error) {
+		return "testCollection", nil
+	}
+
+	// Mock storage to return an error when Paths is called
+	mockStorage := storage.MockStorage{}
+	mockStorage.EXPECT().Paths("testCollection").Return(nil, fmt.Errorf("mock error from Paths"))
+
+	mockSUtil := SUtil{
+		newStorageService: &mockStorage,
+	}
+
+	handlerCalled := false
+	handler := func(collectionName string, paths *storage.AbsPaths, args []string) {
+		handlerCalled = true
+	}
+
+	// Concoct should log the error and not call the handler
+	mockSUtil.Concoct(&cobra.Command{}, []string{}, handler)
+
+	// Assert log output
+	require.Contains(t, logBuffer.String(), "Error getting paths: mock error from Paths")
+
+	// Ensure handler was not called
+	require.False(t, handlerCalled)
 	mockStorage.AssertExpectations(t)
 }
 
