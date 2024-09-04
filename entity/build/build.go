@@ -49,7 +49,7 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 		err error
 	)
 
-	if !s.EntityValidation.EntityUrl(entityUri) {
+	if !s.EntityValidation.EntityUri(entityUri) {
 		return entityVals, errors.New("invalid entity url")
 	}
 

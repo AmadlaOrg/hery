@@ -18,7 +18,7 @@ import (
 // IValidation
 type IValidation interface {
 	Entity(collectionName, entityPath string) error
-	EntityUrl(entityUrl string) bool
+	EntityUri(entityUrl string) bool
 }
 
 // SValidation
@@ -89,8 +89,8 @@ func (s *SValidation) Entity(collectionName, entityPath string) error {
 	return nil
 }
 
-// EntityUrl validates the module path for go get
-func (s *SValidation) EntityUrl(entityUrl string) bool {
+// EntityUri validates the module path for go get
+func (s *SValidation) EntityUri(entityUrl string) bool {
 	if strings.Contains(entityUrl, "://") {
 		return false
 	}

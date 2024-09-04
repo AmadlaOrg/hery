@@ -7,10 +7,20 @@ import (
 	"log"
 )
 
+type IUtil interface {
+	Concoct(
+		cmd *cobra.Command,
+		args []string,
+		handler func(collectionName string, paths *storage.AbsPaths, args []string))
+}
+
+type SUtil struct {
+	newStorageService storage.IStorage
+}
+
 // Function variables to allow for easy testing
 var (
 	getCollectionFlag = collectionPkgCmd.GetCollectionFlag
-	newStorageService = storage.NewStorageService
 )
 
 // Concoct sets up the necessary collection and storage paths and executes the provided handler function.
@@ -22,7 +32,7 @@ var (
 // - cmd: The cobra command that triggered this function.
 // - args: The arguments passed to the cobra command.
 // - handler: A function that takes the collection name, storage paths (AbsPaths), and arguments, and performs the main logic.
-func Concoct(
+func (s *SUtil) Concoct(
 	cmd *cobra.Command,
 	args []string,
 	handler func(collectionName string, paths *storage.AbsPaths, args []string)) {
@@ -30,8 +40,7 @@ func Concoct(
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	storageService := newStorageService()
-	paths, err := storageService.Paths(collectionName)
+	paths, err := s.newStorageService.Paths(collectionName)
 	if err != nil {
 		log.Println("Error getting paths:", err)
 		return

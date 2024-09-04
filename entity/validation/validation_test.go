@@ -73,8 +73,9 @@ func TestEntity(t *testing.T) {
 	})*/
 }
 
-func TestEntityUrl(t *testing.T) {
-	/*tests := []struct {
+func TestEntityUri(t *testing.T) {
+	entityValidationService := NewEntityValidationService()
+	tests := []struct {
 		path     string
 		expected bool
 	}{
@@ -91,10 +92,10 @@ func TestEntityUrl(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.path, func(t *testing.T) {
-			result := EntityUrl(test.path)
+			result := entityValidationService.EntityUri(test.path)
 			if result != test.expected {
 				t.Errorf("EntityUrl(%q) = %v; expected %v", test.path, result, test.expected)
 			}
 		})
-	}*/
+	}
 }

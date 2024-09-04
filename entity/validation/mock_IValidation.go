@@ -64,12 +64,12 @@ func (_c *MockEntityValidation_Entity_Call) RunAndReturn(run func(string, string
 	return _c
 }
 
-// EntityUrl provides a mock function with given fields: entityUrl
-func (_m *MockEntityValidation) EntityUrl(entityUrl string) bool {
+// EntityUri provides a mock function with given fields: entityUrl
+func (_m *MockEntityValidation) EntityUri(entityUrl string) bool {
 	ret := _m.Called(entityUrl)
 
 	if len(ret) == 0 {
-		panic("no return value specified for EntityUrl")
+		panic("no return value specified for EntityUri")
 	}
 
 	var r0 bool
@@ -82,30 +82,30 @@ func (_m *MockEntityValidation) EntityUrl(entityUrl string) bool {
 	return r0
 }
 
-// MockEntityValidation_EntityUrl_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EntityUrl'
-type MockEntityValidation_EntityUrl_Call struct {
+// MockEntityValidation_EntityUri_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EntityUri'
+type MockEntityValidation_EntityUri_Call struct {
 	*mock.Call
 }
 
-// EntityUrl is a helper method to define mock.On call
+// EntityUri is a helper method to define mock.On call
 //   - entityUrl string
-func (_e *MockEntityValidation_Expecter) EntityUrl(entityUrl interface{}) *MockEntityValidation_EntityUrl_Call {
-	return &MockEntityValidation_EntityUrl_Call{Call: _e.mock.On("EntityUrl", entityUrl)}
+func (_e *MockEntityValidation_Expecter) EntityUri(entityUrl interface{}) *MockEntityValidation_EntityUri_Call {
+	return &MockEntityValidation_EntityUri_Call{Call: _e.mock.On("EntityUri", entityUrl)}
 }
 
-func (_c *MockEntityValidation_EntityUrl_Call) Run(run func(entityUrl string)) *MockEntityValidation_EntityUrl_Call {
+func (_c *MockEntityValidation_EntityUri_Call) Run(run func(entityUrl string)) *MockEntityValidation_EntityUri_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string))
 	})
 	return _c
 }
 
-func (_c *MockEntityValidation_EntityUrl_Call) Return(_a0 bool) *MockEntityValidation_EntityUrl_Call {
+func (_c *MockEntityValidation_EntityUri_Call) Return(_a0 bool) *MockEntityValidation_EntityUri_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockEntityValidation_EntityUrl_Call) RunAndReturn(run func(string) bool) *MockEntityValidation_EntityUrl_Call {
+func (_c *MockEntityValidation_EntityUri_Call) RunAndReturn(run func(string) bool) *MockEntityValidation_EntityUri_Call {
 	_c.Call.Return(run)
 	return _c
 }
