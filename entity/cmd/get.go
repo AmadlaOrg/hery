@@ -14,7 +14,7 @@ var GetCmd = &cobra.Command{
 	Short: "Get entity and its dependencies",
 	Run: func(cmd *cobra.Command, args []string) {
 		entityCmdUtilService := util.NewEntityCmdUtilService()
-		entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
+		err := entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
 			if err := validation.Entities(args); err != nil {
 				log.Fatal(err)
 			}
@@ -25,5 +25,9 @@ var GetCmd = &cobra.Command{
 				log.Fatalf("Error getting entity: %s", err)
 			}
 		})
+		if err != nil {
+			// TODO: Handle error
+			return
+		}
 	},
 }

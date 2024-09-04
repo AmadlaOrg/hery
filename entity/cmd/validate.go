@@ -49,7 +49,7 @@ var ValidateCmd = &cobra.Command{
 			return
 		} else if isValidateAll {
 			entityCmdUtilService := util.NewEntityCmdUtilService()
-			entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
+			err := entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
 				entityService := entity.NewEntityService()
 				entityList, err := entityService.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
@@ -87,6 +87,10 @@ var ValidateCmd = &cobra.Command{
 				//     return
 				// }
 			})
+			if err != nil {
+				// TODO: Handle error
+				return
+			}
 		}
 	},
 }
