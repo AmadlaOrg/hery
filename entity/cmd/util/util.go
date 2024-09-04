@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
@@ -35,15 +36,16 @@ var (
 func (s *SUtil) Concoct(
 	cmd *cobra.Command,
 	args []string,
-	handler func(collectionName string, paths *storage.AbsPaths, args []string)) {
+	handler func(collectionName string, paths *storage.AbsPaths, args []string)) error {
 	collectionName, err := getCollectionFlag()
 	if err != nil {
-		log.Fatalln(err.Error())
+		return fmt.Errorf("failed to get collection flag: %w", err)
 	}
 	paths, err := s.newStorageService.Paths(collectionName)
 	if err != nil {
 		log.Println("Error getting paths:", err)
-		return
+		return err
 	}
 	handler(collectionName, paths, args)
+	return nil
 }
