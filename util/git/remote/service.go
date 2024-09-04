@@ -1,6 +1,6 @@
 package remote
 
 // NewGitRemoteService to set up the Git Remote service
-func NewGitRemoteService() *GitRemote {
-	return &GitRemote{}
+func NewGitRemoteService() *SRemote {
+	return &SRemote{}
 }

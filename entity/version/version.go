@@ -21,7 +21,7 @@ type IVersion interface {
 
 // SVersion struct implements the Manager interface.
 type SVersion struct {
-	GitRemote remote.RepoRemoteManager
+	GitRemote remote.IRemote
 }
 
 // Extract extracts the version from a go get URI.

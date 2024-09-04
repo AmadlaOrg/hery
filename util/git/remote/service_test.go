@@ -10,6 +10,6 @@ func TestNewGitRemoteService(t *testing.T) {
 	t.Run("should return a new instance of GitRemote", func(t *testing.T) {
 		gitRemoteService := NewGitRemoteService()
 		assert.NotNil(t, gitRemoteService)
-		assert.IsType(t, &GitRemote{}, gitRemoteService)
+		assert.IsType(t, &SRemote{}, gitRemoteService)
 	})
 }

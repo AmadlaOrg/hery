@@ -23,7 +23,7 @@ type IGet interface {
 
 // SGet struct implements the EntityGetter interface.
 type SGet struct {
-	Git                     git.RepoManager
+	Git                     git.IGit
 	Entity                  entity.IEntity
 	EntityValidation        validation.IValidation
 	EntityVersion           version.IVersion

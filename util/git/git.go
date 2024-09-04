@@ -7,17 +7,17 @@ import (
 	"os"
 )
 
-// RepoManager to help with mocking
-type RepoManager interface {
+// IGit to help with mocking
+type IGit interface {
 	FetchRepo(url, dest string) error
 	CommitHeadHash(repoPath string) (string, error)
 	CheckoutTag(repoPath, tagName string) error
 }
 
-type Git struct{}
+type SGit struct{}
 
 // FetchRepo clones the repository from the given URL to the specified destination.
-func (g *Git) FetchRepo(url, dest string) error {
+func (s *SGit) FetchRepo(url, dest string) error {
 	_, err := git.PlainClone(dest, false, &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
@@ -32,7 +32,7 @@ func (g *Git) FetchRepo(url, dest string) error {
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit
-func (g *Git) CommitHeadHash(repoPath string) (string, error) {
+func (s *SGit) CommitHeadHash(repoPath string) (string, error) {
 	// Open the repository
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
@@ -55,7 +55,7 @@ func (g *Git) CommitHeadHash(repoPath string) (string, error) {
 }
 
 // CheckoutTag checks out the specified branch or tag in the repository.
-func (g *Git) CheckoutTag(repoPath, tagName string) error {
+func (s *SGit) CheckoutTag(repoPath, tagName string) error {
 	// Open the repository
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {

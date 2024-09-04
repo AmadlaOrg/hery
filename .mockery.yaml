@@ -44,14 +44,14 @@ packages:
           inpackage: True
   github.com/AmadlaOrg/hery/util/git:
     interfaces:
-      RepoManager:
+      IGit:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockUtilGit"
           inpackage: True
   github.com/AmadlaOrg/hery/util/git/remote:
     interfaces:
-      RepoRemoteManager:
+      IRemote:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockUtilGitRemote"

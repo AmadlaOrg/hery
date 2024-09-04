@@ -26,7 +26,7 @@ type IBuild interface {
 
 // SBuild struct implements the MetaBuilder interface.
 type SBuild struct {
-	Git                     git.RepoManager
+	Git                     git.IGit
 	Entity                  entity.IEntity
 	EntityValidation        validation.IValidation
 	EntityVersion           version.IVersion

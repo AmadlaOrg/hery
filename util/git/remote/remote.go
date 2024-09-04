@@ -8,16 +8,16 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 )
 
-// RepoRemoteManager to help with mocking
-type RepoRemoteManager interface {
+// IRemote to help with mocking
+type IRemote interface {
 	Tags(url string) ([]string, error)
 	CommitHeadHash(url string) (string, error)
 }
 
-type GitRemote struct{}
+type SRemote struct{}
 
 // Tags returns a list of tags for the repository at the specified URL.
-func (gr *GitRemote) Tags(url string) ([]string, error) {
+func (s *SRemote) Tags(url string) ([]string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
@@ -41,7 +41,7 @@ func (gr *GitRemote) Tags(url string) ([]string, error) {
 }
 
 // CommitHeadHash retrieves the hash of the most recent commit
-func (gr *GitRemote) CommitHeadHash(url string) (string, error) {
+func (s *SRemote) CommitHeadHash(url string) (string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
