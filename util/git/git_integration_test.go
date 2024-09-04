@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestFetchRepo(t *testing.T) {
+func Test_Integration_FetchRepo(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)
@@ -63,7 +63,7 @@ func TestFetchRepo(t *testing.T) {
 	}
 }
 
-func TestCommitHeadHash(t *testing.T) {
+func Test_Integration_CommitHeadHash(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)
@@ -91,7 +91,7 @@ func TestCommitHeadHash(t *testing.T) {
 }
 
 // Mock the PlainOpen function to return an error
-func TestCommitHeadHash_RepoOpenError(t *testing.T) {
+func Test_Integration_CommitHeadHash_RepoOpenError(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)
@@ -116,7 +116,7 @@ func TestCommitHeadHash_RepoOpenError(t *testing.T) {
 	assert.Contains(t, err.Error(), "repository does not exist") // Customize this based on actual error message
 }
 
-func TestCommitHeadHash_RepoHeadError(t *testing.T) {
+func Test_Integration_CommitHeadHash_RepoHeadError(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)
@@ -149,7 +149,7 @@ func TestCommitHeadHash_RepoHeadError(t *testing.T) {
 }
 
 // Mock the CommitObject function to return an error
-func TestCommitHeadHash_CommitObjectError(t *testing.T) {
+func Test_Integration_CommitHeadHash_CommitObjectError(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)
@@ -178,53 +178,8 @@ func TestCommitHeadHash_CommitObjectError(t *testing.T) {
 	assert.Contains(t, err.Error(), "object not found") // Customize this based on actual error message
 }
 
-// Test successful tag checkout
-/*func TestCheckoutTag_Success(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "hery_test_*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func(path string) {
-		err := os.RemoveAll(path)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}(tempDir)
-
-	// Initialize a new git repository
-	repo, err := git.PlainInit(tempDir, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Create an empty commit so that we can tag it
-	worktree, err := repo.Worktree()
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = worktree.Commit("Initial commit", &git.CommitOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Create a tag
-	head, err := repo.Head()
-	if err != nil {
-		t.Fatal(err)
-	}
-	tagName := "v1.0.0"
-	_, err = repo.CreateTag(tagName, head.Hash(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gitService := NewGitService()
-	err = gitService.CheckoutTag(tempDir, tagName)
-	assert.NoError(t, err)
-}*/
-
 // Test repository open error
-func TestCheckoutTag_RepoOpenError(t *testing.T) {
+func Test_Integration_CheckoutTag_RepoOpenError(t *testing.T) {
 	// Use a non-existing directory to simulate repository open error
 	tempDir := "/non/existing/path"
 
@@ -234,39 +189,8 @@ func TestCheckoutTag_RepoOpenError(t *testing.T) {
 	assert.Contains(t, err.Error(), "repository does not exist") // Customize based on actual error message
 }
 
-// Test working tree error
-/*func TestCheckoutTag_WorktreeError(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "hery_test_*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func(path string) {
-		err := os.RemoveAll(path)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}(tempDir)
-
-	// Initialize a new git repository
-	_, err = git.PlainInit(tempDir, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Simulate an error by corrupting the .git directory
-	err = os.RemoveAll(filepath.Join(tempDir, ".git", "index"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gitService := NewGitService()
-	err = gitService.CheckoutTag(tempDir, "v1.0.0")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "worktree not found") // Customize based on actual error message
-}*/
-
 // Test checkout error (e.g., tag does not exist)
-func TestCheckoutTag_CheckoutError(t *testing.T) {
+func Test_Integration_CheckoutTag_CheckoutError(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)

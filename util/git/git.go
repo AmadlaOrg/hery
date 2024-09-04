@@ -16,9 +16,14 @@ type IGit interface {
 
 type SGit struct{}
 
+var (
+	gitPlainOpen  = git.PlainOpen
+	gitPlainClone = git.PlainClone
+)
+
 // FetchRepo clones the repository from the given URL to the specified destination.
 func (s *SGit) FetchRepo(url, dest string) error {
-	_, err := git.PlainClone(dest, false, &git.CloneOptions{
+	_, err := gitPlainClone(dest, false, &git.CloneOptions{
 		URL:      url,
 		Progress: os.Stdout,
 		// TODO: Add support for authentication because some people might require it
@@ -33,8 +38,7 @@ func (s *SGit) FetchRepo(url, dest string) error {
 
 // CommitHeadHash retrieves the hash of the most recent commit
 func (s *SGit) CommitHeadHash(repoPath string) (string, error) {
-	// Open the repository
-	repo, err := git.PlainOpen(repoPath)
+	repo, err := gitPlainOpen(repoPath)
 	if err != nil {
 		return "", err
 	}
@@ -56,8 +60,7 @@ func (s *SGit) CommitHeadHash(repoPath string) (string, error) {
 
 // CheckoutTag checks out the specified branch or tag in the repository.
 func (s *SGit) CheckoutTag(repoPath, tagName string) error {
-	// Open the repository
-	repo, err := git.PlainOpen(repoPath)
+	repo, err := gitPlainOpen(repoPath)
 	if err != nil {
 		return err
 	}

@@ -20,8 +20,9 @@ import (
 // IBuild to help with mocking and to gather metadata from remote and local sources.
 type IBuild interface {
 	MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error)
+	metaFromLocalWithVersion(entityUri, entityVersion string) (entity.Entity, error)
 	metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error)
-	metaFromRemoteWithVersion(entityUri string) (entity.Entity, error)
+	metaFromRemoteWithVersion(entityUri, entityVersion string) (entity.Entity, error)
 }
 
 // SBuild struct implements the MetaBuilder interface.
@@ -54,24 +55,40 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 	}
 
 	dir, err := s.Entity.FindEntityDir(paths, entityVals)
-	if errors.Is(err, errtypes.MultipleFoundError) {
-		return entityVals, err
-	} else if !errors.Is(err, errtypes.NotFoundError) && err != nil {
+	if !errors.Is(err, errtypes.NotFoundError) &&
+		!errors.Is(err, errtypes.MultipleFoundError) &&
+		err != nil {
 		return entityVals, err
 	} else if err == nil {
 		entityVals.AbsPath = dir
 		entityVals.Have = true
-	} else if errors.Is(err, errtypes.NotFoundError) {
-		if strings.Contains(entityUri, "@") {
-			entityVals, err = s.metaFromRemoteWithVersion(entityUri)
+	}
+
+	if strings.Contains(entityUri, "@") {
+		entityVersion, err := s.EntityVersion.Extract(entityUri)
+		if err != nil {
+			if !errors.Is(err, version.ErrorExtractNoVersionFound) {
+				return entityVals, fmt.Errorf("error extracting version: %v", err)
+			} else {
+				entityVersion = "latest"
+			}
+		}
+
+		if errors.Is(err, errtypes.NotFoundError) || entityVersion == "latest" {
+			entityVals, err = s.metaFromRemoteWithVersion(entityUri, entityVersion)
 			if err != nil {
 				return entityVals, err
 			}
 		} else {
-			entityVals, err = s.metaFromRemoteWithoutVersion(entityUri)
+			entityVals, err = s.metaFromLocalWithVersion(entityUri, entityVersion)
 			if err != nil {
 				return entityVals, err
 			}
+		}
+	} else {
+		entityVals, err = s.metaFromRemoteWithoutVersion(entityUri)
+		if err != nil {
+			return entityVals, err
 		}
 	}
 
@@ -82,13 +99,34 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 	return entityVals, nil
 }
 
+// metaFromLocalWithVersion
+func (s *SBuild) metaFromLocalWithVersion(entityUri, entityVersion string) (entity.Entity, error) {
+	var (
+		entityVals = entity.Entity{
+			Have:  false,
+			Exist: false,
+		}
+		err error
+	)
+
+	entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
+	entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
+	if err != nil {
+		return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+	}
+
+	return entityVals, nil
+}
+
 // metaFromRemoteWithoutVersion
 func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error) {
-	var entityVals = entity.Entity{
-		Have:  false,
-		Exist: false,
-	}
-	var entityVersion string
+	var (
+		entityVals = entity.Entity{
+			Have:  false,
+			Exist: false,
+		}
+		entityVersion string
+	)
 
 	repoUrl, err := url.ExtractRepoUrl(entityUri)
 	if err != nil {
@@ -128,23 +166,14 @@ func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, 
 }
 
 // metaFromRemoteWithVersion
-func (s *SBuild) metaFromRemoteWithVersion(entityUri string) (entity.Entity, error) {
+func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (entity.Entity, error) {
 	var (
 		entityVals = entity.Entity{
 			Have:  false,
 			Exist: false,
 		}
-		entityVersion string
+		err error
 	)
-
-	entityVersion, err := s.EntityVersion.Extract(entityUri)
-	if err != nil {
-		if !errors.Is(err, version.ErrorExtractNoVersionFound) {
-			return entityVals, fmt.Errorf("error extracting version: %v", err)
-		} else {
-			entityVersion = "latest"
-		}
-	}
 
 	entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
 	entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)

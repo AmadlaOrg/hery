@@ -16,9 +16,14 @@ type IRemote interface {
 
 type SRemote struct{}
 
+var (
+	gitNewRemote     = git.NewRemote
+	memoryNewStorage = memory.NewStorage
+)
+
 // Tags returns a list of tags for the repository at the specified URL.
 func (s *SRemote) Tags(url string) ([]string, error) {
-	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+	rem := gitNewRemote(memoryNewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
 	})
@@ -42,7 +47,7 @@ func (s *SRemote) Tags(url string) ([]string, error) {
 
 // CommitHeadHash retrieves the hash of the most recent commit
 func (s *SRemote) CommitHeadHash(url string) (string, error) {
-	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+	rem := gitNewRemote(memoryNewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{url},
 	})
