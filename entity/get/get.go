@@ -59,7 +59,7 @@ func (s *SGet) GetInTmp(collectionName string, entities []string) (storage.AbsPa
 func (s *SGet) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
-		entityMeta, err := s.Build.MetaFromRemote(*storagePaths, e)
+		entityMeta, err := s.Build.Meta(*storagePaths, e)
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,8 @@ func (s *SGet) Get(collectionName string, storagePaths *storage.AbsPaths, entiti
 	return s.download(collectionName, storagePaths, entityBuilds)
 }
 
-// download retrieves entities in parallel.
+// download retrieves entities in parallel using concurrency and calls on the functions to set up, validate and
+// collect sub entities
 func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
@@ -91,83 +92,40 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 		go func(entityMeta entity.Entity) {
 			defer wg.Done()
 
-			// Create the directory if it does not exist
-			err := os.MkdirAll(entityMeta.AbsPath, os.ModePerm)
+			// 1. Add repository in the collection directory
+			err := s.addRepo(entityMeta)
 			if err != nil {
 				errCh <- err
 				return
 			}
 
-			// Download the Entity with `git clone`
-			if err := s.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
-				errCh <- fmt.Errorf("error fetching repo: %v", err)
-				return
-			}
-
-			// Changes the repository to the tag (version) that was pass
-			if !entityMeta.IsPseudoVersion {
-				if err := s.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
-					errCh <- fmt.Errorf("error checking out version: %v", err)
-					return
-				}
-			}
-
-			read, err := s.HeryExt.Read(entityMeta.AbsPath, collectionName)
+			// 2. Gather the `<collection name>.hery` configuration file content
+			heryContent, err := s.HeryExt.Read(entityMeta.AbsPath, collectionName)
 			if err != nil {
 				errCh <- fmt.Errorf("error reading yaml: %v", err)
 				return
 			}
 
+			// 3. Validate the content of hery file content to make sure it does not cause is issue later in the code
+			//
+			// -- This follows the Fail Fast principal --
+			//
 			err = s.EntityValidation.Entity(collectionName, entityMeta.AbsPath)
 			if err != nil {
 				errCh <- fmt.Errorf("error validating entity: %v", err)
 				return
 			}
 
-			var subEntitiesMeta []entity.Entity
-			for key, value := range read {
-				if key == "_entity" {
-					entityPath, ok := value.(string)
-					if !ok {
-						errCh <- fmt.Errorf("error converting yaml entity to string: %v", value)
-						return
-					}
-					subEntityMeta, err := s.Build.MetaFromRemote(*storagePaths, entityPath)
-					if err != nil {
-						errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
-						return
-					}
-					subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
-				} else if key == "_self" {
-					selfMap, ok := value.(map[string]interface{})
-					if !ok {
-						errCh <- fmt.Errorf("error converting yaml entity to string: %v", value)
-						return
-					}
-					for selfKey, selfValue := range selfMap {
-						if selfKey == "_entity" {
-							entityPath, ok := selfValue.(string)
-							if !ok {
-								errCh <- fmt.Errorf("error converting yaml entity to string: %v", selfValue)
-								return
-							}
-							subEntityMeta, err := s.Build.MetaFromRemote(*storagePaths, entityPath)
-							if err != nil {
-								errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
-								return
-							}
-							subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
-						}
-					}
-				}
-			}
-
-			if len(subEntitiesMeta) > 0 {
-				err = s.download(collectionName, storagePaths, subEntitiesMeta)
-				if err != nil {
-					errCh <- fmt.Errorf("error downloading sub entities: %v", err)
-					return
-				}
+			// 4. The reference to the other entities are found in the hery file content
+			//
+			// This function gathers the `_entity` properties that have the entity URIs that are used to pull the entity
+			// repositories.
+			//
+			// TODO: Add limit on how many times this can be called since we don't want infinite loop (maybe add a counter)
+			err = s.collectSubEntities(collectionName, storagePaths, heryContent)
+			if err != nil {
+				errCh <- fmt.Errorf("error collecting sub entities: %v", err)
+				return
 			}
 
 		}(entityMeta)
@@ -186,4 +144,89 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 	}
 
 	return combinedErr
+}
+
+// addRepo does all the tasks required to setup a new entity (or entity with a different version)
+// TODO: Add a timer limit (maybe go-git has something for that) so that it does not get
+// TODO: Make sure we have clear error. Because it seems it just hangs without clear error.
+// TODO: Might want to add hashing of the entity once it was downloaded to have verification that nothing was corrupted for Fail Fast principal
+func (s *SGet) addRepo(entityMeta entity.Entity) error {
+	// 1. Create the directory if it does not exist
+	err := os.MkdirAll(entityMeta.AbsPath, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// 2. Download the Entity with `git clone`
+	if err := s.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
+		return fmt.Errorf("error fetching repo: %v", err)
+	}
+
+	// 3. Changes the repository to the tag (version) that was pass
+	if !entityMeta.IsPseudoVersion {
+		if err := s.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
+			return fmt.Errorf("error checking out version: %v", err)
+		}
+	}
+
+	return nil
+}
+
+// collectSubEntities Calls on download function with the entity URIs that were found in the `_entity`
+//
+// For the `_self` contains the initial configuration of the setup of the entity `.hery` configuration. It might contain
+// `_entity` and this function also pulls those sub entities.
+//
+// download function is call because inside any entities there might be again sub entities.
+func (s *SGet) collectSubEntities(
+	collectionName string,
+	storagePaths *storage.AbsPaths,
+	henryContent map[string]interface{}) error {
+
+	// 1. Loops through the properties found in the `.hery` configuration file
+	// found in the `_entity` or the `_entity` in `_self`
+	var subEntitiesMeta []entity.Entity
+	for key, value := range henryContent {
+		if key == "_entity" {
+			entityPath, ok := value.(string)
+			if !ok {
+				return fmt.Errorf("error converting yaml entity to string: %v", value)
+			}
+			subEntityMeta, err := s.Build.Meta(*storagePaths, entityPath)
+			if err != nil {
+				return fmt.Errorf("error fetching sub entity meta: %v", err)
+			}
+			subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
+		} else if key == "_self" {
+			selfMap, ok := value.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("error converting yaml entity to string: %v", value)
+			}
+			for selfKey, selfValue := range selfMap {
+				if selfKey == "_entity" {
+					entityPath, ok := selfValue.(string)
+					if !ok {
+						return fmt.Errorf("error converting yaml entity to string: %v", selfValue)
+					}
+					subEntityMeta, err := s.Build.Meta(*storagePaths, entityPath)
+					if err != nil {
+						return fmt.Errorf("error fetching sub entity meta: %v", err)
+					}
+					subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
+				}
+			}
+		}
+	}
+
+	// 2. If sub entities found then send it to download function
+	// TODO: Add check that this entity does not already in `Have == true`
+	// TODO: Or maybe add that logic at a higher level so that it is not added to the `subEntitiesMeta` list
+	if len(subEntitiesMeta) > 0 {
+		err := s.download(collectionName, storagePaths, subEntitiesMeta)
+		if err != nil {
+			return fmt.Errorf("error downloading sub entities: %v", err)
+		}
+	}
+
+	return nil
 }

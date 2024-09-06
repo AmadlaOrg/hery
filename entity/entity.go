@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
-	"github.com/AmadlaOrg/hery/errtypes"
 	"github.com/AmadlaOrg/hery/storage"
 	"os"
 	"path/filepath"
@@ -30,7 +29,7 @@ func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (stri
 		// Check if the directory exists
 		if _, err := os.Stat(exactPath); os.IsNotExist(err) {
 			return "", errors.Join(
-				errtypes.NotFoundError,
+				ErrorNotFound,
 				fmt.Errorf("no matching directory found for exact version: %s", exactPath))
 		} else if err != nil {
 			return "", err
@@ -52,13 +51,13 @@ func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (stri
 
 	if len(matches) == 0 {
 		return "", errors.Join(
-			errtypes.NotFoundError,
+			ErrorNotFound,
 			fmt.Errorf("no matching directories found for pattern: %s", pattern))
 	}
 
 	if len(matches) > 1 {
 		return "", errors.Join(
-			errtypes.MultipleFoundError,
+			ErrorMultipleFound,
 			fmt.Errorf("multiple matching directories found for pattern: %s", pattern))
 	}
 

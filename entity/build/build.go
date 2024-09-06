@@ -3,7 +3,6 @@ package build
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/errtypes"
 	"github.com/google/uuid"
 	"path/filepath"
 	"strings"
@@ -19,10 +18,11 @@ import (
 
 // IBuild to help with mocking and to gather metadata from remote and local sources.
 type IBuild interface {
-	MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error)
+	Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, error)
 	metaFromLocalWithVersion(entityUri, entityVersion string) (entity.Entity, error)
 	metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error)
 	metaFromRemoteWithVersion(entityUri, entityVersion string) (entity.Entity, error)
+	constructOrigin(entityUri, name, version string) string
 }
 
 // SBuild struct implements the MetaBuilder interface.
@@ -39,9 +39,9 @@ var (
 	uuidNew = uuid.New
 )
 
-// MetaFromRemote gathers as many details about an Entity as possible from git and from the URI passed to populate the
+// Meta gathers as many details about an Entity as possible from git and from the URI passed to populate the
 // Entity struct. It also validates values that are passed to it.
-func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
+func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
 	var (
 		entityVals = entity.Entity{
 			Have:  false,
@@ -55,8 +55,8 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 	}
 
 	dir, err := s.Entity.FindEntityDir(paths, entityVals)
-	if !errors.Is(err, errtypes.NotFoundError) &&
-		!errors.Is(err, errtypes.MultipleFoundError) &&
+	if !errors.Is(err, entity.ErrorNotFound) &&
+		!errors.Is(err, entity.ErrorMultipleFound) &&
 		err != nil {
 		return entityVals, err
 	} else if err == nil {
@@ -74,7 +74,7 @@ func (s *SBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entit
 			}
 		}
 
-		if errors.Is(err, errtypes.NotFoundError) || entityVersion == "latest" {
+		if errors.Is(err, entity.ErrorNotFound) || entityVersion == "latest" {
 			entityVals, err = s.metaFromRemoteWithVersion(entityUri, entityVersion)
 			if err != nil {
 				return entityVals, err
@@ -114,6 +114,17 @@ func (s *SBuild) metaFromLocalWithVersion(entityUri, entityVersion string) (enti
 	if err != nil {
 		return entityVals, fmt.Errorf("error extracting repo url: %v", err)
 	}
+
+	// TODO: Get hash
+	// entityVals.Hash
+
+	entityVals.Have = true
+	entityVals.Exist = true
+	entityVals.IsPseudoVersion = false
+	entityVals.Name = filepath.Base(entityUriWithoutVersion)
+	entityVals.Version = entityVersion
+	entityVals.Entity = entityUri
+	entityVals.Origin = s.constructOrigin(entityVals.Entity, entityVals.Name, entityVals.Version)
 
 	return entityVals, nil
 }
@@ -156,11 +167,7 @@ func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, 
 	entityVals.Name = filepath.Base(entityUri)
 	entityVals.Version = entityVersion
 	entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
-	entityVals.Origin = strings.Replace(
-		entityVals.Entity,
-		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
-		"",
-		1)
+	entityVals.Origin = s.constructOrigin(entityVals.Entity, entityVals.Name, entityVals.Version)
 
 	return entityVals, nil
 }
@@ -210,11 +217,16 @@ func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (ent
 	entityVals.Name = filepath.Base(entityUriWithoutVersion)
 	entityVals.Version = entityVersion
 	entityVals.Entity = entityUri
-	entityVals.Origin = strings.Replace(
-		entityVals.Entity,
-		fmt.Sprintf("%s@%s", entityVals.Name, entityVals.Version),
-		"",
-		1)
+	entityVals.Origin = s.constructOrigin(entityVals.Entity, entityVals.Name, entityVals.Version)
 
 	return entityVals, nil
+}
+
+// constructOrigin
+func (s *SBuild) constructOrigin(entityUri, name, version string) string {
+	return strings.Replace(
+		entityUri,
+		fmt.Sprintf("%s@%s", name, version),
+		"",
+		1)
 }

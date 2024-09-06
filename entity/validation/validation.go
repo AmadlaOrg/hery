@@ -47,6 +47,9 @@ func Schema() *jsonschema.Schema {
 }*/
 
 // Entity validates the YAML content against the JSON schema
+// TODO: Make sure that YAML standard is valid first
+// TODO: Since JSON-Schema cannot merge by-it-self the schemas you will need to add code for that
+// TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
 func (s *SValidation) Entity(collectionName, entityPath string) error {
 	schemaPath := filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), "schema.json")
 	schema, err := s.Schema.Load(schemaPath)

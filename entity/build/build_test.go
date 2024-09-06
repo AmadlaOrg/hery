@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-func TestMetaFromRemote(t *testing.T) {
+func TestMeta(t *testing.T) {
 	// Mocking UUID generation for consistent results
 	originalUUIDNew := uuidNew
 	defer func() { uuidNew = originalUUIDNew }() // Restore original function after test
@@ -194,7 +194,7 @@ func TestMetaFromRemote(t *testing.T) {
 				EntityVersionValidation: mockEntityVersionVal,
 			}
 
-			metaFromRemote, err := mockBuilder.MetaFromRemote(test.inputPaths, test.inputEntityUri)
+			metaFromRemote, err := mockBuilder.Meta(test.inputPaths, test.inputEntityUri)
 			if test.hasError {
 				assert.Error(t, err)
 			} else {
@@ -638,6 +638,33 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			if !reflect.DeepEqual(entityMeta, tt.expectEntity) {
 				t.Errorf("got %v, want %v", entityMeta, tt.expectEntity)
 			}
+		})
+	}
+}
+
+func TestConstructOrigin(t *testing.T) {
+	mockBuilder := SBuild{}
+
+	tests := []struct {
+		name           string
+		inputEntityUri string
+		inputName      string
+		inputVersion   string
+		expected       string
+	}{
+		{
+			name:           "Valid origin",
+			inputEntityUri: "github.com/AmadlaOrg/Entity",
+			inputName:      "github.com/AmadlaOrg/Entity@latest",
+			inputVersion:   "latest",
+			expected:       "github.com/AmadlaOrg/Entity",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := mockBuilder.constructOrigin(tt.inputEntityUri, tt.inputName, tt.inputVersion)
+			assert.Equal(t, tt.expected, got)
 		})
 	}
 }
