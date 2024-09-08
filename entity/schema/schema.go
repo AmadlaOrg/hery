@@ -7,6 +7,7 @@ import (
 	"github.com/santhosh-tekuri/jsonschema"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type ISchema interface {
@@ -31,7 +32,10 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	}
 
 	// 2. Load the HERY base schema from .schema/entity.schema.json
-	baseSchemaPath := ".schema/entity.schema.json"
+	baseSchemaPath, err := filepath.Abs(".schema/entity.schema.json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve base schema path: %w", err)
+	}
 	baseSchemaData, err := s.loadSchemaFile(baseSchemaPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load base schema: %w", err)
@@ -70,7 +74,7 @@ func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
 		return nil, fmt.Errorf("failed to open schema file: %w", err)
 	}
 	defer func(file *os.File) {
-		err := file.Close()
+		err = file.Close()
 		if err != nil {
 			log.Printf("failed to close schema file: %s", err)
 		}

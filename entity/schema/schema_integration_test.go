@@ -1,27 +1,43 @@
 package schema
 
 import (
+	"github.com/santhosh-tekuri/jsonschema"
 	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
 )
 
 func TestLoad(t *testing.T) {
+	mainSchemaAbsPath, err := filepath.Abs(filepath.Join("..", "..", "test", "fixture", "valid-entity", ".amadla", "schema.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	schemaMockService := SSchema{}
 
 	tests := []struct {
 		name            string
 		inputSchemaPath string
-		expected        map[string]any
+		expected        *jsonschema.Schema
 		hasError        bool
 	}{
 		{
-			name: "valid",
+			name:            "valid",
+			inputSchemaPath: mainSchemaAbsPath,
+			expected:        &jsonschema.Schema{},
+			hasError:        false,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			//schemaMockService := SSchema{}
+			got, err := schemaMockService.Load(mainSchemaAbsPath)
+			if test.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, test.expected, got)
 		})
 	}
 }
@@ -32,6 +48,7 @@ func TestLoadSchemaFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	schemaService := SSchema{}
+
 	tests := []struct {
 		name            string
 		inputSchemaPath string
