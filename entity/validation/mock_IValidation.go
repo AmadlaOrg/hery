@@ -17,17 +17,17 @@ func (_m *MockEntityValidation) EXPECT() *MockEntityValidation_Expecter {
 	return &MockEntityValidation_Expecter{mock: &_m.Mock}
 }
 
-// Entity provides a mock function with given fields: collectionName, entityPath
-func (_m *MockEntityValidation) Entity(collectionName string, entityPath string) error {
-	ret := _m.Called(collectionName, entityPath)
+// Entity provides a mock function with given fields: entityPath, collectionName, heryContent
+func (_m *MockEntityValidation) Entity(entityPath string, collectionName string, heryContent map[string]interface{}) error {
+	ret := _m.Called(entityPath, collectionName, heryContent)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Entity")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(collectionName, entityPath)
+	if rf, ok := ret.Get(0).(func(string, string, map[string]interface{}) error); ok {
+		r0 = rf(entityPath, collectionName, heryContent)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -41,15 +41,16 @@ type MockEntityValidation_Entity_Call struct {
 }
 
 // Entity is a helper method to define mock.On call
-//   - collectionName string
 //   - entityPath string
-func (_e *MockEntityValidation_Expecter) Entity(collectionName interface{}, entityPath interface{}) *MockEntityValidation_Entity_Call {
-	return &MockEntityValidation_Entity_Call{Call: _e.mock.On("Entity", collectionName, entityPath)}
+//   - collectionName string
+//   - heryContent map[string]interface{}
+func (_e *MockEntityValidation_Expecter) Entity(entityPath interface{}, collectionName interface{}, heryContent interface{}) *MockEntityValidation_Entity_Call {
+	return &MockEntityValidation_Entity_Call{Call: _e.mock.On("Entity", entityPath, collectionName, heryContent)}
 }
 
-func (_c *MockEntityValidation_Entity_Call) Run(run func(collectionName string, entityPath string)) *MockEntityValidation_Entity_Call {
+func (_c *MockEntityValidation_Entity_Call) Run(run func(entityPath string, collectionName string, heryContent map[string]interface{})) *MockEntityValidation_Entity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		run(args[0].(string), args[1].(string), args[2].(map[string]interface{}))
 	})
 	return _c
 }
@@ -59,7 +60,7 @@ func (_c *MockEntityValidation_Entity_Call) Return(_a0 error) *MockEntityValidat
 	return _c
 }
 
-func (_c *MockEntityValidation_Entity_Call) RunAndReturn(run func(string, string) error) *MockEntityValidation_Entity_Call {
+func (_c *MockEntityValidation_Entity_Call) RunAndReturn(run func(string, string, map[string]interface{}) error) *MockEntityValidation_Entity_Call {
 	_c.Call.Return(run)
 	return _c
 }

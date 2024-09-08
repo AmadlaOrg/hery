@@ -6,6 +6,8 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
+	"github.com/AmadlaOrg/hery/util/file"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -16,6 +18,8 @@ type IEntity interface {
 	FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicateEntity(entities []Entity, entityMeta Entity) error
 	GeneratePseudoVersionPattern(name, version string) string
+	CrawlDirectoriesParallel(root string) (map[string]Entity, error)
+	Read(path, collectionName string) (map[string]any, error)
 }
 
 type SEntity struct{}
@@ -157,4 +161,27 @@ func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, erro
 		return nil, err
 	}
 	return entities, nil
+}
+
+// Read makes it easy to read any yaml file with any of the two extensions: yml or yaml
+func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
+	heryFileName := fmt.Sprintf("%s.hery", collectionName)
+	heryPath := filepath.Join(path, heryFileName)
+
+	if !file.Exists(heryPath) {
+		return nil, fmt.Errorf("%s does not exist", heryPath)
+	}
+
+	content, err := os.ReadFile(heryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var current map[string]interface{}
+	err = yaml.Unmarshal(content, &current)
+	if err != nil {
+		return nil, err
+	}
+
+	return current, nil
 }

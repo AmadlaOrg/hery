@@ -1,4 +1,4 @@
-package heryext
+package entity
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ func TestRead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	heryExtService := NewHeryExtService()
+	heryExtService := NewEntityService()
 	tests := []struct {
 		name                string
 		inputPath           string

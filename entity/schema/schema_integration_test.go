@@ -6,13 +6,27 @@ import (
 	"testing"
 )
 
-func TestLoadSchemaFile(t *testing.T) {
-	fixturePath := filepath.Join("..", "..", "test", "fixture")
-	validEntityAbsPath, err := filepath.Abs(filepath.Join(fixturePath, "valid-entity", ".amadla", "schema.json"))
-	if err != nil {
-		t.Fatal(err)
+func TestLoad(t *testing.T) {
+
+	tests := []struct {
+		name            string
+		inputSchemaPath string
+		expected        map[string]any
+		hasError        bool
+	}{
+		{
+			name: "valid",
+		},
 	}
 
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			//schemaMockService := SSchema{}
+		})
+	}
+}
+
+func TestLoadSchemaFile(t *testing.T) {
 	baseSchemaAbsPath, err := filepath.Abs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -61,10 +75,6 @@ func TestLoadSchemaFile(t *testing.T) {
 				},
 			},
 			hasError: false,
-		},
-		{
-			name:            "",
-			inputSchemaPath: validEntityAbsPath,
 		},
 	}
 

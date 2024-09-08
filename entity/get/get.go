@@ -7,7 +7,6 @@ import (
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
-	"github.com/AmadlaOrg/hery/heryext"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/git"
 	"os"
@@ -29,7 +28,6 @@ type SGet struct {
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.IValidation
 	Build                   build.IBuild
-	HeryExt                 heryext.IHeryExt
 }
 
 // GetInTmp retrieves entities based on the provided collection name and entities
@@ -100,7 +98,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 			}
 
 			// 2. Gather the `<collection name>.hery` configuration file content
-			heryContent, err := s.HeryExt.Read(entityMeta.AbsPath, collectionName)
+			heryContent, err := s.Entity.Read(entityMeta.AbsPath, collectionName)
 			if err != nil {
 				errCh <- fmt.Errorf("error reading yaml: %v", err)
 				return
@@ -110,7 +108,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 			//
 			// -- This follows the Fail Fast principal --
 			//
-			err = s.EntityValidation.Entity(collectionName, entityMeta.AbsPath)
+			err = s.EntityValidation.Entity(entityMeta.AbsPath, collectionName, heryContent)
 			if err != nil {
 				errCh <- fmt.Errorf("error validating entity: %v", err)
 				return

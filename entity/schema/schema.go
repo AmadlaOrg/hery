@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/santhosh-tekuri/jsonschema"
@@ -11,13 +12,14 @@ import (
 type ISchema interface {
 	Load(schemaPath string) (*jsonschema.Schema, error)
 	loadSchemaFile(schemaPath string) (map[string]any, error)
-	mergeSchemas(baseSchema, mainSchema map[string]any) (map[string]any, error)
+	mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any
 }
 
 type SSchema struct{}
 
 var (
-	osOpen = os.Open
+	osOpen      = os.Open
+	jsonMarshal = json.Marshal
 )
 
 // Load loads the JSON schema from a file and merges it with a base schema
@@ -40,14 +42,25 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 
 	println(mergedSchemaData)
 
-	// 4. Compile the merged schema
-	/*compiler := jsonschema.NewCompiler()
-	mergedSchema, err := compiler.Compile(jsonschema.NewGoLoader(mergedSchemaData))
+	// 4. Convert merged schema to JSON
+	mergedSchemaJSON, err := jsonMarshal(mergedSchemaData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal merged schema to JSON: %w", err)
+	}
+
+	// 5. Compile the merged schema from the JSON string
+	compiler := jsonschema.NewCompiler()
+	err = compiler.AddResource("merged_schema.json", bytes.NewReader(mergedSchemaJSON))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load merged schema: %w", err)
+	}
+
+	schema, err := compiler.Compile("merged_schema.json")
 	if err != nil {
 		return nil, fmt.Errorf("failed to compile merged schema: %w", err)
-	}*/
+	}
 
-	return nil, nil
+	return schema, nil
 }
 
 // loadSchemaFile reads a JSON schema file and returns it as a map

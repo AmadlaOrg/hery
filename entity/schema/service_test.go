@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestNewHeryExtService(t *testing.T) {
+func TestNewEntitySchemaService(t *testing.T) {
 	t.Run("should return a new instance of Schema", func(t *testing.T) {
-		service := NewSchemaService()
+		service := NewEntitySchemaService()
 		assert.NotNil(t, service)
 		assert.IsType(t, &SSchema{}, service)
 	})

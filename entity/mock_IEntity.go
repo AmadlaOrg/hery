@@ -67,6 +67,64 @@ func (_c *MockEntity_CheckDuplicateEntity_Call) RunAndReturn(run func([]Entity, 
 	return _c
 }
 
+// CrawlDirectoriesParallel provides a mock function with given fields: root
+func (_m *MockEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
+	ret := _m.Called(root)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CrawlDirectoriesParallel")
+	}
+
+	var r0 map[string]Entity
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (map[string]Entity, error)); ok {
+		return rf(root)
+	}
+	if rf, ok := ret.Get(0).(func(string) map[string]Entity); ok {
+		r0 = rf(root)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]Entity)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(root)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockEntity_CrawlDirectoriesParallel_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CrawlDirectoriesParallel'
+type MockEntity_CrawlDirectoriesParallel_Call struct {
+	*mock.Call
+}
+
+// CrawlDirectoriesParallel is a helper method to define mock.On call
+//   - root string
+func (_e *MockEntity_Expecter) CrawlDirectoriesParallel(root interface{}) *MockEntity_CrawlDirectoriesParallel_Call {
+	return &MockEntity_CrawlDirectoriesParallel_Call{Call: _e.mock.On("CrawlDirectoriesParallel", root)}
+}
+
+func (_c *MockEntity_CrawlDirectoriesParallel_Call) Run(run func(root string)) *MockEntity_CrawlDirectoriesParallel_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntity_CrawlDirectoriesParallel_Call) Return(_a0 map[string]Entity, _a1 error) *MockEntity_CrawlDirectoriesParallel_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockEntity_CrawlDirectoriesParallel_Call) RunAndReturn(run func(string) (map[string]Entity, error)) *MockEntity_CrawlDirectoriesParallel_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindEntityDir provides a mock function with given fields: paths, entityVals
 func (_m *MockEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	ret := _m.Called(paths, entityVals)
@@ -167,6 +225,65 @@ func (_c *MockEntity_GeneratePseudoVersionPattern_Call) Return(_a0 string) *Mock
 }
 
 func (_c *MockEntity_GeneratePseudoVersionPattern_Call) RunAndReturn(run func(string, string) string) *MockEntity_GeneratePseudoVersionPattern_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Read provides a mock function with given fields: path, collectionName
+func (_m *MockEntity) Read(path string, collectionName string) (map[string]interface{}, error) {
+	ret := _m.Called(path, collectionName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Read")
+	}
+
+	var r0 map[string]interface{}
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (map[string]interface{}, error)); ok {
+		return rf(path, collectionName)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) map[string]interface{}); ok {
+		r0 = rf(path, collectionName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]interface{})
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(path, collectionName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockEntity_Read_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Read'
+type MockEntity_Read_Call struct {
+	*mock.Call
+}
+
+// Read is a helper method to define mock.On call
+//   - path string
+//   - collectionName string
+func (_e *MockEntity_Expecter) Read(path interface{}, collectionName interface{}) *MockEntity_Read_Call {
+	return &MockEntity_Read_Call{Call: _e.mock.On("Read", path, collectionName)}
+}
+
+func (_c *MockEntity_Read_Call) Run(run func(path string, collectionName string)) *MockEntity_Read_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntity_Read_Call) Return(_a0 map[string]interface{}, _a1 error) *MockEntity_Read_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockEntity_Read_Call) RunAndReturn(run func(string, string) (map[string]interface{}, error)) *MockEntity_Read_Call {
 	_c.Call.Return(run)
 	return _c
 }

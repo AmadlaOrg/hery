@@ -21,6 +21,13 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityCmdUtil"
           inpackage: True
+  github.com/AmadlaOrg/hery/entity/schema:
+    interfaces:
+      ISchema:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockEntitySchema"
+          inpackage: True
   github.com/AmadlaOrg/hery/entity/validation:
     interfaces:
       IValidation:
@@ -55,20 +62,6 @@ packages:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockUtilGitRemote"
-          inpackage: True
-  github.com/AmadlaOrg/hery/heryext/schema:
-    interfaces:
-      Schema:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockHeryExtSchema"
-          inpackage: True
-  github.com/AmadlaOrg/hery/heryext:
-    interfaces:
-      IHeryExt:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockHeryExt"
           inpackage: True
   github.com/AmadlaOrg/hery/storage:
     interfaces:

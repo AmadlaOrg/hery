@@ -22,12 +22,12 @@ func (_m *MockEntityBuild) EXPECT() *MockEntityBuild_Expecter {
 	return &MockEntityBuild_Expecter{mock: &_m.Mock}
 }
 
-// MetaFromRemote provides a mock function with given fields: paths, entityUri
-func (_m *MockEntityBuild) MetaFromRemote(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
+// Meta provides a mock function with given fields: paths, entityUri
+func (_m *MockEntityBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
 	ret := _m.Called(paths, entityUri)
 
 	if len(ret) == 0 {
-		panic("no return value specified for MetaFromRemote")
+		panic("no return value specified for Meta")
 	}
 
 	var r0 entity.Entity
@@ -50,38 +50,143 @@ func (_m *MockEntityBuild) MetaFromRemote(paths storage.AbsPaths, entityUri stri
 	return r0, r1
 }
 
-// MockEntityBuild_MetaFromRemote_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MetaFromRemote'
-type MockEntityBuild_MetaFromRemote_Call struct {
+// MockEntityBuild_Meta_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Meta'
+type MockEntityBuild_Meta_Call struct {
 	*mock.Call
 }
 
-// MetaFromRemote is a helper method to define mock.On call
+// Meta is a helper method to define mock.On call
 //   - paths storage.AbsPaths
 //   - entityUri string
-func (_e *MockEntityBuild_Expecter) MetaFromRemote(paths interface{}, entityUri interface{}) *MockEntityBuild_MetaFromRemote_Call {
-	return &MockEntityBuild_MetaFromRemote_Call{Call: _e.mock.On("MetaFromRemote", paths, entityUri)}
+func (_e *MockEntityBuild_Expecter) Meta(paths interface{}, entityUri interface{}) *MockEntityBuild_Meta_Call {
+	return &MockEntityBuild_Meta_Call{Call: _e.mock.On("Meta", paths, entityUri)}
 }
 
-func (_c *MockEntityBuild_MetaFromRemote_Call) Run(run func(paths storage.AbsPaths, entityUri string)) *MockEntityBuild_MetaFromRemote_Call {
+func (_c *MockEntityBuild_Meta_Call) Run(run func(paths storage.AbsPaths, entityUri string)) *MockEntityBuild_Meta_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(storage.AbsPaths), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *MockEntityBuild_MetaFromRemote_Call) Return(_a0 entity.Entity, _a1 error) *MockEntityBuild_MetaFromRemote_Call {
+func (_c *MockEntityBuild_Meta_Call) Return(_a0 entity.Entity, _a1 error) *MockEntityBuild_Meta_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockEntityBuild_MetaFromRemote_Call) RunAndReturn(run func(storage.AbsPaths, string) (entity.Entity, error)) *MockEntityBuild_MetaFromRemote_Call {
+func (_c *MockEntityBuild_Meta_Call) RunAndReturn(run func(storage.AbsPaths, string) (entity.Entity, error)) *MockEntityBuild_Meta_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// metaFromRemoteWithVersion provides a mock function with given fields: entityUri
-func (_m *MockEntityBuild) metaFromRemoteWithVersion(entityUri string) (entity.Entity, error) {
-	ret := _m.Called(entityUri)
+// constructOrigin provides a mock function with given fields: entityUri, name, version
+func (_m *MockEntityBuild) constructOrigin(entityUri string, name string, version string) string {
+	ret := _m.Called(entityUri, name, version)
+
+	if len(ret) == 0 {
+		panic("no return value specified for constructOrigin")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string, string) string); ok {
+		r0 = rf(entityUri, name, version)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// MockEntityBuild_constructOrigin_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'constructOrigin'
+type MockEntityBuild_constructOrigin_Call struct {
+	*mock.Call
+}
+
+// constructOrigin is a helper method to define mock.On call
+//   - entityUri string
+//   - name string
+//   - version string
+func (_e *MockEntityBuild_Expecter) constructOrigin(entityUri interface{}, name interface{}, version interface{}) *MockEntityBuild_constructOrigin_Call {
+	return &MockEntityBuild_constructOrigin_Call{Call: _e.mock.On("constructOrigin", entityUri, name, version)}
+}
+
+func (_c *MockEntityBuild_constructOrigin_Call) Run(run func(entityUri string, name string, version string)) *MockEntityBuild_constructOrigin_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntityBuild_constructOrigin_Call) Return(_a0 string) *MockEntityBuild_constructOrigin_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockEntityBuild_constructOrigin_Call) RunAndReturn(run func(string, string, string) string) *MockEntityBuild_constructOrigin_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// metaFromLocalWithVersion provides a mock function with given fields: entityUri, entityVersion
+func (_m *MockEntityBuild) metaFromLocalWithVersion(entityUri string, entityVersion string) (entity.Entity, error) {
+	ret := _m.Called(entityUri, entityVersion)
+
+	if len(ret) == 0 {
+		panic("no return value specified for metaFromLocalWithVersion")
+	}
+
+	var r0 entity.Entity
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (entity.Entity, error)); ok {
+		return rf(entityUri, entityVersion)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) entity.Entity); ok {
+		r0 = rf(entityUri, entityVersion)
+	} else {
+		r0 = ret.Get(0).(entity.Entity)
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(entityUri, entityVersion)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockEntityBuild_metaFromLocalWithVersion_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'metaFromLocalWithVersion'
+type MockEntityBuild_metaFromLocalWithVersion_Call struct {
+	*mock.Call
+}
+
+// metaFromLocalWithVersion is a helper method to define mock.On call
+//   - entityUri string
+//   - entityVersion string
+func (_e *MockEntityBuild_Expecter) metaFromLocalWithVersion(entityUri interface{}, entityVersion interface{}) *MockEntityBuild_metaFromLocalWithVersion_Call {
+	return &MockEntityBuild_metaFromLocalWithVersion_Call{Call: _e.mock.On("metaFromLocalWithVersion", entityUri, entityVersion)}
+}
+
+func (_c *MockEntityBuild_metaFromLocalWithVersion_Call) Run(run func(entityUri string, entityVersion string)) *MockEntityBuild_metaFromLocalWithVersion_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntityBuild_metaFromLocalWithVersion_Call) Return(_a0 entity.Entity, _a1 error) *MockEntityBuild_metaFromLocalWithVersion_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockEntityBuild_metaFromLocalWithVersion_Call) RunAndReturn(run func(string, string) (entity.Entity, error)) *MockEntityBuild_metaFromLocalWithVersion_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// metaFromRemoteWithVersion provides a mock function with given fields: entityUri, entityVersion
+func (_m *MockEntityBuild) metaFromRemoteWithVersion(entityUri string, entityVersion string) (entity.Entity, error) {
+	ret := _m.Called(entityUri, entityVersion)
 
 	if len(ret) == 0 {
 		panic("no return value specified for metaFromRemoteWithVersion")
@@ -89,17 +194,17 @@ func (_m *MockEntityBuild) metaFromRemoteWithVersion(entityUri string) (entity.E
 
 	var r0 entity.Entity
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (entity.Entity, error)); ok {
-		return rf(entityUri)
+	if rf, ok := ret.Get(0).(func(string, string) (entity.Entity, error)); ok {
+		return rf(entityUri, entityVersion)
 	}
-	if rf, ok := ret.Get(0).(func(string) entity.Entity); ok {
-		r0 = rf(entityUri)
+	if rf, ok := ret.Get(0).(func(string, string) entity.Entity); ok {
+		r0 = rf(entityUri, entityVersion)
 	} else {
 		r0 = ret.Get(0).(entity.Entity)
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(entityUri)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(entityUri, entityVersion)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -114,13 +219,14 @@ type MockEntityBuild_metaFromRemoteWithVersion_Call struct {
 
 // metaFromRemoteWithVersion is a helper method to define mock.On call
 //   - entityUri string
-func (_e *MockEntityBuild_Expecter) metaFromRemoteWithVersion(entityUri interface{}) *MockEntityBuild_metaFromRemoteWithVersion_Call {
-	return &MockEntityBuild_metaFromRemoteWithVersion_Call{Call: _e.mock.On("metaFromRemoteWithVersion", entityUri)}
+//   - entityVersion string
+func (_e *MockEntityBuild_Expecter) metaFromRemoteWithVersion(entityUri interface{}, entityVersion interface{}) *MockEntityBuild_metaFromRemoteWithVersion_Call {
+	return &MockEntityBuild_metaFromRemoteWithVersion_Call{Call: _e.mock.On("metaFromRemoteWithVersion", entityUri, entityVersion)}
 }
 
-func (_c *MockEntityBuild_metaFromRemoteWithVersion_Call) Run(run func(entityUri string)) *MockEntityBuild_metaFromRemoteWithVersion_Call {
+func (_c *MockEntityBuild_metaFromRemoteWithVersion_Call) Run(run func(entityUri string, entityVersion string)) *MockEntityBuild_metaFromRemoteWithVersion_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(string), args[1].(string))
 	})
 	return _c
 }
@@ -130,7 +236,7 @@ func (_c *MockEntityBuild_metaFromRemoteWithVersion_Call) Return(_a0 entity.Enti
 	return _c
 }
 
-func (_c *MockEntityBuild_metaFromRemoteWithVersion_Call) RunAndReturn(run func(string) (entity.Entity, error)) *MockEntityBuild_metaFromRemoteWithVersion_Call {
+func (_c *MockEntityBuild_metaFromRemoteWithVersion_Call) RunAndReturn(run func(string, string) (entity.Entity, error)) *MockEntityBuild_metaFromRemoteWithVersion_Call {
 	_c.Call.Return(run)
 	return _c
 }

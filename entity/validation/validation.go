@@ -3,9 +3,9 @@ package validation
 import (
 	"encoding/json"
 	"fmt"
+	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
-	schemaPkg "github.com/AmadlaOrg/hery/heryext/schema"
 	"github.com/AmadlaOrg/hery/util/file"
 	"github.com/santhosh-tekuri/jsonschema"
 	"gopkg.in/yaml.v3"

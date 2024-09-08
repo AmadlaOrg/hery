@@ -3,7 +3,6 @@ package compose
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
-	"github.com/AmadlaOrg/hery/heryext"
 	"github.com/AmadlaOrg/hery/storage"
 	utilObjectPkg "github.com/AmadlaOrg/hery/util/object"
 	"gopkg.in/yaml.v3"
@@ -24,7 +23,7 @@ type IComposer interface {
 // SComposer struct implements the EntityComposer interface.
 type SComposer struct {
 	Storage storage.IStorage
-	HeryExt heryext.IHeryExt
+	Entity  entity.IEntity
 }
 
 // ComposeEntity gathers as many details about an Entity as possible and composes it.
@@ -116,8 +115,8 @@ func (s *SComposer) findEntityDirParallel(root, name, version string) (string, e
 							mu.Lock()
 							matchedDir = path
 							// Check if s.HeryExt is nil to avoid nil pointer dereference
-							if s.HeryExt != nil {
-								readYaml, err := s.HeryExt.Read(path, "amadla")
+							if s.Entity != nil {
+								readYaml, err := s.Entity.Read(path, "amadla")
 								if err != nil {
 									mu.Unlock()
 									return
