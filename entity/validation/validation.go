@@ -17,7 +17,7 @@ import (
 
 // IValidation
 type IValidation interface {
-	Entity(collectionName, entityPath string) error
+	Entity(entityPath, collectionName string, heryContent map[string]any) error
 	EntityUri(entityUrl string) bool
 }
 
@@ -50,7 +50,7 @@ func Schema() *jsonschema.Schema {
 // TODO: Make sure that YAML standard is valid first
 // TODO: Since JSON-Schema cannot merge by-it-self the schemas you will need to add code for that
 // TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
-func (s *SValidation) Entity(collectionName, entityPath string) error {
+func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[string]any) error {
 	schemaPath := filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), "schema.json")
 	schema, err := s.Schema.Load(schemaPath)
 	if err != nil {

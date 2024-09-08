@@ -1,84 +1,64 @@
 package heryext
 
 import (
+	"github.com/stretchr/testify/assert"
+	"path/filepath"
 	"testing"
 )
 
 func TestRead(t *testing.T) {
-	//heryExtService := NewHeryExtService()
-	//tmpDir := t.TempDir()
+	fixturePath := filepath.Join("..", "test", "fixture")
+	validEntityAbsPath, err := filepath.Abs(filepath.Join(fixturePath, "/valid-entity"))
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	/*t.Run("read .yml file", func(t *testing.T) {
-		filePath := filepath.Join(tmpDir, "config.yml")
-		content := []byte(`key: value`)
-		err := os.WriteFile(filePath, content, 0644)
-		assert.NoError(t, err)
+	heryExtService := NewHeryExtService()
+	tests := []struct {
+		name                string
+		inputPath           string
+		inputCollectionName string
+		expected            map[string]any
+		hasError            bool
+	}{
+		{
+			name:                "Valid",
+			inputPath:           validEntityAbsPath,
+			inputCollectionName: "amadla",
+			expected: map[string]any{
+				"_entity":     "github.com/AmadlaOrg/Entity@latest",
+				"name":        "Entity",
+				"description": "The root Entity definition.",
+				"category":    "General",
+				"tags": []any{
+					"main",
+					"master",
+				},
+			},
+			hasError: false,
+		},
+		//
+		// Error
+		//
+		{
+			name:                "Error: file not found",
+			inputPath:           fixturePath,
+			inputCollectionName: "amadla",
+			expected:            nil,
+			hasError:            true,
+		},
+	}
 
-		data, err := heryExtService.Read(tmpDir, "config")
-		assert.NoError(t, err)
-		assert.Equal(t, map[string]interface{}{"key": "value"}, data)
-	})
-
-	t.Run("read .yaml file", func(t *testing.T) {
-		// Ensure no .yml file exists
-		ymlFilePath := filepath.Join(tmpDir, "config.yml")
-		_ = os.Remove(ymlFilePath)
-
-		filePath := filepath.Join(tmpDir, "config.yaml")
-		content := []byte(`key: value`)
-		err := os.WriteFile(filePath, content, 0644)
-		assert.NoError(t, err)
-
-		data, err := heryExtService.Read(tmpDir, "config")
-		assert.NoError(t, err)
-		assert.Equal(t, map[string]interface{}{"key": "value"}, data)
-	})
-
-	t.Run("both .yml and .yaml files exist", func(t *testing.T) {
-		ymlFilePath := filepath.Join(tmpDir, "config.yml")
-		yamlFilePath := filepath.Join(tmpDir, "config.yaml")
-		content := []byte(`key: value`)
-		err := os.WriteFile(ymlFilePath, content, 0644)
-		assert.NoError(t, err)
-		err = os.WriteFile(yamlFilePath, content, 0644)
-		assert.NoError(t, err)
-
-		_, err = heryExtService.Read(tmpDir, "config")
-		assert.Error(t, err)
-		assert.Equal(t, "both "+ymlFilePath+", "+yamlFilePath+" exists", err.Error())
-	})
-
-	t.Run("file does not exist", func(t *testing.T) {
-		_, err := heryExtService.Read(tmpDir, "nonexistent")
-		assert.Error(t, err)
-		assert.Equal(t, filepath.Join(tmpDir, "nonexistent.yml")+" does not exist", err.Error())
-	})*/
-
-	/*t.Run("error reading the file", func(t *testing.T) {
-		// Create a file with no read permissions
-		filePath := filepath.Join(tmpDir, "config_no_read.yml")
-		content := []byte(`key: value`)
-		err := os.WriteFile(filePath, content, 0000)
-		assert.NoError(t, err)
-		defer func(name string, mode os.FileMode) {
-			err := os.Chmod(name, mode)
-			if err != nil {
-				assert.FailNow(t, err.Error())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			heryContent, err := heryExtService.Read(tt.inputPath, tt.inputCollectionName)
+			if tt.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
-		}(filePath, 0644) // Ensure the file can be removed after the test
 
-		_, err = heryExtService.Read(tmpDir, "config_no_read")
-		assert.Error(t, err)
-	})
-
-	t.Run("error unmarshaling the content", func(t *testing.T) {
-		// Create a file with invalid YAML content
-		filePath := filepath.Join(tmpDir, "invalid_config.yml")
-		content := []byte(`: key value :`)
-		err := os.WriteFile(filePath, content, 0644)
-		assert.NoError(t, err)
-
-		_, err = heryExtService.Read(tmpDir, "invalid_config")
-		assert.Error(t, err)
-	})*/
+			assert.Equal(t, tt.expected, heryContent)
+		})
+	}
 }

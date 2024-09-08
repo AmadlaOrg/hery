@@ -9,27 +9,21 @@ import (
 )
 
 type IHeryExt interface {
-	Read(path string, fileName string) (map[string]interface{}, error)
+	Read(path, collectionName string) (map[string]any, error)
 }
 
 type SHeryExt struct{}
 
 // Read makes it easy to read any yaml file with any of the two extensions: yml or yaml
-func (s *SHeryExt) Read(path string, fileName string) (map[string]interface{}, error) {
-	fullFileNameYaml := fmt.Sprintf("%s.hery", fileName)
+func (s *SHeryExt) Read(path, collectionName string) (map[string]any, error) {
+	heryFileName := fmt.Sprintf("%s.hery", collectionName)
+	heryPath := filepath.Join(path, heryFileName)
 
-	var fullPath string
-	YamlPath := filepath.Join(path, fullFileNameYaml)
-
-	YamlPathExists := file.Exists(YamlPath)
-
-	if !YamlPathExists {
-		return nil, fmt.Errorf("%s does not exist", YamlPath)
-	} else {
-		fullPath = YamlPath
+	if !file.Exists(heryPath) {
+		return nil, fmt.Errorf("%s does not exist", heryPath)
 	}
 
-	content, err := os.ReadFile(fullPath)
+	content, err := os.ReadFile(heryPath)
 	if err != nil {
 		return nil, err
 	}

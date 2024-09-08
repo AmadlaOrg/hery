@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "https://raw.githubusercontent.com/AmadlaOrg/Entity/master/.amadla/schema.json",
+  "title": "Amadla Entity Configuration",
+  "description": "Defines the foundational properties of an Entity configuration file.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]*$",
+      "description": "Define the Amadla entity name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Define the Amadla entity description."
+    },
+    "category": {
+      "type": "string",
+      "description": "Using a term to categorize the entity."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Used for grouping the entities.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "description": "Git repository HTTPS link to the plugin.",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "description": "The URL must be a valid URI."
+      }
+    }
+  }
+}
