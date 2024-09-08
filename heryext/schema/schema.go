@@ -73,13 +73,44 @@ func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
 
 // mergeSchemas merges two schemas (base and main) into one
 func (s *SSchema) mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any {
-	// For simplicity, this example assumes both schemas are maps and merges them at the top level.
-	// You may need to handle deeper merging depending on your schema structure.
+	// 1. Loop all the top properties in the entity.schema.json
+	for key, value := range baseSchema {
 
-	// Start with the base schema and add/overwrite properties from the main schema
-	for key, value := range mainSchema {
-		baseSchema[key] = value
+		// 2. If the property is properties then merge the entity.schema.json base properties in the other one
+		if key == "properties" {
+
+			// 2.1: Ensure the "properties" field exists in the main schema
+			if _, exists := mainSchema[key]; !exists {
+				mainSchema[key] = map[string]any{}
+			}
+
+			// 2.2: Merge properties from baseSchema into mainSchema
+			baseProperties := value.(map[string]any)
+			mainProperties := mainSchema[key].(map[string]any)
+			for propertyName, propertyValue := range baseProperties {
+				mainProperties[propertyName] = propertyValue
+			}
+			mainSchema[key] = mainProperties
+
+			// 3. Make sure that the base require properties are in the merge version
+		} else if key == "required" {
+
+			// 3.1: Add `require` if it is not in the top properties
+			if _, exists := mainSchema[key]; !exists {
+				mainSchema[key] = []any{}
+			}
+
+			// 3.2: Merge required fields
+			baseRequired := value.([]any)
+			mainRequired := mainSchema[key].([]any)
+			mainRequired = append(mainRequired, baseRequired...)
+			mainSchema[key] = mainRequired
+
+			// 4. `additionalProperties` needs to always be set as the same as the base one
+		} else if key == "additionalProperties" {
+			mainSchema[key] = value
+		}
 	}
 
-	return baseSchema
+	return mainSchema
 }

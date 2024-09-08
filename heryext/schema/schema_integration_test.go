@@ -7,6 +7,12 @@ import (
 )
 
 func TestLoadSchemaFile(t *testing.T) {
+	fixturePath := filepath.Join("..", "..", "test", "fixture")
+	validEntityAbsPath, err := filepath.Abs(filepath.Join(fixturePath, "valid-entity", ".amadla", "schema.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	baseSchemaAbsPath, err := filepath.Abs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -55,6 +61,10 @@ func TestLoadSchemaFile(t *testing.T) {
 				},
 			},
 			hasError: false,
+		},
+		{
+			name:            "",
+			inputSchemaPath: validEntityAbsPath,
 		},
 	}
 
@@ -114,8 +124,101 @@ func TestMergeSchemas(t *testing.T) {
 					},
 				},
 			},
-			inputMainSchema: map[string]any{},
-			expected:        map[string]any{},
+			inputMainSchema: map[string]any{
+				"$schema":     "https://json-schema.org/draft/2020-12/schema",
+				"id":          "https://raw.githubusercontent.com/AmadlaOrg/Entity/master/.amadla/schema.json",
+				"title":       "Amadla Entity Configuration",
+				"description": "Defines the foundational properties of an Entity configuration file.",
+				"type":        "object",
+				"properties": map[string]any{
+					"name": map[string]any{
+						"type":        "string",
+						"pattern":     "^[a-zA-Z0-9_-]*$",
+						"description": "Define the Amadla entity name.",
+					},
+					"description": map[string]any{
+						"type":        "string",
+						"description": "Define the Amadla entity description.",
+					},
+					"category": map[string]any{
+						"type":        "string",
+						"description": "Using a term to categorize the entity.",
+					},
+					"tags": map[string]any{
+						"type":        "array",
+						"description": "Used for grouping the entities.",
+						"items": map[string]any{
+							"type": "string",
+						},
+					},
+					"plugins": map[string]any{
+						"type":        "array",
+						"description": "Git repository HTTPS link to the plugin.",
+						"items": map[string]any{
+							"type":        "string",
+							"format":      "uri",
+							"description": "The URL must be a valid URI.",
+						},
+					},
+				},
+			},
+			expected: map[string]any{
+				"$schema":     "https://json-schema.org/draft/2020-12/schema",
+				"id":          "https://raw.githubusercontent.com/AmadlaOrg/Entity/master/.amadla/schema.json",
+				"title":       "Amadla Entity Configuration",
+				"description": "Defines the foundational properties of an Entity configuration file.",
+				"type":        "object",
+				"properties": map[string]any{
+					"name": map[string]any{
+						"type":        "string",
+						"pattern":     "^[a-zA-Z0-9_-]*$",
+						"description": "Define the Amadla entity name.",
+					},
+					"description": map[string]any{
+						"type":        "string",
+						"description": "Define the Amadla entity description.",
+					},
+					"category": map[string]any{
+						"type":        "string",
+						"description": "Using a term to categorize the entity.",
+					},
+					"tags": map[string]any{
+						"type":        "array",
+						"description": "Used for grouping the entities.",
+						"items": map[string]any{
+							"type": "string",
+						},
+					},
+					"plugins": map[string]any{
+						"type":        "array",
+						"description": "Git repository HTTPS link to the plugin.",
+						"items": map[string]any{
+							"type":        "string",
+							"format":      "uri",
+							"description": "The URL must be a valid URI.",
+						},
+					},
+					"_entity": map[string]any{
+						"type":        "string",
+						"format":      "uri",
+						"description": "The URI that uniquely identifies the entity within the HERY system.",
+					},
+					"_id": map[string]any{
+						"type":        "string",
+						"pattern":     "^[a-zA-Z0-9_\\-:/]+$",
+						"description": "A unique identifier for an entity dataset.",
+					},
+					"_self": map[string]any{
+						"type":                 "object",
+						"description":          "Used to reference the current entity inside another entity, so that there is no need to use _entity to define the entity block. In other words, it is a shorthand for _entity to reference the current entity.",
+						"additionalProperties": true,
+					},
+				},
+				"additionalProperties": false,
+				"required": []any{
+					"_entity",
+				},
+			},
 		},
 	}
 
