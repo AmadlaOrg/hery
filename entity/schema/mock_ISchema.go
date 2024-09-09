@@ -3,7 +3,7 @@
 package schema
 
 import (
-	jsonschema "github.com/santhosh-tekuri/jsonschema"
+	jsonschema "github.com/santhosh-tekuri/jsonschema/v6"
 	mock "github.com/stretchr/testify/mock"
 )
 

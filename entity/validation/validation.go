@@ -7,7 +7,7 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/util/file"
-	"github.com/santhosh-tekuri/jsonschema"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -85,7 +85,7 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 		return fmt.Errorf("error unmarshalling JSON content: %w", err)
 	}
 
-	if err := schema.ValidateInterface(jsonDataInterface); err != nil {
+	if err := schema.Validate(jsonDataInterface); err != nil {
 		return fmt.Errorf("schema validation failed: %w", err)
 	}
 
