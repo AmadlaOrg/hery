@@ -27,7 +27,7 @@ func Test_Integration_Get(t *testing.T) {
 
 	// Clean up after test
 	defer func(path string) {
-		err := os.RemoveAll(path)
+		err = os.RemoveAll(path)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -38,7 +38,7 @@ func Test_Integration_Get(t *testing.T) {
 		Catalog:    filepath.Join(tempDir, ".hery", "collection"),
 		Collection: filepath.Join(tempDir, ".hery", "collection", "amadla"),
 		Entities:   filepath.Join(tempDir, ".hery", "collection", "amadla", "entity"),
-		Cache:      filepath.Join(tempDir, ".hery", "collection", "amadla", "test.cache"),
+		Cache:      filepath.Join(tempDir, ".hery", "collection", "amadla", "amadla.cache"),
 	}
 
 	tests := []struct {
@@ -109,7 +109,7 @@ func Test_Integration_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			entityBuild := NewGetService()
-			err := entityBuild.Get(test.collectionName, &test.paths, test.entityURIs)
+			err = entityBuild.Get(test.collectionName, &test.paths, test.entityURIs)
 			if test.hasError {
 				assert.Error(t, err)
 			} else {
