@@ -18,8 +18,7 @@ type ISchema interface {
 type SSchema struct{}
 
 var (
-	osOpen      = os.Open
-	jsonMarshal = json.Marshal
+	osOpen = os.Open
 )
 
 // Load loads the JSON schema from a file and merges it with a base schema
