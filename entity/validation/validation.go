@@ -6,6 +6,7 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -38,6 +39,16 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 	// 2. Validate the hery file content with the loaded schema
 	if err = schema.Validate(heryContent); err != nil {
 		return fmt.Errorf("schema validation failed: %w", err)
+	}
+
+	// TODO: Add tests
+	if schema.ID == "" {
+		return fmt.Errorf("schema validation failed: no ID found in schema")
+	}
+
+	idUrnRegex := regexp.MustCompile(schemaPkg.EntityJsonSchemaIdURN)
+	if !idUrnRegex.MatchString(schema.ID) {
+		return fmt.Errorf("schema validation failed: invalid ID found in schema")
 	}
 
 	return nil
