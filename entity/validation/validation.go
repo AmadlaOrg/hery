@@ -41,6 +41,7 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 		return fmt.Errorf("schema validation failed: %w", err)
 	}
 
+	// TODO: Put it in a function (it might be used in other context)
 	// TODO: Add tests
 	if schema.ID == "" {
 		return fmt.Errorf("schema validation failed: no ID found in schema")
@@ -50,6 +51,11 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 	if !idUrnRegex.MatchString(schema.ID) {
 		return fmt.Errorf("schema validation failed: invalid ID found in schema")
 	}
+
+	// TODO: Check for :hery: as first after urn:
+	// TODO: Check for collection name
+	// TODO: Check for Entity name
+	// TODO: Check for version format and if it exist (exist less important)
 
 	return nil
 }
