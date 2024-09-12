@@ -3,10 +3,10 @@ package validation
 import (
 	"fmt"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
+	schemaValidationPkg "github.com/AmadlaOrg/hery/entity/schema/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"unicode"
 )
@@ -22,6 +22,7 @@ type SValidation struct {
 	Version           version.IVersion
 	VersionValidation versionValidationPkg.IValidation
 	Schema            schemaPkg.ISchema
+	SchemaValidation  schemaValidationPkg.IValidation
 }
 
 // Entity validates the YAML content against the JSON schema
@@ -41,21 +42,11 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 		return fmt.Errorf("schema validation failed: %w", err)
 	}
 
-	// TODO: Put it in a function (it might be used in other context)
-	// TODO: Add tests
-	if schema.ID == "" {
-		return fmt.Errorf("schema validation failed: no ID found in schema")
+	// 3. Validate JSON-Schema entity `id`
+	err = s.SchemaValidation.Id(schema.ID, collectionName, heryContent)
+	if err != nil {
+		return err
 	}
-
-	idUrnRegex := regexp.MustCompile(schemaPkg.EntityJsonSchemaIdURN)
-	if !idUrnRegex.MatchString(schema.ID) {
-		return fmt.Errorf("schema validation failed: invalid ID found in schema")
-	}
-
-	// TODO: Check for :hery: as first after urn:
-	// TODO: Check for collection name
-	// TODO: Check for Entity name
-	// TODO: Check for version format and if it exist (exist less important)
 
 	return nil
 }
