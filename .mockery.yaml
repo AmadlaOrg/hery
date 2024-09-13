@@ -28,6 +28,13 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntitySchema"
           inpackage: True
+  github.com/AmadlaOrg/hery/entity/schema/validation:
+    interfaces:
+      IValidation:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockEntitySchemaValidation"
+          inpackage: True
   github.com/AmadlaOrg/hery/entity/validation:
     interfaces:
       IValidation:

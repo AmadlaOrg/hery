@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	schemaValidationPkg "github.com/AmadlaOrg/hery/entity/schema/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -13,7 +14,7 @@ import (
 
 // IValidation
 type IValidation interface {
-	Entity(entityPath, collectionName string, heryContent map[string]any) error
+	Entity(entityPath, collectionName string, heryContent map[string]any, entityMeta entity.Entity) error
 	EntityUri(entityUrl string) bool
 }
 
@@ -29,9 +30,10 @@ type SValidation struct {
 // TODO: Make sure that YAML standard is valid first
 // TODO: Since JSON-Schema cannot merge by-it-self the schemas you will need to add code for that
 // TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
-func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[string]any) error {
+func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[string]any, entityMeta entity.Entity) error {
 	// 1. Get the schema of the entity and load the jsonschema
-	schemaPath := filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), "schema.json")
+	entityConfigDir := fmt.Sprintf(".%s", collectionName)
+	schemaPath := filepath.Join(entityPath, entityConfigDir, schemaPkg.EntityJsonSchemaFileName)
 	schema, err := s.Schema.Load(schemaPath)
 	if err != nil {
 		return fmt.Errorf("error loading JSON schema: %w", err)
@@ -43,7 +45,7 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 	}
 
 	// 3. Validate JSON-Schema entity `id`
-	err = s.SchemaValidation.Id(schema.ID, collectionName, heryContent)
+	err = s.SchemaValidation.Id(schema.ID, collectionName, entityMeta)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	"regexp"
 	"strings"
@@ -9,14 +10,14 @@ import (
 
 // IValidation
 type IValidation interface {
-	Id(id, collectionName string, heryContent map[string]any) error
+	Id(id, collectionName string, entityMeta entity.Entity) error
 }
 
 // SValidation
 type SValidation struct{}
 
 // Id validation of JSON-Schema for an entity
-func (s *SValidation) Id(id, collectionName string, heryContent map[string]any) error {
+func (s *SValidation) Id(id, collectionName string, entityMeta entity.Entity) error {
 	if id == "" {
 		return fmt.Errorf("schema validation failed: no `id` found in schema")
 	}
@@ -31,8 +32,10 @@ func (s *SValidation) Id(id, collectionName string, heryContent map[string]any) 
 		return fmt.Errorf("schema validation failed: invalid `urn` found in schema")
 	}
 
-	// TODO: Check for Entity name
-	// TODO: Check for version format and if it exist (exist less important)
+	suffix := fmt.Sprintf(":%s:%s", entityMeta.Name, entityMeta.Version)
+	if strings.HasSuffix(id, suffix) {
+		return fmt.Errorf("schema validation failed: invalid `urn` found in schema")
+	}
 
 	return nil
 }
