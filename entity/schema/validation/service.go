@@ -1,6 +1,10 @@
 package validation
 
-// NewEntitySchemaValidationService to set up the entity Schema service
+import schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
+
+// NewEntitySchemaValidationService to set up the entity Validation service
 func NewEntitySchemaValidationService() *SValidation {
-	return &SValidation{}
+	return &SValidation{
+		Schema: schemaPkg.NewEntitySchemaService(),
+	}
 }

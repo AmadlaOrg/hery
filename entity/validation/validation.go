@@ -45,7 +45,7 @@ func (s *SValidation) Entity(entityPath, collectionName string, heryContent map[
 	}
 
 	// 3. Validate JSON-Schema entity `id`
-	err = s.SchemaValidation.Id(schema.ID, collectionName, entityMeta)
+	err = s.SchemaValidation.Id(schema.ID, collectionName, entityMeta.Entity)
 	if err != nil {
 		return err
 	}

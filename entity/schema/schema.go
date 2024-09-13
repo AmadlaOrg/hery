@@ -7,10 +7,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ISchema interface {
 	Load(schemaPath string) (*jsonschema.Schema, error)
+	GenerateURNPrefix(collectionName string) string
+	GenerateURN(urnPrefix, entityUri string) string
 	loadSchemaFile(schemaPath string) (map[string]any, error)
 	mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any
 }
@@ -58,6 +61,18 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	}
 
 	return schema, nil
+}
+
+// GenerateURNPrefix returns the URN prefix for JSON-Schema `id`
+func (s *SSchema) GenerateURNPrefix(collectionName string) string {
+	return fmt.Sprintf("urn:hery:%s:", collectionName)
+}
+
+// GenerateURN returns the full URN for JSON-Schema `id`
+func (s *SSchema) GenerateURN(urnPrefix, entityUri string) string {
+	urlToUrn := strings.Replace(entityUri, "/", ":", 255)
+	heryUrnSuffix := strings.Replace(urlToUrn, "@", ":", 1)
+	return fmt.Sprintf("%s%s", urnPrefix, heryUrnSuffix)
 }
 
 // loadSchemaFile reads a JSON schema file and returns it as a map

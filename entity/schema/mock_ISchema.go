@@ -20,6 +20,99 @@ func (_m *MockEntitySchema) EXPECT() *MockEntitySchema_Expecter {
 	return &MockEntitySchema_Expecter{mock: &_m.Mock}
 }
 
+// GenerateURN provides a mock function with given fields: urnPrefix, entityUri
+func (_m *MockEntitySchema) GenerateURN(urnPrefix string, entityUri string) string {
+	ret := _m.Called(urnPrefix, entityUri)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateURN")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(urnPrefix, entityUri)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// MockEntitySchema_GenerateURN_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateURN'
+type MockEntitySchema_GenerateURN_Call struct {
+	*mock.Call
+}
+
+// GenerateURN is a helper method to define mock.On call
+//   - urnPrefix string
+//   - entityUri string
+func (_e *MockEntitySchema_Expecter) GenerateURN(urnPrefix interface{}, entityUri interface{}) *MockEntitySchema_GenerateURN_Call {
+	return &MockEntitySchema_GenerateURN_Call{Call: _e.mock.On("GenerateURN", urnPrefix, entityUri)}
+}
+
+func (_c *MockEntitySchema_GenerateURN_Call) Run(run func(urnPrefix string, entityUri string)) *MockEntitySchema_GenerateURN_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntitySchema_GenerateURN_Call) Return(_a0 string) *MockEntitySchema_GenerateURN_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockEntitySchema_GenerateURN_Call) RunAndReturn(run func(string, string) string) *MockEntitySchema_GenerateURN_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GenerateURNPrefix provides a mock function with given fields: collectionName
+func (_m *MockEntitySchema) GenerateURNPrefix(collectionName string) string {
+	ret := _m.Called(collectionName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateURNPrefix")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(collectionName)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// MockEntitySchema_GenerateURNPrefix_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateURNPrefix'
+type MockEntitySchema_GenerateURNPrefix_Call struct {
+	*mock.Call
+}
+
+// GenerateURNPrefix is a helper method to define mock.On call
+//   - collectionName string
+func (_e *MockEntitySchema_Expecter) GenerateURNPrefix(collectionName interface{}) *MockEntitySchema_GenerateURNPrefix_Call {
+	return &MockEntitySchema_GenerateURNPrefix_Call{Call: _e.mock.On("GenerateURNPrefix", collectionName)}
+}
+
+func (_c *MockEntitySchema_GenerateURNPrefix_Call) Run(run func(collectionName string)) *MockEntitySchema_GenerateURNPrefix_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntitySchema_GenerateURNPrefix_Call) Return(_a0 string) *MockEntitySchema_GenerateURNPrefix_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockEntitySchema_GenerateURNPrefix_Call) RunAndReturn(run func(string) string) *MockEntitySchema_GenerateURNPrefix_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Load provides a mock function with given fields: schemaPath
 func (_m *MockEntitySchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	ret := _m.Called(schemaPath)

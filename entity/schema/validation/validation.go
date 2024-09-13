@@ -2,7 +2,6 @@ package validation
 
 import (
 	"fmt"
-	"github.com/AmadlaOrg/hery/entity"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	"regexp"
 	"strings"
@@ -10,14 +9,16 @@ import (
 
 // IValidation
 type IValidation interface {
-	Id(id, collectionName string, entityMeta entity.Entity) error
+	Id(id, collectionName, entityUri string) error
 }
 
 // SValidation
-type SValidation struct{}
+type SValidation struct {
+	Schema schemaPkg.ISchema
+}
 
 // Id validation of JSON-Schema for an entity
-func (s *SValidation) Id(id, collectionName string, entityMeta entity.Entity) error {
+func (s *SValidation) Id(id, collectionName, entityUri string) error {
 	if id == "" {
 		return fmt.Errorf("schema validation failed: no `id` found in schema")
 	}
@@ -27,13 +28,12 @@ func (s *SValidation) Id(id, collectionName string, entityMeta entity.Entity) er
 		return fmt.Errorf("schema validation failed: invalid `id` found in schema")
 	}
 
-	prefix := fmt.Sprintf("urn:hery:%s:", collectionName)
+	prefix := s.Schema.GenerateURNPrefix(collectionName)
 	if strings.HasPrefix(id, prefix) {
 		return fmt.Errorf("schema validation failed: invalid `urn` found in schema")
 	}
 
-	suffix := fmt.Sprintf(":%s:%s", entityMeta.Name, entityMeta.Version)
-	if strings.HasSuffix(id, suffix) {
+	if s.Schema.GenerateURN(prefix, entityUri) != id {
 		return fmt.Errorf("schema validation failed: invalid `urn` found in schema")
 	}
 
