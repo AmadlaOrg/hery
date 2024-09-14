@@ -34,7 +34,7 @@ func (s *SValidation) Id(id, collectionName, entityUri string) error {
 
 	// 3. Validates that the prefix of the HERY URN is standard
 	prefix := s.Schema.GenerateURNPrefix(collectionName)
-	if strings.HasPrefix(id, prefix) {
+	if !strings.HasPrefix(id, prefix) {
 		return fmt.Errorf("schema validation failed: invalid `urn` prefix (`urn:hery:<collection name>:`)")
 	}
 
