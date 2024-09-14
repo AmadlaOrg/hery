@@ -23,7 +23,7 @@ func (s *SValidation) Id(id, collectionName, entityUri string) error {
 
 	// 1. Validates that the `id` is not empty
 	if id == "" {
-		return fmt.Errorf("schema validation failed: `id` is empty or not set")
+		return fmt.Errorf("schema validation failed: `id` is empty")
 	}
 
 	// 2. Validates that the format is good
@@ -40,7 +40,10 @@ func (s *SValidation) Id(id, collectionName, entityUri string) error {
 
 	// 4. Validates that the entire URN is valid
 	if s.Schema.GenerateURN(prefix, entityUri) != id {
-		return fmt.Errorf("schema validation failed: invalid `urn` since the other values are not the same as the `_entity` URI")
+		return fmt.Errorf(
+			"schema validation failed: invalid `urn` since the other values are not the same as the `_entity` URI: collection: %s and entity URI: %s",
+			collectionName,
+			entityUri)
 	}
 
 	return nil
