@@ -2,7 +2,7 @@ package cmd
 
 import (
 	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
-	"github.com/AmadlaOrg/hery/entity"
+	entityPkg "github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/cmd/util"
 	"github.com/AmadlaOrg/hery/entity/cmd/validation"
 	"github.com/AmadlaOrg/hery/entity/get"
@@ -50,7 +50,7 @@ var ValidateCmd = &cobra.Command{
 		} else if isValidateAll {
 			entityCmdUtilService := util.NewEntityCmdUtilService()
 			err := entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-				entityService := entity.NewEntityService()
+				entityService := entityPkg.NewEntityService()
 				entityList, err := entityService.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
 					log.Fatal(err)
@@ -66,7 +66,7 @@ var ValidateCmd = &cobra.Command{
 				entityValidation := entityValidation.NewEntityValidationService()
 
 				for _, entity := range entityList {
-					err := entityValidation.Entity(collectionName, entity.AbsPath, map[string]any{})
+					err := entityValidation.Entity(collectionName, entity.AbsPath, map[string]any{}, entityPkg.Entity{})
 					if err != nil {
 						log.Fatal(err)
 						return

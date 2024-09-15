@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Function to output error messages
+error() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+# Read from stdin to get information about refs being pushed
+while read local_ref local_sha remote_ref remote_sha
+do
+    # Check if the ref being pushed is a tag
+    if [[ "$remote_ref" == refs/tags/* ]]; then
+        tag_name="${remote_ref#refs/tags/}"
+
+        echo "Processing tag: $tag_name"
+
+        # Find all .hery files in the root directory
+        hery_files=($(find . -maxdepth 1 -type f -name "*.hery" -printf "%f\n"))
+
+        if [ ${#hery_files[@]} -eq 0 ]; then
+            error "No .hery files found in the root directory."
+        fi
+
+        for hery_file in "${hery_files[@]}"
+        do
+            base_name="${hery_file%.hery}"
+            hidden_dir=".$base_name"
+
+            echo "Checking for directory: $hidden_dir"
+
+            # Check if the hidden directory exists
+            if [ ! -d "$hidden_dir" ]; then
+                error "Directory '$hidden_dir' not found for file '$hery_file'."
+            fi
+
+            schema_file="$hidden_dir/schema.hery.json"
+
+            echo "Checking for schema file: $schema_file"
+
+            # Check if schema.hery.json exists
+            if [ ! -f "$schema_file" ]; then
+                error "File '$schema_file' not found."
+            fi
+
+            # Extract the 'id' property from the JSON schema
+            id_value=$(grep -oP '"id"\s*:\s*"\K[^"]+' "$schema_file")
+
+            if [ -z "$id_value" ]; then
+                error "The 'id' property is missing in '$schema_file'."
+            fi
+
+            # Check if 'id' starts with 'urn:hery:<name>:'
+            expected_prefix="urn:hery:$base_name:"
+            if [[ "$id_value" != $expected_prefix* ]]; then
+                error "The 'id' in '$schema_file' does not start with '$expected_prefix'. Found: '$id_value'"
+            fi
+
+            # Extract the suffix from the URN
+            urn_suffix="${id_value#$expected_prefix}"
+
+            # Check if the tag name matches the URN suffix
+            if [ "$tag_name" != "$urn_suffix" ]; then
+                error "Tag name '$tag_name' does not match the URN suffix '$urn_suffix' in '$schema_file'. Please ensure the tag version matches the URN suffix."
+            fi
+
+            echo "Tag '$tag_name' passed all checks for '$hery_file'."
+        done
+    fi
+done
+
+echo "All tags passed the checks."
+exit 0

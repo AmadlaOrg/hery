@@ -1,31 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/.schema/entity.schema.json",
+  "$id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/.schema/entity.schema.json",
   "title": "HERY basic configuration properties.",
   "description": "Defines the foundational HERY entity properties. This schema sets the foundational structure for entities in the HERY system, including reserved properties that are crucial for entity identification and referencing within the system.",
   "type": "object",
   "properties": {
     "_entity": {
+      "$ref": "#/$defs/_entity"
+    },
+    "_id": {
+      "$ref": "#/$defs/_id"
+    },
+    "_self": {
+      "$ref": "#/$defs/_self"
+    }
+  },
+  "required": [
+    "_entity"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "_entity": {
       "type": "string",
-      "format": "uri",
+      "format": "uri-reference",
       "description": "The URI that uniquely identifies the entity within the HERY system."
     },
     "_id": {
       "type": "string",
       "pattern": "^[a-zA-Z0-9_\\-:/]+$",
-      "description": "A unique identifier for an entity dataset."
+      "description": "A unique identifier for an entity dataset. Allowed characters include letters, numbers, underscores, hyphens, colons, and slashes."
     },
     "_self": {
       "type": "object",
       "description": "Used to reference the current entity inside another entity, so that there is no need to use _entity to define the entity block. In other words, it is a shorthand for _entity to reference the current entity.",
       "additionalProperties": true
     }
-  },
-  "required": ["_entity"],
-  "propertiesPattern": {
-    "^[^_].*$": {
-      "type": "any"
-    }
-  },
-  "additionalProperties": false
+  }
 }
