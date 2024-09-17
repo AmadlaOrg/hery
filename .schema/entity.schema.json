@@ -41,7 +41,6 @@
           "$ref": "#/$defs/_id"
         }
       },
-      "required": ["_entity"],
       "additionalProperties": false
     }
   }
