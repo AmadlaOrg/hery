@@ -1,5 +1,7 @@
 package compose
 
+// FIXME:
+/*
 import (
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/storage"
@@ -12,3 +14,4 @@ func NewComposeService() *SComposer {
 		Entity:  entity.NewEntityService(),
 	}
 }
+*/

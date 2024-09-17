@@ -66,7 +66,7 @@ var ValidateCmd = &cobra.Command{
 				entityValidation := entityValidation.NewEntityValidationService()
 
 				for _, entity := range entityList {
-					err := entityValidation.Entity(collectionName, entity.AbsPath, map[string]any{}, entityPkg.Entity{})
+					err := entityValidation.Entity(collectionName, entity.AbsPath, entity.Entity, map[string]any{})
 					if err != nil {
 						log.Fatal(err)
 						return

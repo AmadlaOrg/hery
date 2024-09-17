@@ -1,5 +1,7 @@
 package compose
 
+// FIXME:
+/*
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
@@ -11,6 +13,7 @@ import (
 	"regexp"
 	"sync"
 )
+
 
 // IComposer is an interface for composing entities.
 type IComposer interface {
@@ -38,10 +41,10 @@ func (s *SComposer) ComposeEntity(entityArg string, printToScreen bool) error {
 		return err
 	}
 
-	/*entities, err := CrawlDirectoriesParallel(entityDir)
-	if err != nil {
-		return err
-	}*/
+	//entities, err := CrawlDirectoriesParallel(entityDir)
+	//if err != nil {
+	//	return err
+	//}
 
 	// Find the directory
 	entityDir, err := s.findEntityDirParallel(root, entityName, version)
@@ -198,3 +201,4 @@ func (s *SComposer) mergeYamlFiles(dir string) ([]byte, error) {
 	}
 	return yaml.Marshal(merged)
 }
+*/

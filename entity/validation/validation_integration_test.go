@@ -19,6 +19,7 @@ func TestEntity(t *testing.T) {
 		name                string
 		inputEntityPath     string
 		inputCollectionName string
+		inputEntityUri      string
 		heryContent         map[string]any
 		hasError            bool
 	}{
@@ -26,6 +27,7 @@ func TestEntity(t *testing.T) {
 			name:                "valid",
 			inputEntityPath:     validEntityAbsPath,
 			inputCollectionName: "amadla",
+			inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
 			heryContent: map[string]any{
 				"_entity":     "github.com/AmadlaOrg/Entity@latest",
 				"name":        "Entity",
@@ -42,7 +44,11 @@ func TestEntity(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err = entityValidationService.Entity(tt.inputEntityPath, tt.inputCollectionName, tt.heryContent)
+			err = entityValidationService.Entity(
+				tt.inputEntityPath,
+				tt.inputCollectionName,
+				tt.inputEntityUri,
+				tt.heryContent)
 			if tt.hasError {
 				assert.Error(t, err)
 			} else {
