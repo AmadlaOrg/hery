@@ -11,13 +11,13 @@ import (
 	"unicode"
 )
 
-// IValidation
+// IValidation used by mockery
 type IValidation interface {
 	Entity(entityPath, collectionName, entityUri string, heryContent map[string]any) error
 	EntityUri(entityUrl string) bool
 }
 
-// SValidation
+// SValidation used by mockery
 type SValidation struct {
 	Version           version.IVersion
 	VersionValidation versionValidationPkg.IValidation
@@ -31,7 +31,14 @@ type SValidation struct {
 // TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
 func (s *SValidation) Entity(entityPath, collectionName, entityUri string, heryContent map[string]any) error {
 
+	// TODO: Is the root of the entity heryContent is equal to the _entity (don't forget version)
+	// TODO: If it does not match then check the _self (it does not need to have _entity so it can go straight to validation)
+	// TODO: If _entity is in _self then check if it matches if not throw error that it is not valid and why
+
+	// TODO: We need to add a unit test to see what happens when a YAML is not valid in the `.hery` content
+
 	// 1. Get the schema of the entity and load the jsonschema
+	// TODO: Move the path generator to schema package
 	entityConfigDir := fmt.Sprintf(".%s", collectionName)
 	schemaPath := filepath.Join(entityPath, entityConfigDir, schemaPkg.EntityJsonSchemaFileName)
 	schema, err := s.Schema.Load(schemaPath)

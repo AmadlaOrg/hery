@@ -108,6 +108,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 			//
 			// -- This follows the Fail Fast principal --
 			//
+			// TODO:
 			err = s.EntityValidation.Entity(entityMeta.AbsPath, collectionName, entityMeta.Entity, heryContent)
 			if err != nil {
 				errCh <- fmt.Errorf("error validating entity: %v", err)

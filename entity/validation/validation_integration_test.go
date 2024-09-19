@@ -24,7 +24,7 @@ func TestEntity(t *testing.T) {
 		hasError            bool
 	}{
 		{
-			name:                "valid",
+			name:                "Valid: Same entityUri entity with root of `.hery`",
 			inputEntityPath:     validEntityAbsPath,
 			inputCollectionName: "amadla",
 			inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
@@ -39,6 +39,70 @@ func TestEntity(t *testing.T) {
 				},
 			},
 			hasError: false,
+		},
+		{
+			name:                "Valid: With `_self` without `_entity`",
+			inputEntityPath:     validEntityAbsPath,
+			inputCollectionName: "amadla",
+			inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
+			heryContent: map[string]any{
+				"_entity":     "github.com/AmadlaOrg/Entity@latest",
+				"name":        "Entity",
+				"description": "The root Entity definition.",
+				"category":    "General",
+				"tags": []any{
+					"main",
+					"master",
+				},
+				"_self": map[string]any{
+					"title":       "Some random title",
+					"description": "The random title description.",
+				},
+			},
+			hasError: false,
+		},
+		{
+			name:                "Valid: With `_self` that contains `_entity`",
+			inputEntityPath:     validEntityAbsPath,
+			inputCollectionName: "amadla",
+			inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
+			heryContent: map[string]any{
+				"_entity":     "github.com/AmadlaOrg/Entity@latest",
+				"name":        "Entity",
+				"description": "The root Entity definition.",
+				"category":    "General",
+				"tags": []any{
+					"main",
+					"master",
+				},
+				"_self": map[string]any{
+					"_entity":     "github.com/AmadlaOrg/Entity@latest",
+					"title":       "Some random title",
+					"description": "The random title description.",
+				},
+			},
+			hasError: false,
+		},
+		//
+		// Error
+		//
+		{
+			name:                "Error: entityUri should not be of the same entity that is set in the root of `.hery` if _self is set",
+			inputEntityPath:     validEntityAbsPath,
+			inputCollectionName: "amadla",
+			inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
+			heryContent: map[string]any{
+				"_entity":     "github.com/AmadlaOrg/Entity@latest",
+				"name":        "Entity",
+				"description": "The root Entity definition.",
+				"category":    "General",
+				"tags": []any{
+					"main",
+					"master",
+				},
+				"_self": map[string]any{},
+			},
+			hasError: true,
 		},
 	}
 

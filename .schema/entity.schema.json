@@ -34,9 +34,6 @@
       "type": "object",
       "description": "Used to reference the current entity inside another entity.",
       "properties": {
-        "_entity": {
-          "$ref": "#/$defs/_entity"
-        },
         "_id": {
           "$ref": "#/$defs/_id"
         }

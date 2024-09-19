@@ -1,3 +1,4 @@
+// Package schema contains utils for handling schemas.
 package schema
 
 import (
@@ -10,16 +11,21 @@ import (
 	"strings"
 )
 
+// ISchema used by mockery
 type ISchema interface {
 	Load(schemaPath string) (*jsonschema.Schema, error)
 	GenerateURNPrefix(collectionName string) string
 	GenerateURN(urnPrefix, entityUri string) string
+
+	// Local functions
 	loadSchemaFile(schemaPath string) (map[string]any, error)
 	mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any
 }
 
+// SSchema used by mockery
 type SSchema struct{}
 
+// Help with mocking
 var (
 	osOpen = os.Open
 )
@@ -75,6 +81,10 @@ func (s *SSchema) GenerateURN(urnPrefix, entityUri string) string {
 	return fmt.Sprintf("%s%s", urnPrefix, heryUrnSuffix)
 }
 
+//
+// Local functions
+//
+
 // loadSchemaFile reads a JSON schema file and returns it as a map
 func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
 	file, err := osOpen(schemaPath)
@@ -117,25 +127,37 @@ func (s *SSchema) mergeSchemas(baseSchema, mainSchema map[string]any) map[string
 			}
 			mainSchema[key] = mainProperties
 
-			// 3. Make sure that the base require properties are in the merge version
+			// 3. Since all the base properties use `$defs` to globalise the schema definitions
+			// they also need to be merged
+		} else if key == "$defs" {
+
+			// 3.1: Ensure the "properties" field exists in the main schema
+			if _, exists := mainSchema[key]; !exists {
+				mainSchema[key] = map[string]any{}
+			}
+
+			// 3.2:
+
+			// 4. Make sure that the base require properties are in the merge version
 		} else if key == "required" {
 
-			// 3.1: Add `require` if it is not in the top properties
+			// 4.1: Add `require` if it is not in the top properties
 			if _, exists := mainSchema[key]; !exists {
 				mainSchema[key] = []any{}
 			}
 
-			// 3.2: Merge required fields
+			// 4.2: Merge required fields
 			baseRequired := value.([]any)
 			mainRequired := mainSchema[key].([]any)
 			mainRequired = append(mainRequired, baseRequired...)
 			mainSchema[key] = mainRequired
 
-			// 4. `additionalProperties` needs to always be set as the same as the base one
+			// 5. `additionalProperties` needs to always be set as the same as the base one
 		} else if key == "additionalProperties" {
 			mainSchema[key] = value
 		}
 	}
 
+	// 6. Returns the merged `mainSchema` with the base schema: `.schema/entity.schema.json`
 	return mainSchema
 }
