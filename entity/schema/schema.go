@@ -14,6 +14,7 @@ import (
 // ISchema used by mockery
 type ISchema interface {
 	Load(schemaPath string) (*jsonschema.Schema, error)
+	GenerateSchemaPath(collectionName, entityPath string) string
 	GenerateURNPrefix(collectionName string) string
 	GenerateURN(urnPrefix, entityUri string) string
 
@@ -67,6 +68,11 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	}
 
 	return schema, nil
+}
+
+// GenerateSchemaPath returns the absolute path for the entity's schema
+func (s *SSchema) GenerateSchemaPath(collectionName, entityPath string) string {
+	return filepath.Join(entityPath, "."+collectionName, EntityJsonSchemaFileName)
 }
 
 // GenerateURNPrefix returns the URN prefix for JSON-Schema `id`

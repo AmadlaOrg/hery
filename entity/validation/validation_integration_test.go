@@ -1,33 +1,31 @@
 package validation
 
 import (
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
-	"path/filepath"
 	"testing"
 )
 
 func TestEntity(t *testing.T) {
-	fixturePath := filepath.Join("..", "..", "test", "fixture")
+	/*fixturePath := filepath.Join("..", "..", "test", "fixture")
 	validEntityAbsPath, err := filepath.Abs(filepath.Join(fixturePath, "/valid-entity"))
 	if err != nil {
 		t.Fatal(err)
-	}
+	}*/
 
 	entityValidationService := NewEntityValidationService()
 
 	tests := []struct {
 		name                string
-		inputEntityPath     string
 		inputCollectionName string
-		inputEntityUri      string
+		inputSchema         *jsonschema.Schema
 		heryContent         map[string]any
 		hasError            bool
 	}{
 		{
-			name:                "Valid: Same entityUri entity with root of `.hery`",
-			inputEntityPath:     validEntityAbsPath,
+			name:                "Valid: Same entityUri entity with root of `.hery` without `_self`",
 			inputCollectionName: "amadla",
-			inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
+			inputSchema:         &jsonschema.Schema{},
 			heryContent: map[string]any{
 				"_entity":     "github.com/AmadlaOrg/Entity@latest",
 				"name":        "Entity",
@@ -41,10 +39,10 @@ func TestEntity(t *testing.T) {
 			hasError: false,
 		},
 		{
-			name:                "Valid: With `_self` without `_entity`",
-			inputEntityPath:     validEntityAbsPath,
+			name:                "Valid: With `_self`",
 			inputCollectionName: "amadla",
-			inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
+			inputSchema:         &jsonschema.Schema{},
+			//inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
 			heryContent: map[string]any{
 				"_entity":     "github.com/AmadlaOrg/Entity@latest",
 				"name":        "Entity",
@@ -61,11 +59,32 @@ func TestEntity(t *testing.T) {
 			},
 			hasError: false,
 		},
+		//
+		// Error
+		//
 		{
-			name:                "Valid: With `_self` that contains `_entity`",
-			inputEntityPath:     validEntityAbsPath,
+			name:                "Error: entityUri should not be of the same entity that is set in the root of `.hery` if _self is set",
 			inputCollectionName: "amadla",
-			inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
+			inputSchema:         &jsonschema.Schema{},
+			//inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
+			heryContent: map[string]any{
+				"_entity":     "github.com/AmadlaOrg/Entity@latest",
+				"name":        "Entity",
+				"description": "The root Entity definition.",
+				"category":    "General",
+				"tags": []any{
+					"main",
+					"master",
+				},
+				"_self": map[string]any{},
+			},
+			hasError: true,
+		},
+		{
+			name:                "Error: With `_self` that contains `_entity`",
+			inputSchema:         &jsonschema.Schema{},
+			inputCollectionName: "amadla",
+			//inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
 			heryContent: map[string]any{
 				"_entity":     "github.com/AmadlaOrg/Entity@latest",
 				"name":        "Entity",
@@ -81,37 +100,15 @@ func TestEntity(t *testing.T) {
 					"description": "The random title description.",
 				},
 			},
-			hasError: false,
-		},
-		//
-		// Error
-		//
-		{
-			name:                "Error: entityUri should not be of the same entity that is set in the root of `.hery` if _self is set",
-			inputEntityPath:     validEntityAbsPath,
-			inputCollectionName: "amadla",
-			inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
-			heryContent: map[string]any{
-				"_entity":     "github.com/AmadlaOrg/Entity@latest",
-				"name":        "Entity",
-				"description": "The root Entity definition.",
-				"category":    "General",
-				"tags": []any{
-					"main",
-					"master",
-				},
-				"_self": map[string]any{},
-			},
 			hasError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err = entityValidationService.Entity(
-				tt.inputEntityPath,
+			err := entityValidationService.Entity(
 				tt.inputCollectionName,
-				tt.inputEntityUri,
+				tt.inputSchema,
 				tt.heryContent)
 			if tt.hasError {
 				assert.Error(t, err)

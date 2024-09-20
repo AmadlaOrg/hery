@@ -6,14 +6,15 @@ import (
 	schemaValidationPkg "github.com/AmadlaOrg/hery/entity/schema/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
-	"path/filepath"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"strings"
 	"unicode"
 )
 
 // IValidation used by mockery
 type IValidation interface {
-	Entity(entityPath, collectionName, entityUri string, heryContent map[string]any) error
+	RootEntity(rootSchema, selfSchema *jsonschema.Schema, heryContent map[string]any) error
+	Entity(collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error
 	EntityUri(entityUrl string) bool
 }
 
@@ -25,25 +26,38 @@ type SValidation struct {
 	SchemaValidation  schemaValidationPkg.IValidation
 }
 
-// Entity validates the YAML content against the JSON schema
-// TODO: Make sure that YAML standard is valid first
-// TODO: Since JSON-Schema cannot merge by-it-self the schemas you will need to add code for that
-// TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
-func (s *SValidation) Entity(entityPath, collectionName, entityUri string, heryContent map[string]any) error {
+// RootEntity
+func (s *SValidation) RootEntity(rootSchema, selfSchema *jsonschema.Schema, heryContent map[string]any) error {
 
 	// TODO: Is the root of the entity heryContent is equal to the _entity (don't forget version)
 	// TODO: If it does not match then check the _self (it does not need to have _entity so it can go straight to validation)
 	// TODO: If _entity is in _self then check if it matches if not throw error that it is not valid and why
 
+	// . This step is for when the root entity with the _self entity are valid is valid
+	return nil
+}
+
+// Entity validates the YAML content against the JSON schema
+// TODO: Make sure that YAML standard is valid first
+// TODO: Since JSON-Schema cannot merge by-it-self the schemas you will need to add code for that
+// TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
+// TODO: --- Used it
+func (s *SValidation) Entity(collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error {
+
 	// TODO: We need to add a unit test to see what happens when a YAML is not valid in the `.hery` content
 
 	// 1. Get the schema of the entity and load the jsonschema
-	// TODO: Move the path generator to schema package
-	entityConfigDir := fmt.Sprintf(".%s", collectionName)
-	schemaPath := filepath.Join(entityPath, entityConfigDir, schemaPkg.EntityJsonSchemaFileName)
-	schema, err := s.Schema.Load(schemaPath)
+	// TODO: Move outside so that it is added to type Entity
+	/*schema, err := s.Schema.Load(schemaPath)
 	if err != nil {
 		return fmt.Errorf("error loading JSON schema: %w", err)
+	}*/
+
+	// 1. Validate JSON-Schema entity `id`
+	// TODO: Move it somewhere else
+	err := s.SchemaValidation.Id(schema.ID, collectionName, heryContent["_entity"].(string))
+	if err != nil {
+		return err
 	}
 
 	// 2. Validate the hery file content with the loaded schema
@@ -51,13 +65,7 @@ func (s *SValidation) Entity(entityPath, collectionName, entityUri string, heryC
 		return fmt.Errorf("schema validation failed: %w", err)
 	}
 
-	// 3. Validate JSON-Schema entity `id`
-	err = s.SchemaValidation.Id(schema.ID, collectionName, entityUri)
-	if err != nil {
-		return err
-	}
-
-	// 4. This step is for when the entity is valid
+	// 3. This step is for when the entity is valid
 	return nil
 }
 
