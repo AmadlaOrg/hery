@@ -31,14 +31,14 @@ type SEntity struct {
 	Entities []Entity
 }
 
-// GetEntity
+// GetEntity with an entity URI this functions gets the specific entity
 func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 	var (
 		entityVals = Entity{
 			Have:  false,
 			Exist: false,
 		}
-		//err error
+		err error
 	)
 
 	if strings.Contains(entityUri, "@") {
@@ -71,29 +71,33 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 			}
 		}
 	} else {
-		var (
-			entityVals = entity.Entity{
-				Have:  false,
-				Exist: false,
-			}
-			err error
-		)
-
-		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
-		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
-
+		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUri)
 		if err != nil {
 			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
 		}
 
-		entityVersionList, err := s.EntityVersion.List(entityVals.RepoUrl)
-		if err != nil {
-			return entityVals, fmt.Errorf("error listing versions: %v", err)
+		var matchingEntities []Entity
+		for _, entity := range s.Entities {
+			if entity.LatestVersion && entity.RepoUrl == entityVals.RepoUrl {
+				return entity, nil
+			} else {
+				matchingEntities = append(matchingEntities, entity)
+			}
+		}
+
+		matchCount := len(matchingEntities)
+		if matchCount == 0 {
+			return entityVals, errors.Join(
+				ErrorNotFound,
+				fmt.Errorf("no entity found with repo url %s and version %s", entityVals.RepoUrl, entityVals.Version))
+		} else if matchCount >= 1 {
+			return entityVals, errors.Join(
+				ErrorMultipleFound,
+				fmt.Errorf("multiple matching entities found with repo url: %s", entityVals.RepoUrl))
 		}
 	}
 
-	/**/
-	return Entity{}, fmt.Errorf("no entity found with uri: %s", entityUri)
+	return entityVals, errors.Join(ErrorNotFound, fmt.Errorf("no entity found with uri: %s", entityUri))
 }
 
 // FindEntityDir can find pseudo versioned entity directories and static versioned entities.
