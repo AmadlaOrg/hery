@@ -14,6 +14,7 @@ import (
 // ISchema used by mockery
 type ISchema interface {
 	Load(schemaPath string) (*jsonschema.Schema, error)
+	ExtractSelfEntity(heryContent map[string]any) map[string]any
 	GenerateSchemaPath(collectionName, entityPath string) string
 	GenerateURNPrefix(collectionName string) string
 	GenerateURN(urnPrefix, entityUri string) string
@@ -68,6 +69,15 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	}
 
 	return schema, nil
+}
+
+// ExtractSelfEntity returns the `_self` reserved property content
+// If no content found then it will return `nil`
+func (s *SSchema) ExtractSelfEntity(heryContent map[string]any) map[string]any {
+	if self, ok := heryContent["_self"].(any); ok {
+		return self.(map[string]any)
+	}
+	return nil
 }
 
 // GenerateSchemaPath returns the absolute path for the entity's schema

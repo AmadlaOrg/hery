@@ -38,13 +38,10 @@ func (s *SValidation) RootEntity(rootSchema, selfSchema *jsonschema.Schema, hery
 }
 
 // Entity validates the YAML content against the JSON schema
-// TODO: Make sure that YAML standard is valid first
-// TODO: Since JSON-Schema cannot merge by-it-self the schemas you will need to add code for that
-// TODO: Make sure it validates properly with both the based schema found in `.schema` and the entity's own `schema.json`
-// TODO: --- Used it
 func (s *SValidation) Entity(collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error {
 
 	// TODO: We need to add a unit test to see what happens when a YAML is not valid in the `.hery` content
+	// |-- TODO: Make sure that YAML standard is valid first
 
 	// 1. Get the schema of the entity and load the jsonschema
 	// TODO: Move outside so that it is added to type Entity

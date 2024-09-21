@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/build"
+	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
@@ -28,6 +29,7 @@ type SGet struct {
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.IValidation
 	Build                   build.IBuild
+	Schema                  schemaPkg.ISchema
 }
 
 // GetInTmp retrieves entities based on the provided collection name and entities
@@ -104,16 +106,35 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 				return
 			}
 
+			if selfEntity := s.Schema.ExtractSelfEntity(heryContent); selfEntity != nil {
+				selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
+				selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
+				if err != nil {
+					errCh <- fmt.Errorf("error loading schema: %v", err)
+					return
+				}
+
+				err = s.EntityValidation.Entity(collectionName, selfEntitySchema, selfEntity)
+				if err != nil {
+					errCh <- fmt.Errorf("error validating entity: %v", err)
+					return
+				}
+
+				// TODO: Remove `heryContent["_self"].(any)` so to not need to make it overly heavy for the validator
+			}
+
+			// TODO: Add validation to the main entity
+
 			// 3. Validate the content of hery file content to make sure it does not cause is issue later in the code
 			//
 			// -- This follows the Fail Fast principal --
 			//
 			// TODO:
-			err = s.EntityValidation.Entity(entityMeta.AbsPath, collectionName, entityMeta.Entity, heryContent)
+			/*err = s.EntityValidation.Entity(entityMeta.AbsPath, collectionName, entityMeta.Entity, heryContent)
 			if err != nil {
 				errCh <- fmt.Errorf("error validating entity: %v", err)
 				return
-			}
+			}*/
 
 			// 4. The reference to the other entities are found in the hery file content
 			//
