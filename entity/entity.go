@@ -7,10 +7,12 @@ import (
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/file"
+	"github.com/AmadlaOrg/hery/util/url"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -22,7 +24,77 @@ type IEntity interface {
 	Read(path, collectionName string) (map[string]any, error)
 }
 
-type SEntity struct{}
+type SEntity struct {
+	EntityVersion version.IVersion
+
+	// Data
+	Entities []Entity
+}
+
+// GetEntity
+func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
+	var (
+		entityVals = Entity{
+			Have:  false,
+			Exist: false,
+		}
+		//err error
+	)
+
+	if strings.Contains(entityUri, "@") {
+		entityVersion, err := s.EntityVersion.Extract(entityUri)
+		if err != nil {
+			if !errors.Is(err, version.ErrorExtractNoVersionFound) {
+				return entityVals, fmt.Errorf("error extracting version: %v", err)
+			} else {
+				entityVersion = "latest"
+			}
+		}
+
+		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
+		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
+		if err != nil {
+			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+		}
+
+		if entityVersion == "latest" {
+			for _, entity := range s.Entities {
+				if entity.LatestVersion && entity.RepoUrl == entityVals.RepoUrl {
+					return entity, nil
+				}
+			}
+		} else {
+			for _, entity := range s.Entities {
+				if !entity.LatestVersion && entity.Version == entityVersion && entity.RepoUrl == entityVals.RepoUrl {
+					return entity, nil
+				}
+			}
+		}
+	} else {
+		var (
+			entityVals = entity.Entity{
+				Have:  false,
+				Exist: false,
+			}
+			err error
+		)
+
+		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
+		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
+
+		if err != nil {
+			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
+		}
+
+		entityVersionList, err := s.EntityVersion.List(entityVals.RepoUrl)
+		if err != nil {
+			return entityVals, fmt.Errorf("error listing versions: %v", err)
+		}
+	}
+
+	/**/
+	return Entity{}, fmt.Errorf("no entity found with uri: %s", entityUri)
+}
 
 // FindEntityDir can find pseudo versioned entity directories and static versioned entities.
 func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {

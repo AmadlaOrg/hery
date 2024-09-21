@@ -106,7 +106,12 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 				return
 			}
 
+			// 3. Entity validation
+			// 3.1: Retrieve the `_entity`
+
+			// 3.2: Extracted _self entity validation
 			if selfEntity := s.Schema.ExtractSelfEntity(heryContent); selfEntity != nil {
+
 				selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
 				selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
 				if err != nil {
@@ -120,7 +125,16 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 					return
 				}
 
-				// TODO: Remove `heryContent["_self"].(any)` so to not need to make it overly heavy for the validator
+				delete(heryContent, "_self")
+
+				err = s.EntityValidation.Entity(collectionName, selfEntitySchema, selfEntity)
+				if err != nil {
+					errCh <- fmt.Errorf("error validating entity: %v", err)
+					return
+				}
+			} else {
+				// No `_self`
+
 			}
 
 			// TODO: Add validation to the main entity
