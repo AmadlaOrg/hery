@@ -16,6 +16,7 @@ import (
 	"sync"
 )
 
+// IEntity
 type IEntity interface {
 	FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicateEntity(entities []Entity, entityMeta Entity) error
@@ -24,6 +25,7 @@ type IEntity interface {
 	Read(path, collectionName string) (map[string]any, error)
 }
 
+// SEntity
 type SEntity struct {
 	EntityVersion version.IVersion
 
@@ -31,8 +33,14 @@ type SEntity struct {
 	Entities []Entity
 }
 
+// SetEntity
+func (s *SEntity) SetEntity(entity Entity) {
+	s.Entities = append(s.Entities, entity)
+}
+
 // GetEntity with an entity URI this functions gets the specific entity
 func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
+	// 1. Set default Entity default values
 	var (
 		entityVals = Entity{
 			Have:  false,
@@ -41,22 +49,30 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 		err error
 	)
 
+	// 2. Looks up the entity URI version
 	if strings.Contains(entityUri, "@") {
+
+		// 2.1: Extract version and if not found then it is set as the `latest`
 		entityVersion, err := s.EntityVersion.Extract(entityUri)
 		if err != nil {
+			// 2.1.1: This error is thrown when the extractor ran into an issue
 			if !errors.Is(err, version.ErrorExtractNoVersionFound) {
 				return entityVals, fmt.Errorf("error extracting version: %v", err)
+
+				// 2.1.2: Set version as `latest` if no version found
 			} else {
 				entityVersion = "latest"
 			}
 		}
 
+		// 2.2: Removed version from the entity URI and get the full URL to the repository
 		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
 		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
 		if err != nil {
 			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
 		}
 
+		// 2.3: Extract the entity based on some entity property values
 		if entityVersion == "latest" {
 			for _, entity := range s.Entities {
 				if entity.LatestVersion && entity.RepoUrl == entityVals.RepoUrl {
@@ -70,6 +86,8 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 				}
 			}
 		}
+
+		// 3. If no entity URI version found
 	} else {
 		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUri)
 		if err != nil {
@@ -97,8 +115,11 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 		}
 	}
 
+	// 4. Returns error if no entity was found
 	return entityVals, errors.Join(ErrorNotFound, fmt.Errorf("no entity found with uri: %s", entityUri))
 }
+
+//func (s *SEntity) SetEntitySchema(entity Entity) {}
 
 // FindEntityDir can find pseudo versioned entity directories and static versioned entities.
 func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
