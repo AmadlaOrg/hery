@@ -3,12 +3,98 @@ package entity
 import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/storage"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestSetEntity(t *testing.T) {
+	entityService := NewEntityService()
+
+	tests := []struct {
+		name            string
+		serviceEntities []Entity
+		inputEntityUri  string
+		expectedEntity  Entity
+		expectedErr     error
+		hasError        bool
+	}{
+		{
+			name: "Valid: entity",
+			serviceEntities: []Entity{
+				{
+					Id:              "97d4b783-f448-483c-8111-380d6082ae1c",
+					Entity:          "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
+					Name:            "Entity",
+					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
+					Origin:          "github.com/AmadlaOrg/Entity",
+					Version:         "latest",
+					LatestVersion:   true,
+					IsPseudoVersion: true,
+					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-",
+					Have:            true,
+					Hash:            "",
+					Exist:           true,
+					Schema:          &jsonschema.Schema{},
+					Config: map[string]any{
+						"name":        "Entity",
+						"description": "The meta Entity definition.",
+						"category":    "General",
+						"tags": []string{
+							"main",
+							"master",
+						},
+					},
+				},
+				{
+					Id:              "56d4b783-c448-983c-8911-400d6082ae1c",
+					Entity:          "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
+					Name:            "Entity",
+					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
+					Origin:          "github.com/AmadlaOrg/Entity",
+					Version:         "latest",
+					LatestVersion:   false,
+					IsPseudoVersion: true,
+					AbsPath:         "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-",
+					Have:            true,
+					Hash:            "",
+					Exist:           true,
+					Schema:          &jsonschema.Schema{},
+					Config: map[string]any{
+						"name":        "Entity",
+						"description": "The meta Entity definition.",
+						"category":    "General",
+						"tags": []string{
+							"main",
+							"master",
+						},
+					},
+				},
+			},
+			inputEntityUri: "github.com/AmadlaOrg/Entity@latest",
+			expectedEntity: Entity{},
+			expectedErr:    nil,
+			hasError:       false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			entityService.Entities = tt.serviceEntities
+
+			got, err := entityService.GetEntity(tt.inputEntityUri)
+			if tt.hasError {
+				assert.Error(t, err)
+				assert.ErrorIs(t, err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.expectedEntity, got)
+		})
+	}
+}
 
 func TestFindEntityDir(t *testing.T) {
 	entityService := NewEntityService()

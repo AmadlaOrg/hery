@@ -16,7 +16,7 @@ import (
 	"sync"
 )
 
-// IEntity
+// IEntity used for mock
 type IEntity interface {
 	FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicateEntity(entities []Entity, entityMeta Entity) error
@@ -25,7 +25,7 @@ type IEntity interface {
 	Read(path, collectionName string) (map[string]any, error)
 }
 
-// SEntity
+// SEntity used for mock
 type SEntity struct {
 	EntityVersion version.IVersion
 
@@ -33,7 +33,7 @@ type SEntity struct {
 	Entities []Entity
 }
 
-// SetEntity
+// SetEntity for appending an entity into the struct entity list
 func (s *SEntity) SetEntity(entity Entity) {
 	s.Entities = append(s.Entities, entity)
 }

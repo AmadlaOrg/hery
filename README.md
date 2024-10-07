@@ -11,12 +11,59 @@ Additionally, the term "hery" in British English, pronounced /ˈhɛrɪ/, is an o
 This name reflects the utility's aim to elevate and celebrate structured data management.
 
 ## Install
+### With Go
+```bash
+go install github.com/AmadlaOrg/hery
+```
 ### Build
 ```bash
 go build -o hery
 ```
 
 ## Quickstart
+HERY does not require a lot of learning to get started. All you need to know is the four reserved properties, the
+`.hery` file format that the reserved properties are found, that there is a SQLite caching system, a few of the
+commands and understand some of the basics of the query language.
+
+### `.hery` File Format
+The `.hery` file format is the same as a `.yml`/`.yaml` file. The reason the extension is different is so that `hery`
+CLI is able to find it and so that IDEs can have better support.
+
+HERY format comes with four different reserved properties:
+- `_meta` - For metadata for the relative entity
+- `_entity` - Contains the entity URI with the version (is optional)
+- `_body` - Contains the content of the entity
+- `_id` - To be able to make reference to a specific entity content
+
+Here is an example:
+```hery
+---
+_meta:
+  _entity: github.com/AmadlaOrg/Entity@latest
+  _body:
+    name: RandomName
+    description: Entity Pseudo Version definitions.
+    category: QA
+    tags:
+      - QA
+      - fixture
+      - test
+_body:
+  name: Random Name
+```
+
+There are different structures that are valid. For example `_meta` is an optional reserved property. And at the root of
+the entity content `_entity` is not allowed since it takes the value from the repository itself.
+
+When validation happens it takes for account the entity URI and validates what is in the `_body` whilst everything else
+is ignored.
+
+### Caching
+Since the querying on YAML files would be a bit slow and resource demanding, SQLite is used to store all the entities.
+
+Each entity has its own table and it is found: `~/.hery/collection/<collection name>/<collection name>.cache`.
+
+### Basic Commands
 To verify that it was installed properly:
 ```bash
 hery --version

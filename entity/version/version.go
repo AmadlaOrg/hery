@@ -85,6 +85,21 @@ func (s *SVersion) Latest(versions []string) (string, error) {
 	return versions[len(versions)-1], nil
 }
 
+// GeneratePseudo generates a pseudo version to be used when there is no other source to identify the version of the entity.
+func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
+	commitHeadHash, err := s.GitRemote.CommitHeadHash(entityFullRepoUrl)
+	if err != nil {
+		return "", err
+	}
+	timestamp := time.Now().Format("20060102150405")
+	pseudoVersion := fmt.Sprintf("v0.0.0-%s-%s", timestamp, commitHeadHash[:12])
+	return pseudoVersion, nil
+}
+
+//
+// Private functions
+//
+
 // versionLess compares two version strings and returns true if v1 < v2.
 func (s *SVersion) versionLess(v1, v2 string) bool {
 	return s.compareVersions(v1, v2) < 0
@@ -181,15 +196,4 @@ func (s *SVersion) parseVersion(version string) ([]int, string) {
 	}
 
 	return nums, pre
-}
-
-// GeneratePseudo generates a pseudo version to be used when there is no other source to identify the version of the entity.
-func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
-	commitHeadHash, err := s.GitRemote.CommitHeadHash(entityFullRepoUrl)
-	if err != nil {
-		return "", err
-	}
-	timestamp := time.Now().Format("20060102150405")
-	pseudoVersion := fmt.Sprintf("v0.0.0-%s-%s", timestamp, commitHeadHash[:12])
-	return pseudoVersion, nil
 }
