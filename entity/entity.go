@@ -40,6 +40,7 @@ func (s *SEntity) SetEntity(entity Entity) {
 
 // GetEntity with an entity URI this functions gets the specific entity
 func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
+
 	// 1. Set default Entity default values
 	var (
 		entityVals = Entity{

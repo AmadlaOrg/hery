@@ -96,6 +96,40 @@ func TestSetEntity(t *testing.T) {
 	}
 }
 
+func TestGetEntity(t *testing.T) {
+	entityService := NewEntityService()
+	tests := []struct {
+		name            string
+		serviceEntities []Entity
+		inputEntityUri  string
+		expectedEntity  Entity
+		expectedErr     error
+		hasError        bool
+	}{
+		{
+			name:            "Valid: entity",
+			serviceEntities: []Entity{},
+			inputEntityUri:  "github.com/AmadlaOrg/Entity@latest",
+			expectedEntity:  Entity{},
+			expectedErr:     nil,
+			hasError:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			entityService.Entities = tt.serviceEntities
+			got, err := entityService.GetEntity(tt.inputEntityUri)
+			if tt.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.expectedEntity, got)
+		})
+	}
+}
+
 func TestFindEntityDir(t *testing.T) {
 	entityService := NewEntityService()
 

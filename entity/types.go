@@ -3,16 +3,16 @@ package entity
 import "github.com/santhosh-tekuri/jsonschema/v6"
 
 const (
-	// The entity name format
+	// EntityNameMatch The entity name format
 	// TODO: It also does not seemed to be used
-	EntityNameMatch = `^[a-zA-Z0-9]+$`
+	//EntityNameMatch = `^[a-zA-Z0-9]+$`
 
-	// The entity name and version format
+	// EntityNameAndVersionMatch The entity name and version format
 	// @deprecated: the version is wrong since it changed
 	// TODO: It also does not seemed to be used
-	EntityNameAndVersionMatch = `^([a-zA-Z0-9]+)(@v\d+\.\d+\.\d+)$`
+	//EntityNameAndVersionMatch = `^([a-zA-Z0-9]+)(@v\d+\.\d+\.\d+)$`
 
-	// Used to identify the entities that are stored in a collection
+	// FormatEntityPathAndNameVersion Used to identify the entities that are stored in a collection
 	FormatEntityPathAndNameVersion = `^(.+[/\/]\.[A-z0-9-_]+[/\/]entity[/\/])(.+)([/\/].+@).+$`
 )
 
