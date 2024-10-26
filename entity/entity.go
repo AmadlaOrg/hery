@@ -27,7 +27,8 @@ type IEntity interface {
 
 // SEntity used for mock
 type SEntity struct {
-	EntityVersion version.IVersion
+	EntityVersion           version.IVersion
+	EntityVersionValidation versionValidationPkg.IValidation
 
 	// Data
 	Entities []Entity
@@ -124,8 +125,7 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 
 // FindEntityDir can find pseudo versioned entity directories and static versioned entities.
 func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
-	entityVersionValidation := versionValidationPkg.NewEntityVersionValidationService()
-	if !entityVersionValidation.PseudoFormat(entityVals.Version) {
+	if !s.EntityVersionValidation.PseudoFormat(entityVals.Version) {
 		exactPath := entityVals.Entity
 
 		// Check if the directory exists
@@ -169,13 +169,11 @@ func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (stri
 
 // CheckDuplicateEntity checks if entityMeta is already in entityBuilds.
 func (s *SEntity) CheckDuplicateEntity(entities []Entity, entityMeta Entity) error {
-	entityVersionValidation := versionValidationPkg.NewEntityVersionValidationService()
-
 	for _, existingEntity := range entities {
 		if existingEntity.Origin == entityMeta.Origin &&
 			existingEntity.Name == entityMeta.Name {
-			if entityVersionValidation.PseudoFormat(existingEntity.Version) &&
-				entityVersionValidation.PseudoFormat(entityMeta.Version) {
+			if s.EntityVersionValidation.PseudoFormat(existingEntity.Version) &&
+				s.EntityVersionValidation.PseudoFormat(entityMeta.Version) {
 				// Check pseudo versions
 				if s.GeneratePseudoVersionPattern(existingEntity.Name, existingEntity.Version) ==
 					s.GeneratePseudoVersionPattern(entityMeta.Name, entityMeta.Version) {

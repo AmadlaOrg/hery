@@ -36,7 +36,7 @@ func TestMeta(t *testing.T) {
 		hasError             bool
 	}{
 		// FIXME:
-		/*{
+		{
 			name: "Valid Entity URI Without Version",
 			inputPaths: storage.AbsPaths{
 				Entities: "testdata",
@@ -44,7 +44,7 @@ func TestMeta(t *testing.T) {
 			inputEntityUri:    "github.com/example/entity",
 			internalEntityDir: "testdata/entity_remote.txt",
 			mockValidation: func(mockValidation *validation.MockEntityValidation) {
-				mockValidation.EXPECT().EntityUri("https://github.com/example/entity").Return(true)
+				mockValidation.EXPECT().EntityUri("github.com/example/entity").Return(true)
 			},
 			mockEntityVersion: func(mockEntityVersion *version.MockEntityVersion) {
 				mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0"}, nil)
@@ -66,7 +66,7 @@ func TestMeta(t *testing.T) {
 				Exist:           true,
 			},
 			hasError: false,
-		},*/
+		},
 		//
 		// Error
 		//
