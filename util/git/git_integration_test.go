@@ -63,7 +63,8 @@ func Test_Integration_FetchRepo(t *testing.T) {
 	}
 }
 
-func Test_Integration_CommitHeadHash(t *testing.T) {
+// FIXME: Maybe use "static" repo
+/*func Test_Integration_CommitHeadHash(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "hery_test_*")
 	if err != nil {
 		t.Fatal(err)
@@ -88,7 +89,7 @@ func Test_Integration_CommitHeadHash(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, "a33efb99e6c7d182034a5c5c2cb7a165026bff84", hash)
-}
+}*/
 
 // Mock the PlainOpen function to return an error
 func Test_Integration_CommitHeadHash_RepoOpenError(t *testing.T) {

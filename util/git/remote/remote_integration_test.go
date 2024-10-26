@@ -1,13 +1,7 @@
 package remote
 
-import (
-	"github.com/stretchr/testify/assert"
-	"reflect"
-	"sort"
-	"testing"
-)
-
-func Test_integration_Tags(t *testing.T) {
+// FIXME: Maybe create separate "static" repos
+/*func Test_integration_Tags(t *testing.T) {
 	gitRemoteService := NewGitRemoteService()
 	tags, err := gitRemoteService.Tags("https://github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion")
 	if err != nil {
@@ -32,9 +26,10 @@ func Test_integration_Tags(t *testing.T) {
 	for _, tag := range tags {
 		t.Logf("Retrieved tag: %s", tag)
 	}
-}
+}*/
 
-func Test_integration_CommitHeadHash(t *testing.T) {
+// FIXME: Maybe create separate "static" repos
+/*func Test_integration_CommitHeadHash(t *testing.T) {
 	gitRemoteService := NewGitRemoteService()
 	hash, err := gitRemoteService.CommitHeadHash("https://github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion")
 	if err != nil {
@@ -42,4 +37,4 @@ func Test_integration_CommitHeadHash(t *testing.T) {
 	}
 
 	assert.Equal(t, hash, "c351cf75321ae8a7676b8bef6837b67a60cabdbc")
-}
+}*/

@@ -20,6 +20,101 @@ func (_m *MockEntitySchema) EXPECT() *MockEntitySchema_Expecter {
 	return &MockEntitySchema_Expecter{mock: &_m.Mock}
 }
 
+// ExtractSelfEntity provides a mock function with given fields: heryContent
+func (_m *MockEntitySchema) ExtractSelfEntity(heryContent map[string]interface{}) map[string]interface{} {
+	ret := _m.Called(heryContent)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExtractSelfEntity")
+	}
+
+	var r0 map[string]interface{}
+	if rf, ok := ret.Get(0).(func(map[string]interface{}) map[string]interface{}); ok {
+		r0 = rf(heryContent)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]interface{})
+		}
+	}
+
+	return r0
+}
+
+// MockEntitySchema_ExtractSelfEntity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ExtractSelfEntity'
+type MockEntitySchema_ExtractSelfEntity_Call struct {
+	*mock.Call
+}
+
+// ExtractSelfEntity is a helper method to define mock.On call
+//   - heryContent map[string]interface{}
+func (_e *MockEntitySchema_Expecter) ExtractSelfEntity(heryContent interface{}) *MockEntitySchema_ExtractSelfEntity_Call {
+	return &MockEntitySchema_ExtractSelfEntity_Call{Call: _e.mock.On("ExtractSelfEntity", heryContent)}
+}
+
+func (_c *MockEntitySchema_ExtractSelfEntity_Call) Run(run func(heryContent map[string]interface{})) *MockEntitySchema_ExtractSelfEntity_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(map[string]interface{}))
+	})
+	return _c
+}
+
+func (_c *MockEntitySchema_ExtractSelfEntity_Call) Return(_a0 map[string]interface{}) *MockEntitySchema_ExtractSelfEntity_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockEntitySchema_ExtractSelfEntity_Call) RunAndReturn(run func(map[string]interface{}) map[string]interface{}) *MockEntitySchema_ExtractSelfEntity_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GenerateSchemaPath provides a mock function with given fields: collectionName, entityPath
+func (_m *MockEntitySchema) GenerateSchemaPath(collectionName string, entityPath string) string {
+	ret := _m.Called(collectionName, entityPath)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateSchemaPath")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(collectionName, entityPath)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// MockEntitySchema_GenerateSchemaPath_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateSchemaPath'
+type MockEntitySchema_GenerateSchemaPath_Call struct {
+	*mock.Call
+}
+
+// GenerateSchemaPath is a helper method to define mock.On call
+//   - collectionName string
+//   - entityPath string
+func (_e *MockEntitySchema_Expecter) GenerateSchemaPath(collectionName interface{}, entityPath interface{}) *MockEntitySchema_GenerateSchemaPath_Call {
+	return &MockEntitySchema_GenerateSchemaPath_Call{Call: _e.mock.On("GenerateSchemaPath", collectionName, entityPath)}
+}
+
+func (_c *MockEntitySchema_GenerateSchemaPath_Call) Run(run func(collectionName string, entityPath string)) *MockEntitySchema_GenerateSchemaPath_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockEntitySchema_GenerateSchemaPath_Call) Return(_a0 string) *MockEntitySchema_GenerateSchemaPath_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockEntitySchema_GenerateSchemaPath_Call) RunAndReturn(run func(string, string) string) *MockEntitySchema_GenerateSchemaPath_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GenerateURN provides a mock function with given fields: urnPrefix, entityUri
 func (_m *MockEntitySchema) GenerateURN(urnPrefix string, entityUri string) string {
 	ret := _m.Called(urnPrefix, entityUri)

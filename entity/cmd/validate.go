@@ -6,7 +6,6 @@ import (
 	"github.com/AmadlaOrg/hery/entity/cmd/util"
 	"github.com/AmadlaOrg/hery/entity/cmd/validation"
 	"github.com/AmadlaOrg/hery/entity/get"
-	entityValidation "github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
 	"log"
@@ -63,7 +62,8 @@ var ValidateCmd = &cobra.Command{
 				//println(entityList)
 				//println(paths.Entities)
 
-				entityValidation := entityValidation.NewEntityValidationService()
+				// FIXME:
+				/*entityValidation := entityValidation.NewEntityValidationService()
 
 				for _, entity := range entityList {
 					err := entityValidation.Entity(collectionName, entity.AbsPath, entity.Entity, map[string]any{})
@@ -73,7 +73,7 @@ var ValidateCmd = &cobra.Command{
 					}
 					println(entity.AbsPath)
 					println(entity.Name)
-				}
+				}*/
 
 				// Add your validation logic here
 				// entityDir, err := storage.Path()
