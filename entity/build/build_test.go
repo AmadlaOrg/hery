@@ -35,35 +35,40 @@ func TestMeta(t *testing.T) {
 		expectEntity         entity.Entity
 		hasError             bool
 	}{
-		// FIXME:
 		{
-			name: "Valid Entity URI Without Version",
+			name: "Valid Entity URI With Version",
 			inputPaths: storage.AbsPaths{
-				Entities: "testdata",
+				Entities: "/home/user/.hery/amadla/entity/",
 			},
-			inputEntityUri:    "github.com/example/entity",
-			internalEntityDir: "testdata/entity_remote.txt",
+			inputEntityUri:    "github.com/example/entity@v1.0.0",
+			internalEntityDir: "/home/user/.hery/amadla/entity/github.com/example/entity@v1.0.0",
 			mockValidation: func(mockValidation *validation.MockEntityValidation) {
-				mockValidation.EXPECT().EntityUri("github.com/example/entity").Return(true)
+				mockValidation.EXPECT().EntityUri("github.com/example/entity@v1.0.0").Return(true)
 			},
 			mockEntityVersion: func(mockEntityVersion *version.MockEntityVersion) {
-				mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0"}, nil)
-				mockEntityVersion.EXPECT().Latest([]string{"v1.0.0"}).Return("v1.0.0", nil)
+				mockEntityVersion.EXPECT().Extract("github.com/example/entity@v1.0.0").Return("v1.0.0", nil)
+				//mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0"}, nil)
+				//mockEntityVersion.EXPECT().Latest([]string{"v1.0.0"}).Return("v1.0.0", nil)
 			},
 			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockEntityVersionValidation) {
 				// No specific mocks needed for validation in this case
+				//mockEntityVersionVal.EXPECT().
 			},
 			expectEntity: entity.Entity{
 				Id:              "dca736d3-26c4-46b2-be5a-dfbdc09cff6d",
-				Entity:          "https://github.com/example/entity@v1.0.0",
+				Entity:          "github.com/example/entity@v1.0.0",
 				Name:            "entity",
 				RepoUrl:         "https://github.com/example/entity",
-				Origin:          "https://github.com/example/",
+				Origin:          "github.com/example/",
 				Version:         "v1.0.0",
+				LatestVersion:   false,
 				IsPseudoVersion: false,
-				AbsPath:         "testdata/entity_remote.txt",
-				Have:            true, // TODO: Double check
+				AbsPath:         "/home/user/.hery/amadla/entity/github.com/example/entity@v1.0.0",
+				Have:            true,
+				Hash:            "",
 				Exist:           true,
+				Schema:          nil,
+				Config:          nil,
 			},
 			hasError: false,
 		},
