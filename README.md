@@ -36,7 +36,7 @@ HERY format comes with four different reserved properties:
 - `_id` - To be able to make reference to a specific entity content
 
 Here is an example:
-```hery
+```yaml
 ---
 _meta:
   _entity: github.com/AmadlaOrg/Entity@latest
