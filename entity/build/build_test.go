@@ -47,12 +47,9 @@ func TestMeta(t *testing.T) {
 			},
 			mockEntityVersion: func(mockEntityVersion *version.MockEntityVersion) {
 				mockEntityVersion.EXPECT().Extract("github.com/example/entity@v1.0.0").Return("v1.0.0", nil)
-				//mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0"}, nil)
-				//mockEntityVersion.EXPECT().Latest([]string{"v1.0.0"}).Return("v1.0.0", nil)
 			},
 			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockEntityVersionValidation) {
 				// No specific mocks needed for validation in this case
-				//mockEntityVersionVal.EXPECT().
 			},
 			expectEntity: entity.Entity{
 				Id:              "dca736d3-26c4-46b2-be5a-dfbdc09cff6d",
@@ -65,6 +62,44 @@ func TestMeta(t *testing.T) {
 				IsPseudoVersion: false,
 				AbsPath:         "/home/user/.hery/amadla/entity/github.com/example/entity@v1.0.0",
 				Have:            true,
+				Hash:            "",
+				Exist:           true,
+				Schema:          nil,
+				Config:          nil,
+			},
+			hasError: false,
+		},
+		{
+			name: "Valid Entity URI With Latest Version",
+			inputPaths: storage.AbsPaths{
+				Entities: "/home/user/.hery/amadla/entity/",
+			},
+			inputEntityUri:       "github.com/example/entity@latest",
+			internalEntityDir:    "",
+			internalEntityDirErr: entity.ErrorNotFound, // Not found since `latest` should never be used in directory name (only the latest static version or pseudo version)
+			mockValidation: func(mockValidation *validation.MockEntityValidation) {
+				mockValidation.EXPECT().EntityUri("github.com/example/entity@latest").Return(true)
+			},
+			mockEntityVersion: func(mockEntityVersion *version.MockEntityVersion) {
+				mockEntityVersion.EXPECT().Extract("github.com/example/entity@latest").Return("latest", nil)
+				mockEntityVersion.EXPECT().List("https://github.com/example/entity").Return([]string{"v1.0.0", "v1.0.1"}, nil)
+				mockEntityVersion.EXPECT().Latest([]string{"v1.0.0", "v1.0.1"}).Return("v1.0.1", nil)
+			},
+			mockEntityVersionVal: func(mockEntityVersionVal *versionValidationPkg.MockEntityVersionValidation) {
+				// No specific mocks needed for validation in this case
+				//mockEntityVersionVal.EXPECT().
+			},
+			expectEntity: entity.Entity{
+				Id:              "dca736d3-26c4-46b2-be5a-dfbdc09cff6d",
+				Entity:          "github.com/example/entity@v1.0.1",
+				Name:            "entity",
+				RepoUrl:         "https://github.com/example/entity",
+				Origin:          "github.com/example/",
+				Version:         "v1.0.1",
+				LatestVersion:   true,
+				IsPseudoVersion: false,
+				AbsPath:         "/home/user/.hery/amadla/entity/github.com/example/entity@v1.0.1",
+				Have:            false,
 				Hash:            "",
 				Exist:           true,
 				Schema:          nil,
@@ -412,14 +447,20 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			internalEntityVersionLatest:            "",
 			internalEntityVersionLatestErr:         nil,
 			expectEntity: entity.Entity{
-				Entity:          "github.com/AmadlaOrg/Entity@latest",
+				Id:              "",
+				Entity:          "github.com/AmadlaOrg/Entity@v0.0.0-20240823005443-9b4947da3948",
 				Name:            "Entity",
 				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-				Origin:          "github.com/AmadlaOrg/Entity@latest",
+				Origin:          "github.com/AmadlaOrg/",
 				Version:         "v0.0.0-20240823005443-9b4947da3948",
+				LatestVersion:   true,
 				IsPseudoVersion: true,
+				AbsPath:         "",
 				Have:            false,
+				Hash:            "",
 				Exist:           false,
+				Schema:          nil,
+				Config:          nil,
 			},
 			hasError: false,
 		},
@@ -434,14 +475,19 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			internalEntityVersionLatest:            "v3.0.0",
 			internalEntityVersionLatestErr:         nil,
 			expectEntity: entity.Entity{
-				Entity:          "github.com/AmadlaOrg/Entity@latest",
+				Entity:          "github.com/AmadlaOrg/Entity@v3.0.0",
 				Name:            "Entity",
 				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-				Origin:          "github.com/AmadlaOrg/Entity@latest",
+				Origin:          "github.com/AmadlaOrg/",
 				Version:         "v3.0.0",
+				LatestVersion:   true,
 				IsPseudoVersion: false,
+				AbsPath:         "",
 				Have:            false,
+				Hash:            "",
 				Exist:           false,
+				Schema:          nil,
+				Config:          nil,
 			},
 			hasError: false,
 		},

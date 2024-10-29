@@ -55,9 +55,10 @@ func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, 
 	}
 
 	dir, err := s.Entity.FindEntityDir(paths, entityVals)
-	if !errors.Is(err, entity.ErrorNotFound) &&
-		!errors.Is(err, entity.ErrorMultipleFound) &&
+	if !errors.Is(err, entity.ErrorNotFound) && // If the directory or path was not found
+		!errors.Is(err, entity.ErrorMultipleFound) && // In some cases where there are multiple directory for the same entity with multiple pseudo versions
 		err != nil {
+		// Returns an error when it is outside just not found or multiple directories
 		return entityVals, err
 	} else if err == nil {
 		entityVals.AbsPath = dir
@@ -207,6 +208,8 @@ func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (ent
 			}
 			entityVals.IsPseudoVersion = false
 		}
+		entityVals.LatestVersion = true
+		entityUri = fmt.Sprintf("%s@%s", entityUriWithoutVersion, entityVersion)
 	} else if !s.EntityVersionValidation.Format(entityVersion) &&
 		!s.EntityVersionValidation.PseudoFormat(entityVersion) {
 		return entityVals, fmt.Errorf("invalid entity version format: %v", entityVersion)
@@ -222,7 +225,7 @@ func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (ent
 	return entityVals, nil
 }
 
-// constructOrigin
+// constructOrigin generates the last part of the full path from the repository URI host and path with the version
 func (s *SBuild) constructOrigin(entityUri, name, version string) string {
 	return strings.Replace(
 		entityUri,
