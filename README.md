@@ -26,8 +26,8 @@ HERY does not require a lot of learning to get started. All you need to know is 
 commands and understand some of the basics of the query language.
 
 ### `.hery` File Format
-The `.hery` file format is the same as a `.yml`/`.yaml` file. The reason the extension is different is so that `hery`
-CLI is able to find it and so that IDEs can have better support.
+The `.hery` file format is the same as a `.yml`/`.yaml` file format. The reason the extension is different is so that
+`hery` CLI is able to find it and so that IDEs can have better support.
 
 HERY format comes with four different reserved properties:
 - `_meta` - For metadata for the relative entity
@@ -61,7 +61,7 @@ is ignored.
 ### Caching
 Since the querying on YAML files would be a bit slow and resource demanding, SQLite is used to store all the entities.
 
-Each entity has its own table and it is found: `~/.hery/collection/<collection name>/<collection name>.cache`.
+Each entity has its own table, and it is found: `~/.hery/collection/<collection name>/<collection name>.cache`.
 
 ### Basic Commands
 To verify that it was installed properly:
@@ -112,46 +112,9 @@ To get more details on the functioning and commands: [.docs](.docs).
 
        ![Atom icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/atom.png) [Atom](.editor/atom.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-atom-editor-plugin))
 
-### Create Entity
-1. Create repository
-2. Make a dot directory with the collection name at the root of the repository:
-   - `mkdir -p .<collection name>`
-3. Make `.hery` configuration file with the collection name at the root of the repository
-   - `touch <collection name>.hery`
-4. Make a `schema.json` configuration file in the `.<collection name>` directory
-   - `touch ./.<collection name>/schema.json`
-5. Add the content in `.hery` configuration file and the `schema.json` [JSON-Schema](https://json-schema.org/)
-6. Add it in git:
-   - `git add .`
-   - `git commit -m "Batman"`
-
-### Manage Tag Versioning
-Steps to add a tag:
-```bash
-git tag -a v1.0.0-alpha.1
-git push --tags
-```
-
-### Entity version numbering
-HERY follows the same [versioning standard as Golang](https://go.dev/doc/modules/version-numbers).
-
-| Version stage                         | Example                                                              | Description                                                                                                                                                       |
-|---------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| In development                        | Automatic pseudo-version number `v0.0.0-20170915032832-14c0d48ead0c` | Indicates that the module is currently **in development and is considered unstable**. This release does not offer backward compatibility or stability assurances. |
-| Major version                         | `v1.x.x`                                                             | Indicates **public API changes that are not backward-compatible**. This release does not guarantee compatibility with previous major versions.                    |
-| Minor version                         | `vx.4.x`                                                             | Indicates **public API changes that are backward-compatible**. This release guarantees both backward compatibility and stability.                                 |
-| Patch version                         | `vx.x.1`                                                             | Indicates **changes that do not impact the module's public API or its dependencies**. This release ensures backward compatibility and stability.                  |
-| Pre-release version (alpha, beta, rc) | `vx.x.x-beta.2`                                                      | Indicates that this is a **pre-release milestone, such as an alpha or beta version**. This release does not offer any stability guarantees.                       |
-
 ### Giving Credit
 The `.pairs` file is a great way to add details about the people that contributed to the entity. There is one used in
 this repository that can be used as reference.
-
-### Check dependencies
-Useful to check that libraries for testing and development don't find themselves in the build version of the project:
-```bash
-go list -f '{{.Deps}}' ./main.go
-```
 
 > TODO: Create a script to blacklist certain libraries.
 > Also useful for security.

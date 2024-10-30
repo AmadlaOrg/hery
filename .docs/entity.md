@@ -93,3 +93,16 @@ _body:
       _body:
         title: Hello World!
 ```
+
+### Create Entity
+1. Create repository
+2. Make a dot directory with the collection name at the root of the repository:
+    - `mkdir -p .<collection name>`
+3. Make `.hery` configuration file with the collection name at the root of the repository
+    - `touch <collection name>.hery`
+4. Make a `schema.json` configuration file in the `.<collection name>` directory
+    - `touch ./.<collection name>/schema.json`
+5. Add the content in `.hery` configuration file and the `schema.json` [JSON-Schema](https://json-schema.org/)
+6. Add it in git:
+    - `git add .`
+    - `git commit -m "Batman"`

@@ -25,6 +25,23 @@ type SVersion struct {
 }
 
 // Extract extracts the version from a go get URI.
+//
+// There are three types of versions that can be extracted:
+// 1. Normal version (e.g.: v1.0.1, vx.x.x-beta.2)
+// 2. Pseudo version (e.g.: v0.0.0-20240924093300-abcd1234efgh)
+// 3. latest version (set or not set after the `@`)
+//
+// Normal version is detailed in the README at the root of the project and https://go.dev/doc/modules/version-numbers
+// More information can also be found in: ./docs/version.md
+//
+// Pseudo version:
+// - The first part will always contain: v0.0.0 // TODO: Golang seems the contain numbers at times... Maybe after a new commit following the most recent tagging of a version
+// - The second part after the dash `-` is the date of when the entity was downloaded (for this reason it is "dynamic" and changing from one host to another) // TODO: Maybe this needs to be changed for the caching to be portable with pseudo versions. Second way: check the hash in the caching and then use the dating in the caching when it is re-downloaded (but this would make caching more of a higher authority)
+// - The third part after the second dash `-` is a portion of the hash of the git commit that was downloaded (static and portable)
+//
+// The version type `latest` in two different ways:
+// - If no version found the caller needs to check for the error type `ErrorExtractNoVersionFound` and determine if to set the entity version to `latest` or not
+// - If it was set to then out put it as such
 func (s *SVersion) Extract(url string) (string, error) {
 	versionAnnotationCount := strings.Count(url, "@")
 	if versionAnnotationCount > 1 {
