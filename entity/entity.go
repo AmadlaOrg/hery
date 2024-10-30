@@ -83,13 +83,15 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 		// 2.3: Extract the entity based on some entity property values
 		if entityVersion == "latest" {
 			for _, entity := range s.Entities {
-				if entity.LatestVersion && entity.RepoUrl == entityVals.RepoUrl {
+				if entity.LatestVersion &&
+					entity.RepoUrl == entityVals.RepoUrl {
 					return entity, nil
 				}
 			}
 		} else {
 			for _, entity := range s.Entities {
-				if !entity.LatestVersion && entity.Version == entityVersion && entity.RepoUrl == entityVals.RepoUrl {
+				if entity.Version == entityVersion &&
+					entity.RepoUrl == entityVals.RepoUrl {
 					return entity, nil
 				}
 			}
@@ -104,7 +106,8 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 
 		var matchingEntities []Entity
 		for _, entity := range s.Entities {
-			if entity.LatestVersion && entity.RepoUrl == entityVals.RepoUrl {
+			if entity.LatestVersion &&
+				entity.RepoUrl == entityVals.RepoUrl {
 				return entity, nil
 			} else {
 				matchingEntities = append(matchingEntities, entity)

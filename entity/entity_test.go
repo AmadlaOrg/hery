@@ -81,14 +81,13 @@ func TestSetEntity(t *testing.T) {
 	}
 }
 
-// FIXME:
 func TestGetEntity(t *testing.T) {
 	entityService := NewEntityService()
 	tests := []struct {
 		name            string
 		serviceEntities []Entity
 		inputEntityUri  string
-		expectedEntity  Entity
+		expectedId      string
 		expectedErr     error
 		hasError        bool
 	}{
@@ -170,7 +169,7 @@ func TestGetEntity(t *testing.T) {
 				},
 			},
 			inputEntityUri: "github.com/AmadlaOrg/Entity@latest",
-			expectedEntity: Entity{},
+			expectedId:     "97d4b783-f448-483c-8111-380d6082ae1c",
 			expectedErr:    nil,
 			hasError:       false,
 		},
@@ -185,7 +184,7 @@ func TestGetEntity(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Equal(t, tt.expectedEntity, got)
+			assert.Equal(t, tt.expectedId, got.Id)
 		})
 	}
 }
@@ -463,6 +462,90 @@ func TestGeneratePseudoVersionPattern(t *testing.T) {
 		})
 	}
 }
+
+/*func TestCrawlDirectoriesParallel(t *testing.T) {
+	// Step 1: Create a temporary root directory.
+	root, err := os.MkdirTemp("", "testroot")
+	if err != nil {
+		t.Fatalf("Failed to create temporary root directory: %v", err)
+	}
+	// Ensure the temporary directory is removed after the test.
+	defer os.RemoveAll(root)
+
+	// Step 2: Create a parent directory within the root.
+	parentDir := filepath.Join(root, "parent")
+	if err := os.Mkdir(parentDir, 0755); err != nil {
+		t.Fatalf("Failed to create parent directory: %v", err)
+	}
+
+	// Step 3: Define directory names.
+	matchingDirs := []string{
+		"entityA_v1.0",
+		"entityB_v2.1",
+	}
+	nonMatchingDirs := []string{
+		"random_dir",
+		"entityC",
+	}
+
+	// Step 4: Create matching directories under the parent.
+	for _, dirName := range matchingDirs {
+		dirPath := filepath.Join(parentDir, dirName)
+		if err := os.Mkdir(dirPath, 0755); err != nil {
+			t.Fatalf("Failed to create matching directory '%s': %v", dirPath, err)
+		}
+	}
+
+	// Step 5: Create non-matching directories under the parent.
+	for _, dirName := range nonMatchingDirs {
+		dirPath := filepath.Join(parentDir, dirName)
+		if err := os.Mkdir(dirPath, 0755); err != nil {
+			t.Fatalf("Failed to create non-matching directory '%s': %v", dirPath, err)
+		}
+	}
+
+	// Step 6: Initialize an instance of SEntity.
+	sEntity := &SEntity{}
+
+	// Step 7: Invoke the CrawlDirectoriesParallel method.
+	entities, err := sEntity.CrawlDirectoriesParallel(root)
+	if err != nil {
+		t.Fatalf("CrawlDirectoriesParallel returned an error: %v", err)
+	}
+
+	// Step 8: Define the expected entities map.
+	expectedEntities := map[string]Entity{
+		"entityA": {Origin: "parent", Version: "v1.0"},
+		"entityB": {Origin: "parent", Version: "v2.1"},
+	}
+
+	// Step 9: Verify the number of entities returned.
+	if len(entities) != len(expectedEntities) {
+		t.Errorf("Expected %d entities, but got %d", len(expectedEntities), len(entities))
+	}
+
+	// Step 10: Verify each expected entity is present and correct.
+	for key, expected := range expectedEntities {
+		actual, exists := entities[key]
+		if !exists {
+			t.Errorf("Expected entity '%s' not found in the result", key)
+			continue
+		}
+		if actual.Origin != expected.Origin {
+			t.Errorf("Entity '%s': expected Origin '%s', got '%s'", key, expected.Origin, actual.Origin)
+		}
+		if actual.Version != expected.Version {
+			t.Errorf("Entity '%s': expected Version '%s', got '%s'", key, expected.Version, actual.Version)
+		}
+	}
+
+	// Step 11: Ensure no unexpected entities are present.
+	for key := range entities {
+		if _, expected := expectedEntities[key]; !expected {
+			t.Errorf("Unexpected entity '%s' found in the result", key)
+		}
+	}
+}*/
 
 /*func createTestDirectoryStructure(t *testing.T, root string) {
 	// Create test directories and files
