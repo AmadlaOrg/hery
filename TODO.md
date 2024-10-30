@@ -1,6 +1,6 @@
 # TODO
-[ ] Making pseudo versioning portable (will making caching a higher authority)
-[ ] Pseudo version first part (v0.0.0) should this following the previous tagging version
+- [ ] Making pseudo versioning portable (will making caching a higher authority)
+- [ ] Pseudo version first part (v0.0.0) should this following the previous tagging version
 
 ## Notes
 ### Check dependencies
