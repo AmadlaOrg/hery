@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 )
@@ -10,6 +11,7 @@ func NewEntityService() *SEntity {
 	return &SEntity{
 		EntityVersion:           version.NewEntityVersionService(),
 		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
+		EntityValidation:        validation.NewEntityValidationService(),
 
 		// Data
 		Entities: []Entity{},

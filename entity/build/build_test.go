@@ -693,6 +693,13 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 	}
 }
 
+func TestMetaFromLocalWithVersion_Error_FromExtractRepoUrl(t *testing.T) {
+	builder := SBuild{}
+	_, err := builder.metaFromLocalWithVersion("https://github.com", "v1.0.0")
+
+	assert.Error(t, err)
+}
+
 func TestConstructOrigin(t *testing.T) {
 	mockBuilder := SBuild{}
 

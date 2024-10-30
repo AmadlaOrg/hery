@@ -3,6 +3,7 @@ package entity
 import (
 	"errors"
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
@@ -29,6 +30,7 @@ type IEntity interface {
 type SEntity struct {
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.IValidation
+	EntityValidation        validation.IValidation
 
 	// Data
 	Entities []Entity
@@ -50,6 +52,10 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 		}
 		err error
 	)
+
+	if !s.EntityValidation.EntityUri(entityUri) {
+		return entityVals, errors.New("invalid entity url")
+	}
 
 	// 2. Looks up the entity URI version
 	if strings.Contains(entityUri, "@") {

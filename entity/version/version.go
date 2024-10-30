@@ -39,7 +39,9 @@ func (s *SVersion) Extract(url string) (string, error) {
 		return "", errors.Join(ErrorExtractNoVersionFound, fmt.Errorf("url: %s", url))
 	}
 
-	if !regexp.MustCompile(Format).MatchString(matches[1]) {
+	if matches[1] == "latest" {
+		return "latest", nil
+	} else if !regexp.MustCompile(Format).MatchString(matches[1]) {
 		return "", errors.Join(ErrorExtractInvalidVersion, fmt.Errorf("invalid version format: %s", matches[1]))
 	}
 
