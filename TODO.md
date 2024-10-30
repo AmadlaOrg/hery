@@ -10,3 +10,6 @@ Useful to check that libraries for testing and development don't find themselves
 ```bash
 go list -f '{{.Deps}}' ./main.go
 ```
+
+> TODO: Create a script to blacklist certain libraries.
+> Also useful for security.

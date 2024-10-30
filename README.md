@@ -112,13 +112,6 @@ To get more details on the functioning and commands: [.docs](.docs).
 
        ![Atom icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/atom.png) [Atom](.editor/atom.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-atom-editor-plugin))
 
-### Giving Credit
-The `.pairs` file is a great way to add details about the people that contributed to the entity. There is one used in
-this repository that can be used as reference.
-
-> TODO: Create a script to blacklist certain libraries.
-> Also useful for security.
-
 ## ©️ Copyright
 - "[The Bear and Honey.](https://www.flickr.com/photos/97123293@N07/29003630251)" by [Swallowtail Garden Seeds](https://www.flickr.com/photos/97123293@N07) is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/?ref=openverse).
 
