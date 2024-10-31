@@ -20,12 +20,12 @@ func (_m *MockEntitySchema) EXPECT() *MockEntitySchema_Expecter {
 	return &MockEntitySchema_Expecter{mock: &_m.Mock}
 }
 
-// ExtractSelfEntity provides a mock function with given fields: heryContent
-func (_m *MockEntitySchema) ExtractSelfEntity(heryContent map[string]interface{}) map[string]interface{} {
+// ExtractBody provides a mock function with given fields: heryContent
+func (_m *MockEntitySchema) ExtractBody(heryContent map[string]interface{}) map[string]interface{} {
 	ret := _m.Called(heryContent)
 
 	if len(ret) == 0 {
-		panic("no return value specified for ExtractSelfEntity")
+		panic("no return value specified for ExtractBody")
 	}
 
 	var r0 map[string]interface{}
@@ -40,30 +40,30 @@ func (_m *MockEntitySchema) ExtractSelfEntity(heryContent map[string]interface{}
 	return r0
 }
 
-// MockEntitySchema_ExtractSelfEntity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ExtractSelfEntity'
-type MockEntitySchema_ExtractSelfEntity_Call struct {
+// MockEntitySchema_ExtractBody_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ExtractBody'
+type MockEntitySchema_ExtractBody_Call struct {
 	*mock.Call
 }
 
-// ExtractSelfEntity is a helper method to define mock.On call
+// ExtractBody is a helper method to define mock.On call
 //   - heryContent map[string]interface{}
-func (_e *MockEntitySchema_Expecter) ExtractSelfEntity(heryContent interface{}) *MockEntitySchema_ExtractSelfEntity_Call {
-	return &MockEntitySchema_ExtractSelfEntity_Call{Call: _e.mock.On("ExtractSelfEntity", heryContent)}
+func (_e *MockEntitySchema_Expecter) ExtractBody(heryContent interface{}) *MockEntitySchema_ExtractBody_Call {
+	return &MockEntitySchema_ExtractBody_Call{Call: _e.mock.On("ExtractBody", heryContent)}
 }
 
-func (_c *MockEntitySchema_ExtractSelfEntity_Call) Run(run func(heryContent map[string]interface{})) *MockEntitySchema_ExtractSelfEntity_Call {
+func (_c *MockEntitySchema_ExtractBody_Call) Run(run func(heryContent map[string]interface{})) *MockEntitySchema_ExtractBody_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(map[string]interface{}))
 	})
 	return _c
 }
 
-func (_c *MockEntitySchema_ExtractSelfEntity_Call) Return(_a0 map[string]interface{}) *MockEntitySchema_ExtractSelfEntity_Call {
+func (_c *MockEntitySchema_ExtractBody_Call) Return(_a0 map[string]interface{}) *MockEntitySchema_ExtractBody_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockEntitySchema_ExtractSelfEntity_Call) RunAndReturn(run func(map[string]interface{}) map[string]interface{}) *MockEntitySchema_ExtractSelfEntity_Call {
+func (_c *MockEntitySchema_ExtractBody_Call) RunAndReturn(run func(map[string]interface{}) map[string]interface{}) *MockEntitySchema_ExtractBody_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -3,7 +3,6 @@ package get
 import (
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/storage"
-	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -41,7 +40,7 @@ func TestDownload(t *testing.T) {
 					Have:            true,
 					Hash:            "",
 					Exist:           true,
-					Schema:          &jsonschema.Schema{},
+					Schema:          nil,
 					Config:          nil,
 				},
 				{
@@ -57,7 +56,7 @@ func TestDownload(t *testing.T) {
 					Have:            true,
 					Hash:            "",
 					Exist:           true,
-					Schema:          &jsonschema.Schema{},
+					Schema:          nil,
 					Config:          nil,
 				},
 				{
@@ -73,7 +72,7 @@ func TestDownload(t *testing.T) {
 					Have:            true,
 					Hash:            "",
 					Exist:           true,
-					Schema:          &jsonschema.Schema{},
+					Schema:          nil,
 					Config:          nil,
 				},
 			},

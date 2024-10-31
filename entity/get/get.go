@@ -14,6 +14,15 @@ import (
 	"sync"
 )
 
+// TODO: Change name to Retrieve. Get is to generic and can cause confusion (e.g.: used in certain patterns)
+
+const perm os.FileMode = os.ModePerm
+
+// For easier mocking
+var (
+	osMkdirAll = os.MkdirAll
+)
+
 // IGet is an interface for getting entities.
 type IGet interface {
 	GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error)
@@ -109,8 +118,9 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 			// 3. Entity validation
 			// 3.1: Retrieve the `_entity`
 
-			// 3.2: Extracted _self entity validation
-			if selfEntity := s.Schema.ExtractSelfEntity(heryContent); selfEntity != nil {
+			// 3.2: Extracted _body entity validation
+			// TODO: this used to be the logic for _self
+			if selfEntity := s.Schema.ExtractBody(heryContent); selfEntity != nil {
 
 				selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
 				selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
@@ -125,7 +135,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 					return
 				}
 
-				delete(heryContent, "_self")
+				delete(heryContent, "_body")
 
 				err = s.EntityValidation.Entity(collectionName, selfEntitySchema, selfEntity)
 				if err != nil {
@@ -133,7 +143,8 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 					return
 				}
 			} else {
-				// No `_self`
+				// No `_body`
+				// TODO: Double check
 
 			}
 
@@ -186,7 +197,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 // TODO: Might want to add hashing of the entity once it was downloaded to have verification that nothing was corrupted for Fail Fast principal
 func (s *SGet) addRepo(entityMeta entity.Entity) error {
 	// 1. Create the directory if it does not exist
-	err := os.MkdirAll(entityMeta.AbsPath, os.ModePerm)
+	err := osMkdirAll(entityMeta.AbsPath, perm)
 	if err != nil {
 		return err
 	}
@@ -208,19 +219,21 @@ func (s *SGet) addRepo(entityMeta entity.Entity) error {
 
 // collectSubEntities Calls on download function with the entity URIs that were found in the `_entity`
 //
-// For the `_self` contains the initial configuration of the setup of the entity `.hery` configuration. It might contain
+// For the `_body` contains the initial configuration of the setup of the entity `.hery` configuration. It might contain
 // `_entity` and this function also pulls those sub entities.
 //
 // download function is call because inside any entities there might be again sub entities.
+// TODO: Needs to be reviewed based on the new structure
 func (s *SGet) collectSubEntities(
 	collectionName string,
 	storagePaths *storage.AbsPaths,
 	henryContent map[string]interface{}) error {
 
 	// 1. Loops through the properties found in the `.hery` configuration file
-	// found in the `_entity` or the `_entity` in `_self`
+	// found in the `_entity` or the `_entity` in `_body`
 	var subEntitiesMeta []entity.Entity
 	for key, value := range henryContent {
+		// TODO: There is multiple keys that are at the same level that can be present: _entity, _meta, _id, and _body
 		if key == "_entity" {
 			entityPath, ok := value.(string)
 			if !ok {
@@ -231,7 +244,7 @@ func (s *SGet) collectSubEntities(
 				return fmt.Errorf("error fetching sub entity meta: %v", err)
 			}
 			subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
-		} else if key == "_self" {
+		} else if key == "_body" {
 			selfMap, ok := value.(map[string]interface{})
 			if !ok {
 				return fmt.Errorf("error converting yaml entity to string: %v", value)

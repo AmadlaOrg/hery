@@ -72,7 +72,7 @@ import (
 						"pattern":     "^[a-zA-Z0-9_\\-:/]+$",
 						"description": "A unique identifier for an entity dataset.",
 					},
-					"_self": map[string]any{
+					"_body": map[string]any{
 						"type":                 "object",
 						"description":          "Used to reference the current entity inside another entity, so that there is no need to use _entity to define the entity block. In other words, it is a shorthand for _entity to reference the current entity.",
 						"additionalProperties": true,
