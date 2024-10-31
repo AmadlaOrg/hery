@@ -18,11 +18,11 @@ type IStorage interface {
 }
 
 type AbsPaths struct {
-	Storage    string
-	Catalog    string
-	Collection string
-	Entities   string
-	Cache      string
+	Storage    string // e.g.: /home/user/.hery/
+	Catalog    string // e.g.: /home/user/.hery/collection/
+	Collection string // e.g.: /home/user/.hery/collection/amadla/
+	Entities   string // e.g.: /home/user/.hery/collection/amadla/entity/
+	Cache      string // e.g.: /home/user/.hery/collection/amadla/amadla.cache
 }
 
 const perm os.FileMode = os.ModePerm

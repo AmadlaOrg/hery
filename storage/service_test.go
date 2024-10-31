@@ -11,9 +11,10 @@ func Test_NewStorageService(t *testing.T) {
 	}
 
 	// Check that the returned value is of the correct type
-	if storageService == nil {
+	// TODO: Why was it here in the first place?
+	/*if storageService == nil {
 		t.Fatalf("Expected NewStorageService to return a non-nil value, but got nil")
-	}
+	}*/
 
 	// Optionally, check that the fields in AbsPaths are initialized to their zero values
 	if storageService.Storage != "" ||

@@ -17,6 +17,10 @@ import (
 	"sync"
 )
 
+var (
+	yamlUnmarshal = yaml.Unmarshal
+)
+
 // IEntity used for mock
 type IEntity interface {
 	FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error)
@@ -283,7 +287,7 @@ func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
 	}
 
 	var current map[string]interface{}
-	err = yaml.Unmarshal(content, &current)
+	err = yamlUnmarshal(content, &current)
 	if err != nil {
 		return nil, err
 	}
