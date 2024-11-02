@@ -5,21 +5,39 @@
   "description": "Defines the foundational HERY entity properties. This schema sets the foundational structure for entities in the HERY system, including reserved properties that are crucial for entity identification and referencing within the system.",
   "type": "object",
   "properties": {
+    "_meta": {
+      "$ref": "#/$defs/_meta"
+    },
     "_entity": {
       "$ref": "#/$defs/_entity"
     },
     "_id": {
       "$ref": "#/$defs/_id"
     },
-    "_self": {
-      "$ref": "#/$defs/_self"
+    "_body": {
+      "$ref": "#/$defs/_body"
     }
   },
-  "required": [
-    "_entity"
-  ],
   "additionalProperties": false,
   "$defs": {
+    "_meta": {
+      "type": "object",
+      "description": "",
+      "properties": {
+        "_meta": {
+          "$ref": "#/$defs/_meta"
+        },
+        "_entity": {
+          "$ref": "#/$defs/_entity"
+        },
+        "_id": {
+          "$ref": "#/$defs/_id"
+        },
+        "_body": {
+          "$ref": "#/$defs/_body"
+        }
+      }
+    },
     "_entity": {
       "type": "string",
       "format": "uri-reference",
@@ -30,15 +48,9 @@
       "pattern": "^[a-zA-Z0-9_\\-:/]+$",
       "description": "A unique identifier for an entity dataset. Allowed characters include letters, numbers, underscores, hyphens, colons, and slashes."
     },
-    "_self": {
+    "_body": {
       "type": "object",
-      "description": "Used to reference the current entity inside another entity.",
-      "properties": {
-        "_id": {
-          "$ref": "#/$defs/_id"
-        }
-      },
-      "additionalProperties": false
+      "description": "Used to reference the current entity inside another entity."
     }
   }
 }

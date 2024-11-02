@@ -1,8 +1,8 @@
 ---
-_entity: "example.com/entity/12345"
-name: "SomeName"
+_meta:
+  name: "SomeName"
 _something_random: "WrOnG!"
-_self:
+_body:
   _id: "self:id:1231243"
   property: Some Value!
   array_property: ["Hello", "World!"]

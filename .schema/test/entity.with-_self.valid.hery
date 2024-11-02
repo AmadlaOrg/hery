@@ -1,7 +1,6 @@
 ---
-_entity: "example.com/entity/12345"
-_self:
-  _id: "self:id:1231243"
+_id: "self:id:1231243"
+_body:
   property: Some Value!
   array_property: ["Hello", "World!"]
   obj_property:
