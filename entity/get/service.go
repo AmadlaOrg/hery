@@ -10,7 +10,7 @@ import (
 )
 
 // NewGetService to set up the Get service
-func NewGetService() *SGet {
+func NewGetService() IGet {
 	return &SGet{
 		Git:                     utilGit.NewGitService(),
 		Entity:                  entity.NewEntityService(),

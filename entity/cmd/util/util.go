@@ -12,7 +12,7 @@ type IUtil interface {
 	Concoct(
 		cmd *cobra.Command,
 		args []string,
-		handler func(collectionName string, paths *storage.AbsPaths, args []string))
+		handler func(collectionName string, paths *storage.AbsPaths, args []string)) error
 }
 
 type SUtil struct {

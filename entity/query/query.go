@@ -9,10 +9,14 @@ import (
 	"v.io/v23/glob"
 )
 
-type Query struct{}
+type IQuery interface {
+	Query(args []string)
+}
+
+type SQuery struct{}
 
 // Query
-func (q *Query) Q(args []string) {
+func (q *SQuery) Query(args []string) {
 	for _, arg := range args {
 		if arg == "!" {
 			continue

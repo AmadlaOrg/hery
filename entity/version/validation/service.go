@@ -5,7 +5,7 @@ import (
 )
 
 // NewEntityVersionValidationService to set up the Entity version validation service
-func NewEntityVersionValidationService() *SValidation {
+func NewEntityVersionValidationService() IValidation {
 	return &SValidation{
 		Version: version.NewEntityVersionService(),
 	}

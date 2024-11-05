@@ -26,7 +26,7 @@ var (
 // IGet is an interface for getting entities.
 type IGet interface {
 	GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error)
-	Get(collectionName string, storagePath string, args []string) error
+	Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error
 	download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
 }
 

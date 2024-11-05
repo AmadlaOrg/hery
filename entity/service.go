@@ -7,7 +7,7 @@ import (
 )
 
 // NewEntityService to set up the entity build service
-func NewEntityService() *SEntity {
+func NewEntityService() IEntity {
 	return &SEntity{
 		EntityVersion:           version.NewEntityVersionService(),
 		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),

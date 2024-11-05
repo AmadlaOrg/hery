@@ -11,7 +11,7 @@ import (
 
 // IClient
 type IClient interface {
-	Connect() error
+	Connect()
 }
 
 // SClient

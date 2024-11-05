@@ -21,6 +21,13 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityCmdUtil"
           inpackage: True
+  github.com/AmadlaOrg/hery/entity/get:
+    interfaces:
+      IGet:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockEntityGet"
+          inpackage: True
   github.com/AmadlaOrg/hery/entity/schema:
     interfaces:
       ISchema:
