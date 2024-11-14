@@ -9,6 +9,7 @@ import (
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/file"
 	"github.com/AmadlaOrg/hery/util/url"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -23,6 +24,9 @@ var (
 
 // IEntity used for mock
 type IEntity interface {
+	SetEntity(entity Entity)
+	GetEntity(entityUri string) (Entity, error)
+	GetAllEntities() []Entity
 	FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicateEntity(entities []Entity, entityMeta Entity) error
 	GeneratePseudoVersionPattern(name, version string) string
@@ -134,7 +138,27 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 	return entityVals, errors.Join(ErrorNotFound, fmt.Errorf("no entity found with uri: %s", entityUri))
 }
 
-//func (s *SEntity) SetEntitySchema(entity Entity) {}
+// GetAllEntities results of an array of entities
+func (s *SEntity) GetAllEntities() []Entity {
+	return s.Entities
+}
+
+// SetEntitySchema for appending an entity schema into the specific struct entity
+func (s *SEntity) SetEntitySchema(entity Entity, schema *jsonschema.Schema) {
+	var wg sync.WaitGroup
+	wg.Add(len(s.Entities))
+
+	for i := range s.Entities {
+		go func(i int) {
+			defer wg.Done()
+			if s.Entities[i].Id == entity.Id {
+				s.Entities[i].Schema = schema
+			}
+		}(i)
+	}
+
+	wg.Wait()
+}
 
 // FindEntityDir can find pseudo versioned entity directories and static versioned entities.
 func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
@@ -201,7 +225,7 @@ func (s *SEntity) CheckDuplicateEntity(entities []Entity, entityMeta Entity) err
 	return nil
 }
 
-// GeneratePseudoVersionPattern generates a pattern string for pseudo-versioned entities based on their name and version.
+// GeneratePseudoVersionPattern generates a pattern string for pseudo-versioned entities based on their name and version
 func (s *SEntity) GeneratePseudoVersionPattern(name, version string) string {
 	return fmt.Sprintf("%s@%s-*-%s", name, version[:6], version[22:])
 }

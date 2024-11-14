@@ -10,6 +10,6 @@ var QueryCmd = &cobra.Command{
 	Short: "Query entities",
 	Run: func(cmd *cobra.Command, args []string) {
 		queryService := query.NewQueryService()
-		queryService.Q(args)
+		queryService.Query(args)
 	},
 }

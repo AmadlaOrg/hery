@@ -76,7 +76,7 @@ func TestSetEntity(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			entityService.SetEntity(tt.inputEntity)
-			assert.Equal(t, tt.expectedEntities, entityService.Entities)
+			assert.Equal(t, tt.expectedEntities, entityService.GetAllEntities())
 		})
 	}
 }
@@ -177,7 +177,10 @@ func TestGetEntity(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			entityService.Entities = tt.serviceEntities
+			for _, entity := range tt.serviceEntities {
+				entityService.SetEntity(entity)
+			}
+
 			got, err := entityService.GetEntity(tt.inputEntityUri)
 			if tt.hasError {
 				assert.Error(t, err)
@@ -186,6 +189,40 @@ func TestGetEntity(t *testing.T) {
 			}
 			assert.Equal(t, tt.expectedId, got.Id)
 		})
+	}
+}
+
+func TestSetEntitySchema(t *testing.T) {
+	// Define a sample schema
+	oldSchema := &jsonschema.Schema{}
+	newSchema := &jsonschema.Schema{}
+
+	// Create an SEntity with a list of entities, including one with a matching ID
+	s := SEntity{
+		Entities: []Entity{
+			{Id: "1", Schema: oldSchema},
+			{Id: "2", Schema: oldSchema},
+			{Id: "3", Schema: oldSchema}, // This is the target entity
+		},
+	}
+
+	// Define the target entity with the same ID as one in s.Entities
+	targetEntity := Entity{Id: "3"}
+
+	// Call SetEntitySchema to update the schema of the matching entity
+	s.SetEntitySchema(targetEntity, newSchema)
+
+	// Check if only the matching entity was updated
+	for _, e := range s.Entities {
+		if e.Id == targetEntity.Id {
+			if e.Schema != newSchema {
+				t.Errorf("Schema was not updated for entity with ID %s", e.Id)
+			}
+		} else {
+			if e.Schema != oldSchema {
+				t.Errorf("Schema was incorrectly updated for entity with ID %s", e.Id)
+			}
+		}
 	}
 }
 
