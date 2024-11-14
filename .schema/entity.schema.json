@@ -18,7 +18,10 @@
       "$ref": "#/$defs/_body"
     }
   },
-  "additionalProperties": false,
+  "required": [
+    "_meta",
+    "_body"
+  ],
   "$defs": {
     "_meta": {
       "type": "object",

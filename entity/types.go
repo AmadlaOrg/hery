@@ -34,4 +34,16 @@ type Entity struct {
 	Exist           bool               // True if it was found and false if not found with Git remote (e.g.: true)
 	Schema          *jsonschema.Schema // The entity's JSON-Schema
 	Config          map[string]any     // From the `.hery` config file
+	Content         Content
 }
+
+// Content
+type Content struct {
+	Entity string             `json:"_entity,omitempty"`
+	Id     string             `json:"_id,omitempty"`
+	Meta   NotFormatedContent `json:"_meta"`
+	Body   NotFormatedContent `json:"_body"`
+}
+
+// NotFormatedContent
+type NotFormatedContent = map[string]any

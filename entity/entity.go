@@ -9,6 +9,7 @@ import (
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/file"
 	"github.com/AmadlaOrg/hery/util/url"
+	"github.com/google/uuid"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -20,6 +21,11 @@ import (
 
 var (
 	yamlUnmarshal = yaml.Unmarshal
+	osReadFile    = os.ReadFile
+	osStat        = os.Stat
+	osIsNotExist  = os.IsNotExist
+	filepathWalk  = filepath.Walk
+	fileExists    = file.Exists
 )
 
 // IEntity used for mock
@@ -32,6 +38,7 @@ type IEntity interface {
 	GeneratePseudoVersionPattern(name, version string) string
 	CrawlDirectoriesParallel(root string) (map[string]Entity, error)
 	Read(path, collectionName string) (map[string]any, error)
+	SetEntityContent(entity Entity, heryContent NotFormatedContent) (Content, error)
 }
 
 // SEntity used for mock
@@ -166,7 +173,7 @@ func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (stri
 		exactPath := entityVals.Entity
 
 		// Check if the directory exists
-		if _, err := os.Stat(exactPath); os.IsNotExist(err) {
+		if _, err := osStat(exactPath); osIsNotExist(err) {
 			return "", errors.Join(
 				ErrorNotFound,
 				fmt.Errorf("no matching directory found for exact version: %s", exactPath))
@@ -247,7 +254,7 @@ func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, erro
 	worker := func() {
 		defer wg.Done()
 		for path := range paths {
-			info, err := os.Stat(path)
+			info, err := osStat(path)
 			if err != nil {
 				fmt.Println("Error stating path:", err)
 				continue
@@ -280,7 +287,7 @@ func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, erro
 	}
 
 	// Walk the directory tree
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err := filepathWalk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -301,11 +308,11 @@ func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
 	heryFileName := fmt.Sprintf("%s.hery", collectionName)
 	heryPath := filepath.Join(path, heryFileName)
 
-	if !file.Exists(heryPath) {
+	if !fileExists(heryPath) {
 		return nil, fmt.Errorf("%s does not exist", heryPath)
 	}
 
-	content, err := os.ReadFile(heryPath)
+	content, err := osReadFile(heryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -317,4 +324,50 @@ func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
 	}
 
 	return current, nil
+}
+
+// SetEntityContent
+func (s *SEntity) SetEntityContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
+	// 1. Extract `_entity`
+	entitySection := heryContent["_entity"].(string)
+	if entity.Entity != "" {
+		entitySection = entity.Entity
+	} else if entitySection == "" {
+		return Content{}, errors.New("no entity section found")
+	}
+
+	// 2. Extract `_id`
+	idSection := heryContent["_id"].(string)
+	if entity.Id != "" {
+		idSection = entity.Id
+	} else if idSection == "" {
+		idSection = uuid.New().String()
+	}
+
+	// 3. Extract `_meta`
+	metaSection := heryContent["_meta"].(map[string]any)
+	if metaSection == nil {
+		return Content{
+			Entity: entitySection,
+			Id:     idSection,
+		}, errors.New("_meta section is empty")
+	}
+
+	// 4. Extract `_body`
+	bodySection := heryContent["_body"].(map[string]any)
+	if bodySection == nil {
+		return Content{
+			Entity: entitySection,
+			Id:     idSection,
+			Meta:   metaSection,
+		}, errors.New("_body section is empty")
+	}
+
+	// 5. Returns all the components of an entity content
+	return Content{
+		Entity: entitySection,
+		Id:     idSection,
+		Meta:   metaSection,
+		Body:   bodySection,
+	}, nil
 }

@@ -118,39 +118,27 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 			}
 
 			// 3. Entity validation
-			// 3.1: Retrieve the `_entity`
-
-			// 3.2: Extracted _body entity validation
-			// TODO: this used to be the logic for _self
-			if selfEntity := s.Schema.ExtractBody(heryContent); selfEntity != nil {
-
-				selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
-				selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
-				if err != nil {
-					errCh <- fmt.Errorf("error loading schema: %v", err)
-					return
-				}
-
-				err = s.EntityValidation.Entity(collectionName, selfEntitySchema, selfEntity)
-				if err != nil {
-					errCh <- fmt.Errorf("error validating entity: %v", err)
-					return
-				}
-
-				delete(heryContent, "_body")
-
-				err = s.EntityValidation.Entity(collectionName, selfEntitySchema, selfEntity)
-				if err != nil {
-					errCh <- fmt.Errorf("error validating entity: %v", err)
-					return
-				}
-			} else {
-				// No `_body`
-				// TODO: Double check
-
+			// 3.1: Extract the basic hery structure
+			content, err := s.Entity.SetEntityContent(entityMeta, heryContent)
+			if err != nil {
+				errCh <- fmt.Errorf("error setting entity content: %v", err)
+				return
 			}
 
-			// TODO: Add validation to the main entity
+			selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
+			selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
+			if err != nil {
+				errCh <- fmt.Errorf("error loading schema: %v", err)
+				return
+			}
+
+			err = s.EntityValidation.Entity(collectionName, selfEntitySchema, content.Body)
+			if err != nil {
+				errCh <- fmt.Errorf("error validating entity: %v", err)
+				return
+			}
+
+			// 3.2: Extracted _body entity section to validate
 
 			// 3. Validate the content of hery file content to make sure it does not cause is issue later in the code
 			//

@@ -14,7 +14,6 @@ import (
 // ISchema used by mockery
 type ISchema interface {
 	Load(schemaPath string) (*jsonschema.Schema, error)
-	ExtractBody(heryContent map[string]any) map[string]any
 	GenerateSchemaPath(collectionName, entityPath string) string
 	GenerateURNPrefix(collectionName string) string
 	GenerateURN(urnPrefix, entityUri string) string
@@ -29,7 +28,10 @@ type SSchema struct{}
 
 // Help with mocking
 var (
-	osOpen = os.Open
+	osOpen                = os.Open
+	filepathAbs           = filepath.Abs
+	jsonNewDecoder        = json.NewDecoder
+	jsonschemaNewCompiler = jsonschema.NewCompiler
 )
 
 // Load loads the JSON schema from a file and merges it with a base schema
@@ -41,7 +43,7 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	}
 
 	// 2. Load the HERY base schema from .schema/entity.schema.json
-	baseSchemaPath, err := filepath.Abs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
+	baseSchemaPath, err := filepathAbs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve base schema path: %w", err)
 	}
@@ -54,7 +56,7 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	mergedSchemaData := s.mergeSchemas(baseSchemaData, mainSchemaData)
 
 	// 4. Create a new compiler
-	compiler := jsonschema.NewCompiler()
+	compiler := jsonschemaNewCompiler()
 
 	// 5. Add the merged schema to the compiler as a resource
 	err = compiler.AddResource("merged_schema.json", mergedSchemaData) //bytes.NewReader(mergedSchemaJSON))
@@ -71,19 +73,9 @@ func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
 	return schema, nil
 }
 
-// ExtractBody returns the `_body` reserved property content
-// If no content found then it will return `nil`
-// TODO: Should that not be set somewhere else?
-func (s *SSchema) ExtractBody(heryContent map[string]any) map[string]any {
-	if self, ok := heryContent["_body"].(any); ok {
-		return self.(map[string]any)
-	}
-	return nil
-}
-
 // GenerateSchemaPath returns the absolute path for the entity's schema
 func (s *SSchema) GenerateSchemaPath(collectionName, entityPath string) string {
-	return filepath.Join(entityPath, "."+collectionName, EntityJsonSchemaFileName)
+	return filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), EntityJsonSchemaFileName)
 }
 
 // GenerateURNPrefix returns the URN prefix for JSON-Schema `id`
@@ -116,7 +108,7 @@ func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
 	}(file)
 
 	var schemaData map[string]any
-	if err = json.NewDecoder(file).Decode(&schemaData); err != nil {
+	if err = jsonNewDecoder(file).Decode(&schemaData); err != nil {
 		return nil, fmt.Errorf("failed to decode schema file: %w", err)
 	}
 

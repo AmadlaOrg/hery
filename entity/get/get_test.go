@@ -3,6 +3,7 @@ package get
 import (
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/build"
+	"github.com/AmadlaOrg/hery/entity/schema"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
@@ -191,8 +192,29 @@ func TestDownload(t *testing.T) {
 			mockUtilGit.EXPECT().FetchRepo(mock.Anything, mock.Anything).Return(nil)
 			mockUtilGit.EXPECT().CheckoutTag(mock.Anything, mock.Anything).Return(nil)
 
-			// TODO: After testing all the code and their results then mock all of them. This is not an integration test.
+			mockHeryContent := map[string]any{
+				"_body": map[string]any{
+					"name":        "Entity",
+					"description": "The meta Entity definition.",
+					"category":    "General",
+					"tags":        []any{"main", "master"},
+				},
+			}
 
+			mockEntity := entity.NewMockEntity(t)
+			mockEntity.EXPECT().Read(mock.Anything, mock.Anything).Return(mockHeryContent, nil)
+
+			mockHeryContentBody := mockHeryContent["_body"].(map[string]any)
+
+			mockEntitySchema := schema.NewMockEntitySchema(t)
+			mockEntitySchema.EXPECT().ExtractBody(mock.Anything).Return(mockHeryContentBody)
+			mockEntitySchema.EXPECT().GenerateSchemaPath(mock.Anything, mock.Anything).Return()
+			mockEntitySchema.EXPECT().Load(mock.Anything).Return()
+
+			mockEntityValidation := validation.NewMockEntityValidation(t)
+			mockEntityValidation.EXPECT().Entity(mock.Anything, mock.Anything, mock.Anything).Return()
+
+			// TODO: After testing all the code and their results then mock all of them. This is not an integration test.
 			getService := SGet{
 				Git:                     mockUtilGit,
 				Entity:                  entity.NewEntityService(),

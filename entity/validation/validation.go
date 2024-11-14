@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/hery/entity"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	schemaValidationPkg "github.com/AmadlaOrg/hery/entity/schema/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -14,7 +15,7 @@ import (
 // IValidation used by mockery
 type IValidation interface {
 	RootEntity(rootSchema, selfSchema *jsonschema.Schema, heryContent map[string]any) error
-	Entity(collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error
+	Entity(collectionName string, schema *jsonschema.Schema, heryContent entity.NotFormatedContent) error
 	EntityUri(entityUrl string) bool
 }
 
@@ -38,7 +39,8 @@ func (s *SValidation) RootEntity(rootSchema, selfSchema *jsonschema.Schema, hery
 }
 
 // Entity validates the YAML content against the JSON schema
-func (s *SValidation) Entity(collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error {
+func (s *SValidation) Entity(
+	collectionName string, schema *jsonschema.Schema, heryContent entity.NotFormatedContent) error {
 
 	// TODO: We need to add a unit test to see what happens when a YAML is not valid in the `.hery` content
 	// |-- TODO: Make sure that YAML standard is valid first
@@ -64,6 +66,10 @@ func (s *SValidation) Entity(collectionName string, schema *jsonschema.Schema, h
 
 	// 3. This step is for when the entity is valid
 	return nil
+}
+
+func (s *SValidation) Body() {
+
 }
 
 // EntityUri validates the module path for go get
