@@ -37,7 +37,7 @@ type Entity struct {
 	Content         Content
 }
 
-// Content
+// Content of an entity
 type Content struct {
 	Entity string             `json:"_entity,omitempty"`
 	Id     string             `json:"_id,omitempty"`
@@ -45,5 +45,5 @@ type Content struct {
 	Body   NotFormatedContent `json:"_body"`
 }
 
-// NotFormatedContent
+// NotFormatedContent when the content of entity as not been structured
 type NotFormatedContent = map[string]any

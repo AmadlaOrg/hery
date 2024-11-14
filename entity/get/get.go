@@ -16,13 +16,6 @@ import (
 
 // TODO: Change name to Retrieve. Get is to generic and can cause confusion (e.g.: used in certain patterns)
 
-const perm os.FileMode = os.ModePerm
-
-// For easier mocking
-var (
-	osMkdirAll = os.MkdirAll
-)
-
 // IGet is an interface for getting entities.
 type IGet interface {
 	GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error)
@@ -40,6 +33,13 @@ type SGet struct {
 	Build                   build.IBuild
 	Schema                  schemaPkg.ISchema
 }
+
+const perm os.FileMode = os.ModePerm
+
+// For easier mocking
+var (
+	osMkdirAll = os.MkdirAll
+)
 
 // GetInTmp retrieves entities based on the provided collection name and entities
 func (s *SGet) GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error) {
@@ -73,7 +73,7 @@ func (s *SGet) Get(collectionName string, storagePaths *storage.AbsPaths, entiti
 			return err
 		}
 
-		if err = s.Entity.CheckDuplicateEntity(entityBuilds, entityMeta); err != nil {
+		if err = s.Entity.CheckDuplicate(entityBuilds, entityMeta); err != nil {
 			return err
 		}
 
@@ -90,7 +90,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 	wg.Add(len(entitiesMeta))
 
 	// Channel to collect errors
-	errCh := make(chan error, len(entitiesMeta))
+	errCh := make(chan error, 1)
 
 	// TODO: Is Exist param ever used? Have is if it is in local and exist is for when it is found remotely
 
@@ -119,7 +119,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 
 			// 3. Entity validation
 			// 3.1: Extract the basic hery structure
-			content, err := s.Entity.SetEntityContent(entityMeta, heryContent)
+			content, err := s.Entity.SetContent(entityMeta, heryContent)
 			if err != nil {
 				errCh <- fmt.Errorf("error setting entity content: %v", err)
 				return

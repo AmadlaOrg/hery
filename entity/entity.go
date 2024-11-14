@@ -30,15 +30,14 @@ var (
 
 // IEntity used for mock
 type IEntity interface {
-	SetEntity(entity Entity)
-	GetEntity(entityUri string) (Entity, error)
-	GetAllEntities() []Entity
-	FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error)
-	CheckDuplicateEntity(entities []Entity, entityMeta Entity) error
-	GeneratePseudoVersionPattern(name, version string) string
+	Add(entity Entity)
+	Get(entityUri string) (Entity, error)
+	GetAll() []Entity
+	FindDir(paths storage.AbsPaths, entityVals Entity) (string, error)
+	CheckDuplicate(entities []Entity, entityMeta Entity) error
+	GeneratePseudoVersionPattern(name, version string) string // TODO: Move it to the version package
 	CrawlDirectoriesParallel(root string) (map[string]Entity, error)
 	Read(path, collectionName string) (map[string]any, error)
-	SetEntityContent(entity Entity, heryContent NotFormatedContent) (Content, error)
 }
 
 // SEntity used for mock
@@ -51,13 +50,18 @@ type SEntity struct {
 	Entities []Entity
 }
 
-// SetEntity for appending an entity into the struct entity list
-func (s *SEntity) SetEntity(entity Entity) {
+// Add for appending an entity into the struct entity list
+func (s *SEntity) Add(entity Entity) error {
+	content, err := s.setContent()
+	if err != nil {
+		return
+	}
+
 	s.Entities = append(s.Entities, entity)
 }
 
-// GetEntity with an entity URI this functions gets the specific entity
-func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
+// Get with an entity URI this functions gets the specific entity
+func (s *SEntity) Get(entityUri string) (Entity, error) {
 
 	// 1. Set default Entity default values
 	var (
@@ -97,6 +101,7 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 
 		// 2.3: Extract the entity based on some entity property values
 		if entityVersion == "latest" {
+			// TODO: Needs goroutine
 			for _, entity := range s.Entities {
 				if entity.LatestVersion &&
 					entity.RepoUrl == entityVals.RepoUrl {
@@ -104,6 +109,7 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 				}
 			}
 		} else {
+			// TODO: Needs goroutine
 			for _, entity := range s.Entities {
 				if entity.Version == entityVersion &&
 					entity.RepoUrl == entityVals.RepoUrl {
@@ -120,6 +126,8 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 		}
 
 		var matchingEntities []Entity
+
+		// TODO: Needs goroutine
 		for _, entity := range s.Entities {
 			if entity.LatestVersion &&
 				entity.RepoUrl == entityVals.RepoUrl {
@@ -145,19 +153,25 @@ func (s *SEntity) GetEntity(entityUri string) (Entity, error) {
 	return entityVals, errors.Join(ErrorNotFound, fmt.Errorf("no entity found with uri: %s", entityUri))
 }
 
-// GetAllEntities results of an array of entities
-func (s *SEntity) GetAllEntities() []Entity {
+// GetAll results of an array of entities
+func (s *SEntity) GetAll() []Entity {
 	return s.Entities
 }
 
-// SetEntitySchema for appending an entity schema into the specific struct entity
-func (s *SEntity) SetEntitySchema(entity Entity, schema *jsonschema.Schema) {
+// SetSchema for appending an entity schema into the specific struct entity
+// TODO: What to do if the `id` is empty
+func (s *SEntity) setSchema(entity Entity, schema *jsonschema.Schema) error {
 	var wg sync.WaitGroup
 	wg.Add(len(s.Entities))
+
+	errCh := make(chan error, 1)
 
 	for i := range s.Entities {
 		go func(i int) {
 			defer wg.Done()
+			if s.Entities[i].Id == "" {
+				// TODO: Throw error
+			}
 			if s.Entities[i].Id == entity.Id {
 				s.Entities[i].Schema = schema
 			}
@@ -165,10 +179,59 @@ func (s *SEntity) SetEntitySchema(entity Entity, schema *jsonschema.Schema) {
 	}
 
 	wg.Wait()
+	close(errCh)
+
+	return fmt.Errorf("%v", errCh) // TODO: Better error handling?
 }
 
-// FindEntityDir can find pseudo versioned entity directories and static versioned entities.
-func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
+// SetContent
+func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
+	// 1. Extract `_entity`
+	entitySection := heryContent["_entity"].(string)
+	if entity.Entity != "" {
+		entitySection = entity.Entity
+	} else if entitySection == "" {
+		return Content{}, errors.New("no entity section found")
+	}
+
+	// 2. Extract `_id`
+	idSection := heryContent["_id"].(string)
+	if entity.Id != "" {
+		idSection = entity.Id
+	} else if idSection == "" {
+		idSection = uuid.New().String()
+	}
+
+	// 3. Extract `_meta`
+	metaSection := heryContent["_meta"].(map[string]any)
+	if metaSection == nil {
+		return Content{
+			Entity: entitySection,
+			Id:     idSection,
+		}, errors.New("_meta section is empty")
+	}
+
+	// 4. Extract `_body`
+	bodySection := heryContent["_body"].(map[string]any)
+	if bodySection == nil {
+		return Content{
+			Entity: entitySection,
+			Id:     idSection,
+			Meta:   metaSection,
+		}, errors.New("_body section is empty")
+	}
+
+	// 5. Returns all the components of an entity content
+	return Content{
+		Entity: entitySection,
+		Id:     idSection,
+		Meta:   metaSection,
+		Body:   bodySection,
+	}, nil
+}
+
+// FindDir can find pseudo versioned entity directories and static versioned entities.
+func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	if !s.EntityVersionValidation.PseudoFormat(entityVals.Version) {
 		exactPath := entityVals.Entity
 
@@ -211,8 +274,8 @@ func (s *SEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (stri
 	return matches[0], nil
 }
 
-// CheckDuplicateEntity checks if entityMeta is already in entityBuilds.
-func (s *SEntity) CheckDuplicateEntity(entities []Entity, entityMeta Entity) error {
+// CheckDuplicate checks if entityMeta is already in entityBuilds.
+func (s *SEntity) CheckDuplicate(entities []Entity, entityMeta Entity) error {
 	for _, existingEntity := range entities {
 		if existingEntity.Origin == entityMeta.Origin &&
 			existingEntity.Name == entityMeta.Name {
@@ -233,11 +296,13 @@ func (s *SEntity) CheckDuplicateEntity(entities []Entity, entityMeta Entity) err
 }
 
 // GeneratePseudoVersionPattern generates a pattern string for pseudo-versioned entities based on their name and version
+// TODO: Move it?
 func (s *SEntity) GeneratePseudoVersionPattern(name, version string) string {
 	return fmt.Sprintf("%s@%s-*-%s", name, version[:6], version[22:])
 }
 
 // CrawlDirectoriesParallel crawls the directories in parallel and returns a map of entities
+// TODO: Move it?
 func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 	entities := make(map[string]Entity)
 	var mu sync.Mutex
@@ -324,50 +389,4 @@ func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
 	}
 
 	return current, nil
-}
-
-// SetEntityContent
-func (s *SEntity) SetEntityContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
-	// 1. Extract `_entity`
-	entitySection := heryContent["_entity"].(string)
-	if entity.Entity != "" {
-		entitySection = entity.Entity
-	} else if entitySection == "" {
-		return Content{}, errors.New("no entity section found")
-	}
-
-	// 2. Extract `_id`
-	idSection := heryContent["_id"].(string)
-	if entity.Id != "" {
-		idSection = entity.Id
-	} else if idSection == "" {
-		idSection = uuid.New().String()
-	}
-
-	// 3. Extract `_meta`
-	metaSection := heryContent["_meta"].(map[string]any)
-	if metaSection == nil {
-		return Content{
-			Entity: entitySection,
-			Id:     idSection,
-		}, errors.New("_meta section is empty")
-	}
-
-	// 4. Extract `_body`
-	bodySection := heryContent["_body"].(map[string]any)
-	if bodySection == nil {
-		return Content{
-			Entity: entitySection,
-			Id:     idSection,
-			Meta:   metaSection,
-		}, errors.New("_body section is empty")
-	}
-
-	// 5. Returns all the components of an entity content
-	return Content{
-		Entity: entitySection,
-		Id:     idSection,
-		Meta:   metaSection,
-		Body:   bodySection,
-	}, nil
 }

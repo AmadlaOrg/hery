@@ -9,7 +9,7 @@ import (
 )
 
 // NewEntityBuildService to set up the entity Build service
-func NewEntityBuildService() *SBuild {
+func NewEntityBuildService() IBuild {
 	return &SBuild{
 		Git:                     git.NewGitService(),
 		Entity:                  entity.NewEntityService(),
