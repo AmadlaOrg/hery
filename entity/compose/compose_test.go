@@ -81,7 +81,7 @@ func TestParseEntityArg(t *testing.T) {
 	}
 }
 
-func TestFindEntityDirParallel(t *testing.T) {
+func TestFindDirParallel(t *testing.T) {
 	composeService := NewComposeService()
 
 	tests := []struct {

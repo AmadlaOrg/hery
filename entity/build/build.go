@@ -54,7 +54,7 @@ func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, 
 		return entityVals, errors.New("invalid entity url")
 	}
 
-	dir, err := s.Entity.FindEntityDir(paths, entityVals)
+	dir, err := s.Entity.FindDir(paths, entityVals)
 	if !errors.Is(err, entity.ErrorNotFound) && // If the directory or path was not found
 		!errors.Is(err, entity.ErrorMultipleFound) && // In some cases where there are multiple directory for the same entity with multiple pseudo versions
 		err != nil {

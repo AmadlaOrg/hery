@@ -2,7 +2,6 @@ package validation
 
 import (
 	"fmt"
-	"github.com/AmadlaOrg/hery/entity"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	schemaValidationPkg "github.com/AmadlaOrg/hery/entity/schema/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -15,7 +14,7 @@ import (
 // IValidation used by mockery
 type IValidation interface {
 	RootEntity(rootSchema, selfSchema *jsonschema.Schema, heryContent map[string]any) error
-	Entity(collectionName string, schema *jsonschema.Schema, heryContent entity.NotFormatedContent) error
+	Entity(collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error
 	EntityUri(entityUrl string) bool
 }
 
@@ -40,7 +39,7 @@ func (s *SValidation) RootEntity(rootSchema, selfSchema *jsonschema.Schema, hery
 
 // Entity validates the YAML content against the JSON schema
 func (s *SValidation) Entity(
-	collectionName string, schema *jsonschema.Schema, heryContent entity.NotFormatedContent) error {
+	collectionName string, schema *jsonschema.Schema, heryContent map[string]any) error {
 
 	// TODO: We need to add a unit test to see what happens when a YAML is not valid in the `.hery` content
 	// |-- TODO: Make sure that YAML standard is valid first

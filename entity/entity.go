@@ -51,11 +51,12 @@ type SEntity struct {
 }
 
 // Add for appending an entity into the struct entity list
-func (s *SEntity) Add(entity Entity) error {
-	content, err := s.setContent()
+func (s *SEntity) Add(entity Entity) {
+	// TODO:
+	/*content, err := s.setContent()
 	if err != nil {
 		return
-	}
+	}*/
 
 	s.Entities = append(s.Entities, entity)
 }

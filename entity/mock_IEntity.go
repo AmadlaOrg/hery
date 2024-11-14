@@ -20,12 +20,45 @@ func (_m *MockEntity) EXPECT() *MockEntity_Expecter {
 	return &MockEntity_Expecter{mock: &_m.Mock}
 }
 
-// CheckDuplicateEntity provides a mock function with given fields: entities, entityMeta
-func (_m *MockEntity) CheckDuplicateEntity(entities []Entity, entityMeta Entity) error {
+// Add provides a mock function with given fields: entity
+func (_m *MockEntity) Add(entity Entity) {
+	_m.Called(entity)
+}
+
+// MockEntity_Add_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Add'
+type MockEntity_Add_Call struct {
+	*mock.Call
+}
+
+// Add is a helper method to define mock.On call
+//   - entity Entity
+func (_e *MockEntity_Expecter) Add(entity interface{}) *MockEntity_Add_Call {
+	return &MockEntity_Add_Call{Call: _e.mock.On("Add", entity)}
+}
+
+func (_c *MockEntity_Add_Call) Run(run func(entity Entity)) *MockEntity_Add_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(Entity))
+	})
+	return _c
+}
+
+func (_c *MockEntity_Add_Call) Return() *MockEntity_Add_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockEntity_Add_Call) RunAndReturn(run func(Entity)) *MockEntity_Add_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CheckDuplicate provides a mock function with given fields: entities, entityMeta
+func (_m *MockEntity) CheckDuplicate(entities []Entity, entityMeta Entity) error {
 	ret := _m.Called(entities, entityMeta)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CheckDuplicateEntity")
+		panic("no return value specified for CheckDuplicate")
 	}
 
 	var r0 error
@@ -38,31 +71,31 @@ func (_m *MockEntity) CheckDuplicateEntity(entities []Entity, entityMeta Entity)
 	return r0
 }
 
-// MockEntity_CheckDuplicateEntity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CheckDuplicateEntity'
-type MockEntity_CheckDuplicateEntity_Call struct {
+// MockEntity_CheckDuplicate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CheckDuplicate'
+type MockEntity_CheckDuplicate_Call struct {
 	*mock.Call
 }
 
-// CheckDuplicateEntity is a helper method to define mock.On call
+// CheckDuplicate is a helper method to define mock.On call
 //   - entities []Entity
 //   - entityMeta Entity
-func (_e *MockEntity_Expecter) CheckDuplicateEntity(entities interface{}, entityMeta interface{}) *MockEntity_CheckDuplicateEntity_Call {
-	return &MockEntity_CheckDuplicateEntity_Call{Call: _e.mock.On("CheckDuplicateEntity", entities, entityMeta)}
+func (_e *MockEntity_Expecter) CheckDuplicate(entities interface{}, entityMeta interface{}) *MockEntity_CheckDuplicate_Call {
+	return &MockEntity_CheckDuplicate_Call{Call: _e.mock.On("CheckDuplicate", entities, entityMeta)}
 }
 
-func (_c *MockEntity_CheckDuplicateEntity_Call) Run(run func(entities []Entity, entityMeta Entity)) *MockEntity_CheckDuplicateEntity_Call {
+func (_c *MockEntity_CheckDuplicate_Call) Run(run func(entities []Entity, entityMeta Entity)) *MockEntity_CheckDuplicate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].([]Entity), args[1].(Entity))
 	})
 	return _c
 }
 
-func (_c *MockEntity_CheckDuplicateEntity_Call) Return(_a0 error) *MockEntity_CheckDuplicateEntity_Call {
+func (_c *MockEntity_CheckDuplicate_Call) Return(_a0 error) *MockEntity_CheckDuplicate_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockEntity_CheckDuplicateEntity_Call) RunAndReturn(run func([]Entity, Entity) error) *MockEntity_CheckDuplicateEntity_Call {
+func (_c *MockEntity_CheckDuplicate_Call) RunAndReturn(run func([]Entity, Entity) error) *MockEntity_CheckDuplicate_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -125,12 +158,12 @@ func (_c *MockEntity_CrawlDirectoriesParallel_Call) RunAndReturn(run func(string
 	return _c
 }
 
-// FindEntityDir provides a mock function with given fields: paths, entityVals
-func (_m *MockEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
+// FindDir provides a mock function with given fields: paths, entityVals
+func (_m *MockEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	ret := _m.Called(paths, entityVals)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FindEntityDir")
+		panic("no return value specified for FindDir")
 	}
 
 	var r0 string
@@ -153,31 +186,31 @@ func (_m *MockEntity) FindEntityDir(paths storage.AbsPaths, entityVals Entity) (
 	return r0, r1
 }
 
-// MockEntity_FindEntityDir_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindEntityDir'
-type MockEntity_FindEntityDir_Call struct {
+// MockEntity_FindDir_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindDir'
+type MockEntity_FindDir_Call struct {
 	*mock.Call
 }
 
-// FindEntityDir is a helper method to define mock.On call
+// FindDir is a helper method to define mock.On call
 //   - paths storage.AbsPaths
 //   - entityVals Entity
-func (_e *MockEntity_Expecter) FindEntityDir(paths interface{}, entityVals interface{}) *MockEntity_FindEntityDir_Call {
-	return &MockEntity_FindEntityDir_Call{Call: _e.mock.On("FindEntityDir", paths, entityVals)}
+func (_e *MockEntity_Expecter) FindDir(paths interface{}, entityVals interface{}) *MockEntity_FindDir_Call {
+	return &MockEntity_FindDir_Call{Call: _e.mock.On("FindDir", paths, entityVals)}
 }
 
-func (_c *MockEntity_FindEntityDir_Call) Run(run func(paths storage.AbsPaths, entityVals Entity)) *MockEntity_FindEntityDir_Call {
+func (_c *MockEntity_FindDir_Call) Run(run func(paths storage.AbsPaths, entityVals Entity)) *MockEntity_FindDir_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(storage.AbsPaths), args[1].(Entity))
 	})
 	return _c
 }
 
-func (_c *MockEntity_FindEntityDir_Call) Return(_a0 string, _a1 error) *MockEntity_FindEntityDir_Call {
+func (_c *MockEntity_FindDir_Call) Return(_a0 string, _a1 error) *MockEntity_FindDir_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockEntity_FindEntityDir_Call) RunAndReturn(run func(storage.AbsPaths, Entity) (string, error)) *MockEntity_FindEntityDir_Call {
+func (_c *MockEntity_FindDir_Call) RunAndReturn(run func(storage.AbsPaths, Entity) (string, error)) *MockEntity_FindDir_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -229,59 +262,12 @@ func (_c *MockEntity_GeneratePseudoVersionPattern_Call) RunAndReturn(run func(st
 	return _c
 }
 
-// GetAllEntities provides a mock function with given fields:
-func (_m *MockEntity) GetAllEntities() []Entity {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetAllEntities")
-	}
-
-	var r0 []Entity
-	if rf, ok := ret.Get(0).(func() []Entity); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]Entity)
-		}
-	}
-
-	return r0
-}
-
-// MockEntity_GetAllEntities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllEntities'
-type MockEntity_GetAllEntities_Call struct {
-	*mock.Call
-}
-
-// GetAllEntities is a helper method to define mock.On call
-func (_e *MockEntity_Expecter) GetAllEntities() *MockEntity_GetAllEntities_Call {
-	return &MockEntity_GetAllEntities_Call{Call: _e.mock.On("GetAllEntities")}
-}
-
-func (_c *MockEntity_GetAllEntities_Call) Run(run func()) *MockEntity_GetAllEntities_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockEntity_GetAllEntities_Call) Return(_a0 []Entity) *MockEntity_GetAllEntities_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockEntity_GetAllEntities_Call) RunAndReturn(run func() []Entity) *MockEntity_GetAllEntities_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetEntity provides a mock function with given fields: entityUri
-func (_m *MockEntity) GetEntity(entityUri string) (Entity, error) {
+// Get provides a mock function with given fields: entityUri
+func (_m *MockEntity) Get(entityUri string) (Entity, error) {
 	ret := _m.Called(entityUri)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetEntity")
+		panic("no return value specified for Get")
 	}
 
 	var r0 Entity
@@ -304,30 +290,77 @@ func (_m *MockEntity) GetEntity(entityUri string) (Entity, error) {
 	return r0, r1
 }
 
-// MockEntity_GetEntity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEntity'
-type MockEntity_GetEntity_Call struct {
+// MockEntity_Get_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Get'
+type MockEntity_Get_Call struct {
 	*mock.Call
 }
 
-// GetEntity is a helper method to define mock.On call
+// Get is a helper method to define mock.On call
 //   - entityUri string
-func (_e *MockEntity_Expecter) GetEntity(entityUri interface{}) *MockEntity_GetEntity_Call {
-	return &MockEntity_GetEntity_Call{Call: _e.mock.On("GetEntity", entityUri)}
+func (_e *MockEntity_Expecter) Get(entityUri interface{}) *MockEntity_Get_Call {
+	return &MockEntity_Get_Call{Call: _e.mock.On("Get", entityUri)}
 }
 
-func (_c *MockEntity_GetEntity_Call) Run(run func(entityUri string)) *MockEntity_GetEntity_Call {
+func (_c *MockEntity_Get_Call) Run(run func(entityUri string)) *MockEntity_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string))
 	})
 	return _c
 }
 
-func (_c *MockEntity_GetEntity_Call) Return(_a0 Entity, _a1 error) *MockEntity_GetEntity_Call {
+func (_c *MockEntity_Get_Call) Return(_a0 Entity, _a1 error) *MockEntity_Get_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockEntity_GetEntity_Call) RunAndReturn(run func(string) (Entity, error)) *MockEntity_GetEntity_Call {
+func (_c *MockEntity_Get_Call) RunAndReturn(run func(string) (Entity, error)) *MockEntity_Get_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetAll provides a mock function with given fields:
+func (_m *MockEntity) GetAll() []Entity {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAll")
+	}
+
+	var r0 []Entity
+	if rf, ok := ret.Get(0).(func() []Entity); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]Entity)
+		}
+	}
+
+	return r0
+}
+
+// MockEntity_GetAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAll'
+type MockEntity_GetAll_Call struct {
+	*mock.Call
+}
+
+// GetAll is a helper method to define mock.On call
+func (_e *MockEntity_Expecter) GetAll() *MockEntity_GetAll_Call {
+	return &MockEntity_GetAll_Call{Call: _e.mock.On("GetAll")}
+}
+
+func (_c *MockEntity_GetAll_Call) Run(run func()) *MockEntity_GetAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockEntity_GetAll_Call) Return(_a0 []Entity) *MockEntity_GetAll_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockEntity_GetAll_Call) RunAndReturn(run func() []Entity) *MockEntity_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -387,39 +420,6 @@ func (_c *MockEntity_Read_Call) Return(_a0 map[string]interface{}, _a1 error) *M
 }
 
 func (_c *MockEntity_Read_Call) RunAndReturn(run func(string, string) (map[string]interface{}, error)) *MockEntity_Read_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// SetEntity provides a mock function with given fields: entity
-func (_m *MockEntity) SetEntity(entity Entity) {
-	_m.Called(entity)
-}
-
-// MockEntity_SetEntity_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetEntity'
-type MockEntity_SetEntity_Call struct {
-	*mock.Call
-}
-
-// SetEntity is a helper method to define mock.On call
-//   - entity Entity
-func (_e *MockEntity_Expecter) SetEntity(entity interface{}) *MockEntity_SetEntity_Call {
-	return &MockEntity_SetEntity_Call{Call: _e.mock.On("SetEntity", entity)}
-}
-
-func (_c *MockEntity_SetEntity_Call) Run(run func(entity Entity)) *MockEntity_SetEntity_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(Entity))
-	})
-	return _c
-}
-
-func (_c *MockEntity_SetEntity_Call) Return() *MockEntity_SetEntity_Call {
-	_c.Call.Return()
-	return _c
-}
-
-func (_c *MockEntity_SetEntity_Call) RunAndReturn(run func(Entity)) *MockEntity_SetEntity_Call {
 	_c.Call.Return(run)
 	return _c
 }

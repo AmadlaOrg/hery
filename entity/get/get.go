@@ -119,24 +119,24 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 
 			// 3. Entity validation
 			// 3.1: Extract the basic hery structure
-			content, err := s.Entity.SetContent(entityMeta, heryContent)
+			/*content, err := s.Entity.SetContent(entityMeta, heryContent)
 			if err != nil {
 				errCh <- fmt.Errorf("error setting entity content: %v", err)
 				return
-			}
+			}*/
 
-			selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
+			/*selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
 			selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
 			if err != nil {
 				errCh <- fmt.Errorf("error loading schema: %v", err)
 				return
-			}
+			}*/
 
-			err = s.EntityValidation.Entity(collectionName, selfEntitySchema, content.Body)
+			/*err = s.EntityValidation.Entity(collectionName, selfEntitySchema, content.Body)
 			if err != nil {
 				errCh <- fmt.Errorf("error validating entity: %v", err)
 				return
-			}
+			}*/
 
 			// 3.2: Extracted _body entity section to validate
 

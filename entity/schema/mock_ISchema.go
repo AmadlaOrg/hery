@@ -20,54 +20,6 @@ func (_m *MockEntitySchema) EXPECT() *MockEntitySchema_Expecter {
 	return &MockEntitySchema_Expecter{mock: &_m.Mock}
 }
 
-// ExtractBody provides a mock function with given fields: heryContent
-func (_m *MockEntitySchema) ExtractBody(heryContent map[string]interface{}) map[string]interface{} {
-	ret := _m.Called(heryContent)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ExtractBody")
-	}
-
-	var r0 map[string]interface{}
-	if rf, ok := ret.Get(0).(func(map[string]interface{}) map[string]interface{}); ok {
-		r0 = rf(heryContent)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[string]interface{})
-		}
-	}
-
-	return r0
-}
-
-// MockEntitySchema_ExtractBody_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ExtractBody'
-type MockEntitySchema_ExtractBody_Call struct {
-	*mock.Call
-}
-
-// ExtractBody is a helper method to define mock.On call
-//   - heryContent map[string]interface{}
-func (_e *MockEntitySchema_Expecter) ExtractBody(heryContent interface{}) *MockEntitySchema_ExtractBody_Call {
-	return &MockEntitySchema_ExtractBody_Call{Call: _e.mock.On("ExtractBody", heryContent)}
-}
-
-func (_c *MockEntitySchema_ExtractBody_Call) Run(run func(heryContent map[string]interface{})) *MockEntitySchema_ExtractBody_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(map[string]interface{}))
-	})
-	return _c
-}
-
-func (_c *MockEntitySchema_ExtractBody_Call) Return(_a0 map[string]interface{}) *MockEntitySchema_ExtractBody_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockEntitySchema_ExtractBody_Call) RunAndReturn(run func(map[string]interface{}) map[string]interface{}) *MockEntitySchema_ExtractBody_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GenerateSchemaPath provides a mock function with given fields: collectionName, entityPath
 func (_m *MockEntitySchema) GenerateSchemaPath(collectionName string, entityPath string) string {
 	ret := _m.Called(collectionName, entityPath)

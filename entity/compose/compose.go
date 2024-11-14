@@ -19,7 +19,7 @@ import (
 type IComposer interface {
 	ComposeEntity(entityArg string, printToScreen bool) error
 	parseEntityArg(entityArg string) (string, string, error)
-	findEntityDirParallel(root, name, version string) (string, error)
+	findDirParallel(root, name, version string) (string, error)
 	mergeYamlFiles(dir string) ([]byte, error)
 }
 

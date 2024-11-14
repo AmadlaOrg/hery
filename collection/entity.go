@@ -1,36 +1,37 @@
 package collection
 
 import (
-	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
 )
 
 type IEntityCollection interface {
+	setCollection(collectionName string) error
+	Select() (entity.Entity, error)
+	Add(entity entity.Entity) error
+	Remove() error
 }
 
 type SEntityCollection struct {
 }
 
+// setCollection
 func (s *SEntityCollection) setCollection(collectionName string) error {
 
 	return nil
 }
 
-// Select
-func (s *SEntityCollection) Select(collectionName string) (entity.Entity, error) {
+// Select entity
+func (s *SEntityCollection) Select() (entity.Entity, error) {
 	return entity.Entity{}, nil
 }
 
-// Add to a collection
-func (s *SEntityCollection) Add(collectionName string, entity entity.Entity) error {
-	if collectionName == "" {
-		return fmt.Errorf("collection name is empty")
-	}
+// Add entity to a collection
+func (s *SEntityCollection) Add(entity entity.Entity) error {
 
 	return nil
 }
 
-// Remove
-func (s *SEntityCollection) Remove(collectionName string) error {
+// Remove entity
+func (s *SEntityCollection) Remove() error {
 	return nil
 }

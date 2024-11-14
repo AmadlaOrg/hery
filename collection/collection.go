@@ -8,6 +8,10 @@ import (
 )
 
 type ICollection interface {
+	Select(collectionName string) IEntityCollection
+	Create(collectionName string) error
+	Remove(collectionName string) error
+	Exists(collectionName string) bool
 	List() ([][]string, error)
 }
 
@@ -21,8 +25,8 @@ var (
 	osMkdirAll = os.MkdirAll
 )
 
-// Select
-func (s *SCollection) Select() IEntityCollection {
+// Select collection to work with
+func (s *SCollection) Select(collectionName string) IEntityCollection {
 	return &SEntityCollection{}
 }
 
@@ -46,7 +50,7 @@ func (s *SCollection) Create(collectionName string) error {
 	return nil
 }
 
-// Remove
+// Remove a specific collection
 func (s *SCollection) Remove(collectionName string) error {
 	return nil
 }

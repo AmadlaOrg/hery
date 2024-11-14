@@ -1,5 +1,17 @@
 with-expecter: True
 packages:
+  github.com/AmadlaOrg/hery/collection:
+    interfaces:
+      ICollection:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockCollection"
+          inpackage: True
+      ICollectionEntity:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockCollectionEntity"
+          inpackage: True
   github.com/AmadlaOrg/hery/entity:
     interfaces:
       IEntity:
