@@ -92,6 +92,8 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 	// Channel to collect errors
 	errCh := make(chan error, len(entitiesMeta))
 
+	// TODO: Is Exist param ever used? Have is if it is in local and exist is for when it is found remotely
+
 	for _, entityMeta := range entitiesMeta {
 		// Skips if it is already there
 		if entityMeta.Have {
@@ -176,7 +178,7 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 		}(entityMeta)
 	}
 
-	wg.Wait()
+	wg.Wait() // TODO: Just hangs here
 	close(errCh)
 
 	var combinedErr error
@@ -203,13 +205,13 @@ func (s *SGet) addRepo(entityMeta entity.Entity) error {
 	}
 
 	// 2. Download the Entity with `git clone`
-	if err := s.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
+	if err = s.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
 		return fmt.Errorf("error fetching repo: %v", err)
 	}
 
 	// 3. Changes the repository to the tag (version) that was pass
 	if !entityMeta.IsPseudoVersion {
-		if err := s.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
+		if err = s.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
 			return fmt.Errorf("error checking out version: %v", err)
 		}
 	}
