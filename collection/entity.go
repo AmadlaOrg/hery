@@ -13,7 +13,6 @@ import (
 )
 
 type IEntityCollection interface {
-	setCollection(collectionName string) error
 	SelectByUri(entityUri string) (entityPkg.Entity, error)
 	SelectById(id string) (entityPkg.Entity, error)
 	Append(entity entityPkg.Entity) error
@@ -27,12 +26,6 @@ type SEntityCollection struct {
 
 	// Data
 	Collection *Collection
-}
-
-// setCollection
-func (s *SEntityCollection) setCollection(collectionName string) error {
-
-	return nil
 }
 
 // SelectAll results of an array of entities

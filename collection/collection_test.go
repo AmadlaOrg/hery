@@ -5,7 +5,11 @@ import (
 	"testing"
 )
 
-func TestSelect(t *testing.T) {}
+func TestSelect(t *testing.T) {
+	collectionService := NewCollectionService()
+	selectCollection := collectionService.Select("amadla")
+	assert.NotNil(t, selectCollection)
+}
 
 func TestCreate(t *testing.T) {}
 

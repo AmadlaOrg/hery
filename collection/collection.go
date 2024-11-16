@@ -30,8 +30,14 @@ var (
 
 // Select collection to work with
 func (s *SCollection) Select(collectionName string) IEntityCollection {
-
-	return &SEntityCollection{}
+	// TODO: Verify if the collection exist
+	return &SEntityCollection{
+		Collection: &Collection{
+			Name:              collectionName,
+			Paths:             nil,
+			TransientEntities: nil,
+		},
+	}
 }
 
 // Create collection components (collection directory, the directories and cache file)

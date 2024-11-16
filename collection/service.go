@@ -14,6 +14,7 @@ func NewCollectionService() ICollection {
 	}
 }
 
+// NewEntityCollectionService to set up the entity collection service
 func NewEntityCollectionService() IEntityCollection {
 	return &SEntityCollection{
 		EntityVersion:           version.NewEntityVersionService(),
