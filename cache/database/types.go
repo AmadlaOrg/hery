@@ -1,5 +1,10 @@
 package database
 
+const (
+	ErrorClosingDatabase        = "closing database"
+	ErrorDatabaseNotInitialized = "database not initialized"
+)
+
 // Table is a basic representation in a struct of a table in a SQL DB
 type Table struct {
 	Name    string

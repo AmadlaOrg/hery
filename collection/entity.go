@@ -16,7 +16,7 @@ type IEntityCollection interface {
 	SelectByUri(entityUri string) (entityPkg.Entity, error)
 	SelectById(id string) (entityPkg.Entity, error)
 	Append(entity entityPkg.Entity) error
-	Remove() error
+	Remove(id string) error
 }
 
 type SEntityCollection struct {
@@ -129,6 +129,7 @@ func (s *SEntityCollection) SelectByUri(entityUri string) (entityPkg.Entity, err
 
 // SelectById entity
 func (s *SEntityCollection) SelectById(id string) (entityPkg.Entity, error) {
+
 	return entityPkg.Entity{}, nil
 }
 
@@ -144,6 +145,32 @@ func (s *SEntityCollection) Append(entity entityPkg.Entity) error {
 }
 
 // Remove entity
-func (s *SEntityCollection) Remove() error {
+func (s *SEntityCollection) Remove(id string) error {
+	/*var (
+		wg       sync.WaitGroup
+		entities = s.Collection.TransientEntities
+	)
+	wg.Add(len(*entities))
+
+	errCh := make(chan error, 1)
+
+	for i := range *entities {
+		go func(i int) {
+			defer wg.Done()
+			if *entities[i].Id == "" {
+				errCh <- fmt.Errorf("entity id is empty")
+				return
+			}
+			if entities[i].Id == id {
+				delete(entities[i])
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	return fmt.Errorf("%v", errCh)*/
+
 	return nil
 }
