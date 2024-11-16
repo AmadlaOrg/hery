@@ -17,6 +17,9 @@ type ICollection interface {
 
 type SCollection struct {
 	Storage storage.IStorage
+
+	// Data
+	Collections *[]*Collection
 }
 
 const perm os.FileMode = os.ModePerm
@@ -27,6 +30,7 @@ var (
 
 // Select collection to work with
 func (s *SCollection) Select(collectionName string) IEntityCollection {
+
 	return &SEntityCollection{}
 }
 
@@ -92,4 +96,18 @@ func (s *SCollection) List() ([][]string, error) {
 	}
 
 	return directories, nil
+}
+
+func (s *SCollection) retrieve(collectionName string) (Collection, error) {
+	collectionPath, err := s.Storage.Main()
+	if err != nil {
+		return Collection{}, err
+	}
+
+	_ = fmt.Sprintf("%v", collectionPath)
+
+	return Collection{
+		Name: collectionName,
+		//Paths: collectionPath,
+	}, nil
 }

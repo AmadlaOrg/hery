@@ -1,5 +1,33 @@
 with-expecter: True
 packages:
+  github.com/AmadlaOrg/hery/cache:
+    interfaces:
+      ICache:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockCache"
+          inpackage: True
+  github.com/AmadlaOrg/hery/cache/database:
+    interfaces:
+      IDatabase:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockCacheDatabase"
+          inpackage: True
+  github.com/AmadlaOrg/hery/cache/parser:
+    interfaces:
+      IParser:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockCacheParser"
+          inpackage: True
+  github.com/AmadlaOrg/hery/client:
+    interfaces:
+      IClient:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: "MockClient"
+          inpackage: True
   github.com/AmadlaOrg/hery/collection:
     interfaces:
       ICollection:

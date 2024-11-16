@@ -12,8 +12,5 @@ func NewEntityService() IEntity {
 		EntityVersion:           version.NewEntityVersionService(),
 		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
 		EntityValidation:        validation.NewEntityValidationService(),
-
-		// Data
-		Entities: []Entity{},
 	}
 }

@@ -3,6 +3,7 @@ package build
 import (
 	"errors"
 	"fmt"
+	"github.com/AmadlaOrg/hery/message"
 	"github.com/google/uuid"
 	"path/filepath"
 	"strings"
@@ -55,8 +56,8 @@ func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, 
 	}
 
 	dir, err := s.Entity.FindDir(paths, entityVals)
-	if !errors.Is(err, entity.ErrorNotFound) && // If the directory or path was not found
-		!errors.Is(err, entity.ErrorMultipleFound) && // In some cases where there are multiple directory for the same entity with multiple pseudo versions
+	if !errors.Is(err, message.ErrorNotFound) && // If the directory or path was not found
+		!errors.Is(err, message.ErrorMultipleFound) && // In some cases where there are multiple directory for the same entity with multiple pseudo versions
 		err != nil {
 		// Returns an error when it is outside just not found or multiple directories
 		return entityVals, err
@@ -75,7 +76,7 @@ func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, 
 			}
 		}
 
-		if errors.Is(err, entity.ErrorNotFound) || entityVersion == "latest" {
+		if errors.Is(err, message.ErrorNotFound) || entityVersion == "latest" {
 			entityVals, err = s.metaFromRemoteWithVersion(entityUri, entityVersion)
 			if err != nil {
 				return entityVals, err

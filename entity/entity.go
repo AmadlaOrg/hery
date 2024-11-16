@@ -3,20 +3,19 @@ package entity
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/entity/validation"
-	"github.com/AmadlaOrg/hery/entity/version"
-	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
-	"github.com/AmadlaOrg/hery/storage"
-	"github.com/AmadlaOrg/hery/util/file"
-	"github.com/AmadlaOrg/hery/util/url"
-	"github.com/google/uuid"
-	"github.com/santhosh-tekuri/jsonschema/v6"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"sync"
+
+	"github.com/AmadlaOrg/hery/entity/validation"
+	"github.com/AmadlaOrg/hery/entity/version"
+	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	"github.com/AmadlaOrg/hery/message"
+	"github.com/AmadlaOrg/hery/storage"
+	"github.com/AmadlaOrg/hery/util/file"
+	"github.com/google/uuid"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -30,9 +29,6 @@ var (
 
 // IEntity used for mock
 type IEntity interface {
-	Add(entity Entity)
-	Get(entityUri string) (Entity, error)
-	GetAll() []Entity
 	FindDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicate(entities []Entity, entityMeta Entity) error
 	GeneratePseudoVersionPattern(name, version string) string // TODO: Move it to the version package
@@ -45,123 +41,11 @@ type SEntity struct {
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.IValidation
 	EntityValidation        validation.IValidation
-
-	// Data
-	Entities []Entity
-}
-
-// Add for appending an entity into the struct entity list
-func (s *SEntity) Add(entity Entity) {
-	// TODO:
-	/*content, err := s.setContent()
-	if err != nil {
-		return
-	}*/
-
-	s.Entities = append(s.Entities, entity)
-}
-
-// Get with an entity URI this functions gets the specific entity
-func (s *SEntity) Get(entityUri string) (Entity, error) {
-
-	// 1. Set default Entity default values
-	var (
-		entityVals = Entity{
-			Have:  false,
-			Exist: false,
-		}
-		err error
-	)
-
-	if !s.EntityValidation.EntityUri(entityUri) {
-		return entityVals, errors.New("invalid entity url")
-	}
-
-	// 2. Looks up the entity URI version
-	if strings.Contains(entityUri, "@") {
-
-		// 2.1: Extract version and if not found then it is set as the `latest`
-		entityVersion, err := s.EntityVersion.Extract(entityUri)
-		if err != nil {
-			// 2.1.1: This error is thrown when the extractor ran into an issue
-			if !errors.Is(err, version.ErrorExtractNoVersionFound) {
-				return entityVals, fmt.Errorf("error extracting version: %v", err)
-
-				// 2.1.2: Set version as `latest` if no version found
-			} else {
-				entityVersion = "latest"
-			}
-		}
-
-		// 2.2: Removed version from the entity URI and get the full URL to the repository
-		entityUriWithoutVersion := url.TrimVersion(entityUri, entityVersion)
-		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUriWithoutVersion)
-		if err != nil {
-			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
-		}
-
-		// 2.3: Extract the entity based on some entity property values
-		if entityVersion == "latest" {
-			// TODO: Needs goroutine
-			for _, entity := range s.Entities {
-				if entity.LatestVersion &&
-					entity.RepoUrl == entityVals.RepoUrl {
-					return entity, nil
-				}
-			}
-		} else {
-			// TODO: Needs goroutine
-			for _, entity := range s.Entities {
-				if entity.Version == entityVersion &&
-					entity.RepoUrl == entityVals.RepoUrl {
-					return entity, nil
-				}
-			}
-		}
-
-		// 3. If no entity URI version found
-	} else {
-		entityVals.RepoUrl, err = url.ExtractRepoUrl(entityUri)
-		if err != nil {
-			return entityVals, fmt.Errorf("error extracting repo url: %v", err)
-		}
-
-		var matchingEntities []Entity
-
-		// TODO: Needs goroutine
-		for _, entity := range s.Entities {
-			if entity.LatestVersion &&
-				entity.RepoUrl == entityVals.RepoUrl {
-				return entity, nil
-			} else {
-				matchingEntities = append(matchingEntities, entity)
-			}
-		}
-
-		matchCount := len(matchingEntities)
-		if matchCount == 0 {
-			return entityVals, errors.Join(
-				ErrorNotFound,
-				fmt.Errorf("no entity found with repo url %s and version %s", entityVals.RepoUrl, entityVals.Version))
-		} else if matchCount >= 1 {
-			return entityVals, errors.Join(
-				ErrorMultipleFound,
-				fmt.Errorf("multiple matching entities found with repo url: %s", entityVals.RepoUrl))
-		}
-	}
-
-	// 4. Returns error if no entity was found
-	return entityVals, errors.Join(ErrorNotFound, fmt.Errorf("no entity found with uri: %s", entityUri))
-}
-
-// GetAll results of an array of entities
-func (s *SEntity) GetAll() []Entity {
-	return s.Entities
 }
 
 // SetSchema for appending an entity schema into the specific struct entity
 // TODO: What to do if the `id` is empty
-func (s *SEntity) setSchema(entity Entity, schema *jsonschema.Schema) error {
+/*func (s *SEntity) setSchema(entity Entity, schema *jsonschema.Schema) error {
 	var wg sync.WaitGroup
 	wg.Add(len(s.Entities))
 
@@ -183,7 +67,7 @@ func (s *SEntity) setSchema(entity Entity, schema *jsonschema.Schema) error {
 	close(errCh)
 
 	return fmt.Errorf("%v", errCh) // TODO: Better error handling?
-}
+}*/
 
 // SetContent
 func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
@@ -231,7 +115,7 @@ func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Con
 	}, nil
 }
 
-// FindDir can find pseudo versioned entity directories and static versioned entities.
+// FindDir can find pseudo versioned entity directories and static versioned entities
 func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	if !s.EntityVersionValidation.PseudoFormat(entityVals.Version) {
 		exactPath := entityVals.Entity
@@ -239,7 +123,7 @@ func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, er
 		// Check if the directory exists
 		if _, err := osStat(exactPath); osIsNotExist(err) {
 			return "", errors.Join(
-				ErrorNotFound,
+				message.ErrorNotFound,
 				fmt.Errorf("no matching directory found for exact version: %s", exactPath))
 		} else if err != nil {
 			return "", err
@@ -261,13 +145,13 @@ func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, er
 
 	if len(matches) == 0 {
 		return "", errors.Join(
-			ErrorNotFound,
+			message.ErrorNotFound,
 			fmt.Errorf("no matching directories found for pattern: %s", pattern))
 	}
 
 	if len(matches) > 1 {
 		return "", errors.Join(
-			ErrorMultipleFound,
+			message.ErrorMultipleFound,
 			fmt.Errorf("multiple matching directories found for pattern: %s", pattern))
 	}
 
@@ -370,6 +254,7 @@ func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, erro
 }
 
 // Read makes it easy to read any yaml file with any of the two extensions: yml or yaml
+// TODO: Maybe just pass collection (it might cause a cycle problem)
 func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
 	heryFileName := fmt.Sprintf("%s.hery", collectionName)
 	heryPath := filepath.Join(path, heryFileName)

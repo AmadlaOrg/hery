@@ -8,10 +8,7 @@ const (
 
 // Collection contains all the collection data
 type Collection struct {
-	Name     string
-	Entities []entity.Entity
-	Paths    []string // TODO: storage.AbsStorage
-}
-
-type EntityCollection struct {
+	Name              string
+	Paths             *[]string // TODO: storage.AbsStorage
+	TransientEntities *[]*entity.Entity
 }
