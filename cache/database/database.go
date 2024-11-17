@@ -110,12 +110,6 @@ func (s *SDatabase) CreateTable(table Table) error {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
-	// TODO: Example of what Id and other columns look like:
-	/*
-		Id TEXT PRIMARY KEY,
-		        name TEXT NOT NULL
-	*/
-
 	var sqlColumns string
 	for _, column := range table.Columns {
 		sqlColumn := fmt.Sprintf(",\n%s %s %s", column.ColumnName, column.DataType, column.Constraint)

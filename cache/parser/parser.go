@@ -16,6 +16,11 @@ type SParser struct{}
 
 // Parse
 func (s *SParser) ParseEntity(entity entity.Entity) (database.Table, error) {
+	// TODO: Use schema to determine the data type for the SQL
+	// string == TEXT
+	// TODO: Convert schema from the struct to the JSON-Schema string
+	// TODO: For `Id` always: `Id TEXT PRIMARY KEY,`
+	// TODO: Maybe always have `NOT NULL` as a constrain. E.g.: name TEXT NOT NULL
 
 	return database.Table{}, nil
 }
