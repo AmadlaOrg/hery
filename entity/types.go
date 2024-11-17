@@ -33,8 +33,10 @@ type Entity struct {
 	Hash            string             // The hash of the entity to verify if the repository on the local environment was corrupted or not (e.g.: c7e9911d38b263a69c664b8e0b5d4f27e607554d)
 	Exist           bool               // True if it was found and false if not found with Git remote (e.g.: true)
 	Schema          *jsonschema.Schema // The entity's JSON-Schema
-	Config          map[string]any     // From the `.hery` config file
-	Content         Content
+
+	// TODO: Maybe should be removed and replace by `Content`
+	Config  map[string]any // From the `.hery` config file
+	Content Content
 }
 
 // Content of an entity

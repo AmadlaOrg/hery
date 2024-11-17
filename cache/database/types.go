@@ -9,7 +9,7 @@ const (
 type Table struct {
 	Name    string
 	Columns []Column
-	Rows    map[string]string
+	Rows    []map[string]any
 }
 
 // Column is a basic representation in a struct of a column in a SQL DB

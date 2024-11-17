@@ -8,12 +8,15 @@ import (
 type IParser interface {
 	ParseEntity(entity entity.Entity) (database.Table, error)
 	ParseMultipleEntities(entities []entity.Entity) (database.Table, error)
+	ParseTable(data []byte) (entity.Entity, error)
+	ParseRow(data []byte) (entity.Entity, error)
 }
 
 type SParser struct{}
 
 // Parse
 func (s *SParser) ParseEntity(entity entity.Entity) (database.Table, error) {
+
 	return database.Table{}, nil
 }
 

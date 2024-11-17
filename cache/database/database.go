@@ -139,7 +139,13 @@ func (s *SDatabase) Insert(table Table, names []string) error {
 	if err != nil {
 		return fmt.Errorf("error preparing insert statement: %v", err)
 	}
-	defer stmt.Close()
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			// TODO:
+			return
+		}
+	}(stmt)
 
 	for _, name := range names {
 		_, err := stmt.Exec(name)

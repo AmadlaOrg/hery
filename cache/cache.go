@@ -11,7 +11,7 @@ import (
 type ICache interface {
 	Open() error
 	Close() error
-	AddEntity() error
+	AddEntity(entity entity.Entity) error
 	InsertInEntity() error
 	SelectEntity() (entity.Entity, error)
 }
@@ -49,7 +49,28 @@ func (s *SCache) Close() error {
 }
 
 // AddEntity
-func (s *SCache) AddEntity() error {
+func (s *SCache) AddEntity(entity entity.Entity) error {
+	entitiesTable := database.Table{
+		Name:    "entities",
+		Columns: []database.Column{},
+	}
+
+	// TODO: Maybe create a method to just check if exist instead of creating a new one
+	err := s.Database.CreateTable(entitiesTable)
+	if err != nil {
+		return err
+	}
+
+	parseEntity, err := s.Parser.ParseEntity(entity)
+	if err != nil {
+		return err
+	}
+
+	err = s.Database.CreateTable(parseEntity)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
