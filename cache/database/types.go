@@ -7,13 +7,21 @@ const (
 
 // Table is a basic representation in a struct of a table in a SQL DB
 type Table struct {
-	Name    string
-	Columns []Column
-	Rows    []map[string]any
+	Name          string
+	Columns       []Column
+	Relationships []Relationships
+	Rows          []map[string]any
 }
 
 // Column is a basic representation in a struct of a column in a SQL DB
 type Column struct {
 	ColumnName string
 	DataType   string
+	Constraint string
+}
+
+type Relationships struct {
+	ColumnName           string
+	ReferencesTableName  string
+	ReferencesColumnName string
 }

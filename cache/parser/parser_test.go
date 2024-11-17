@@ -107,7 +107,13 @@ func TestParseEntity(t *testing.T) {
 					DataType:   "string",
 				},
 			},
-			Rows: []map[string]any{},
+			Rows: []map[string]any{
+				{
+					"Id":          "b5de2fb8-80d2-4506-b82b-66cca70f7d3e",
+					"server_name": "localhost",
+					"listen":      "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
+				},
+			},
 		},
 		{
 			Name: "Net",
@@ -125,7 +131,12 @@ func TestParseEntity(t *testing.T) {
 					DataType:   "string",
 				},
 			},
-			Rows: []map[string]any{},
+			Rows: []map[string]any{
+				{
+					"Id":    "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
+					"ports": "[80, 443]",
+				},
+			},
 		},
 	}
 	e := entity.Entity{

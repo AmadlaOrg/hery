@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -109,18 +110,51 @@ func (s *SDatabase) CreateTable(table Table) error {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
-	createTableSQL := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
-    );`, table.Name)
+	// TODO: Example of what Id and other columns look like:
+	/*
+		Id TEXT PRIMARY KEY,
+		        name TEXT NOT NULL
+	*/
+
+	var sqlColumns string
+	for _, column := range table.Columns {
+		sqlColumn := fmt.Sprintf(",\n%s %s %s", column.ColumnName, column.DataType, column.Constraint)
+		sqlColumns = fmt.Sprintf("%s %s", sqlColumns, sqlColumn)
+	}
+
+	sqlColumns = strings.TrimPrefix(sqlColumns, ",")
+
+	var sqlRelationships string
+	for _, relationship := range table.Relationships {
+		sqlRelationship := fmt.Sprintf(
+			",\nFOREIGN KEY(%s) REFERENCES %s(%s)",
+			relationship.ColumnName,
+			relationship.ReferencesTableName,
+			relationship.ReferencesColumnName)
+		sqlRelationships = fmt.Sprintf("%s %s", sqlRelationships, sqlRelationship)
+	}
+
+	createTableSQL := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (%s%s);`, table.Name, sqlColumns, sqlRelationships)
 
 	_, err := db.Exec(createTableSQL)
 	if err != nil {
 		return fmt.Errorf("error creating table: %v", err)
 	}
 
-	createIndexSQL := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS idx_%s_name ON %s(name);`, table.Name, table.Name)
-	_, err = db.Exec(createIndexSQL)
+	var sqlIndexes string
+	for _, index := range table.Columns {
+		// TODO: `idx_` what is this? Is this needed?
+		//createIndexSQL := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS idx_%s_name ON %s(name);`, table.Name, table.Name)
+		sqlIndexe := fmt.Sprintf(
+			"CREATE INDEX IF NOT EXISTS idx_%s_%s ON %s(%s);",
+			table.Name,
+			index.ColumnName,
+			table.Name,
+			index.ColumnName)
+		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
+	}
+
+	_, err = db.Exec(sqlIndexes)
 	if err != nil {
 		return fmt.Errorf("error creating index: %v", err)
 	}
