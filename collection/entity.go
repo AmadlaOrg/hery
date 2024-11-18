@@ -77,7 +77,7 @@ func (s *SEntityCollection) SelectByUri(entityUri string) (entityPkg.Entity, err
 		if entityVersion == "latest" {
 			// TODO: Needs goroutine
 			for _, entity := range *s.Collection.TransientEntities {
-				if entity.LatestVersion &&
+				if entity.IsLatestVersion &&
 					entity.RepoUrl == entityVals.RepoUrl {
 					return *entity, nil
 				}
@@ -103,7 +103,7 @@ func (s *SEntityCollection) SelectByUri(entityUri string) (entityPkg.Entity, err
 
 		// TODO: Needs goroutine
 		for _, entity := range *s.Collection.TransientEntities {
-			if entity.LatestVersion &&
+			if entity.IsLatestVersion &&
 				entity.RepoUrl == entityVals.RepoUrl {
 				return *entity, nil
 			} else {

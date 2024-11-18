@@ -40,7 +40,7 @@ func TestParseEntity(t *testing.T) {
 					DataType:   "string",
 				},
 				{
-					ColumnName: "LatestVersion",
+					ColumnName: "IsLatestVersion",
 					DataType:   "bool",
 				},
 				{
@@ -80,7 +80,7 @@ func TestParseEntity(t *testing.T) {
 					"RepoUrl":         "https://github.com/AmadlaOrg/EntityApplication",
 					"Origin":          "github.com/AmadlaOrg/EntityApplication",
 					"Version":         "v1.0.0",
-					"LatestVersion":   true,
+					"IsLatestVersion": true,
 					"IsPseudoVersion": false,
 					"AbsPath":         "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 					"Have":            true,
@@ -146,7 +146,7 @@ func TestParseEntity(t *testing.T) {
 		RepoUrl:         "https://github.com/AmadlaOrg/EntityApplication",
 		Origin:          "github.com/AmadlaOrg/EntityApplication",
 		Version:         "v1.0.0",
-		LatestVersion:   true,
+		IsLatestVersion: true,
 		IsPseudoVersion: false,
 		AbsPath:         "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 		Have:            true,
@@ -185,7 +185,13 @@ func TestParseEntity(t *testing.T) {
 		},
 	}
 
-	dbTable, err := parserService.ParseEntity(e)
+	dbTable, err := parserService.Entity(e)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, dbTable)
+}
+
+func TestEntityToTableName(t *testing.T) {
+	parserService := NewParserService()
+	tableName := parserService.EntityToTableName("github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0")
+	assert.Equal(t, "github_com_AmadlaOrg_EntityApplication_WebServer_v1_0_0", tableName)
 }

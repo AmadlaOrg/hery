@@ -209,7 +209,7 @@ func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (ent
 			}
 			entityVals.IsPseudoVersion = false
 		}
-		entityVals.LatestVersion = true
+		entityVals.IsLatestVersion = true
 		entityUri = fmt.Sprintf("%s@%s", entityUriWithoutVersion, entityVersion)
 	} else if !s.EntityVersionValidation.Format(entityVersion) &&
 		!s.EntityVersionValidation.PseudoFormat(entityVersion) {

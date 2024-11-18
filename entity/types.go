@@ -26,7 +26,7 @@ type Entity struct {
 	RepoUrl         string             // The full repository URL (e.g.: https://github.com/AmadlaOrg/EntityApplication)
 	Origin          string             // The entity URL path (it can also be used as a relative path) (e.g.: github.com/AmadlaOrg/EntityApplication)
 	Version         string             // The entity version (what is after `@`) (e.g.: v1.0.0)
-	LatestVersion   bool               // Indicates if the Version of this entity is the most recent
+	IsLatestVersion bool               // Indicates if the Version of this entity is the most recent
 	IsPseudoVersion bool               // True if the version was generated
 	AbsPath         string             // The absolute path to where the entity is stored (e.g.: /home/user/.hery/amadla/entity/github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0)
 	Have            bool               // True if the entity is downloaded and false if not (e.g.: true)
