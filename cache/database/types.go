@@ -20,6 +20,7 @@ type Column struct {
 	Constraint string
 }
 
+// Relationships so to create relationships
 type Relationships struct {
 	ColumnName           string
 	ReferencesTableName  string

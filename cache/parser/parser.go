@@ -24,11 +24,25 @@ func (s *SParser) Entity(entity entity.Entity) ([]database.Table, error) {
 	// TODO: For `Id` always: `Id TEXT PRIMARY KEY,`
 	// TODO: Maybe always have `NOT NULL` as a constrain. E.g.: name TEXT NOT NULL
 
-	//entityBody := entity.Content.Body
+	entityBody := entity.Content.Body
 
-	/*for _, bodyProperty := range entityBody {
+	// TODO: It needs data type and constrain
+	var dynamicColumns []database.Column
+	for key, value := range entityBody {
+		//dataType := determineDataType(value)
+		// TODO: Lookup the JsonSchema for the datatype
+		dynamicColumns = append(dynamicColumns, database.Column{
+			ColumnName: key,
+			DataType:   "", //dataType,
+			Constraint: "", // TODO: Maybe there is something we can use from json schema (unique, require, etc)
+		})
+	}
 
-	}*/
+	// TODO:
+	var dynamicRelationships []database.Relationships
+	for key, value := range entityBody {
+		dynamicRelationships = append(dynamicRelationships, database.Relationships{})
+	}
 
 	return []database.Table{
 		{
