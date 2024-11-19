@@ -33,6 +33,14 @@
         "format": "uri",
         "description": "The URL must be a valid URI."
       }
+    },
+    "entities": {
+      "type": "array",
+      "description": "Git repository HTTPS link to the plugin.",
+      "items": {
+        "$ref": "outer.entity.schema.json",
+        "description": "The URL must be a valid URI."
+      }
     }
   }
 }

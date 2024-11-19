@@ -3,7 +3,8 @@ package parser
 import (
 	"github.com/AmadlaOrg/hery/cache/database"
 	"github.com/AmadlaOrg/hery/entity"
-	"github.com/santhosh-tekuri/jsonschema/v6"
+	"github.com/AmadlaOrg/hery/entity/schema"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -140,8 +141,8 @@ func TestParseEntity(t *testing.T) {
 		},
 	}
 	e := entity.Entity{
-		Id:              "c0fdd76d-a5b5-4f35-8784-e6238d6933ab",
-		Entity:          "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
+		Id:              uuid.MustParse("c0fdd76d-a5b5-4f35-8784-e6238d6933ab"),
+		Uri:             "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 		Name:            "WebServer",
 		RepoUrl:         "https://github.com/AmadlaOrg/EntityApplication",
 		Origin:          "github.com/AmadlaOrg/EntityApplication",
@@ -152,7 +153,7 @@ func TestParseEntity(t *testing.T) {
 		Have:            true,
 		Hash:            "",
 		Exist:           true,
-		Schema:          &jsonschema.Schema{},
+		Schema:          &schema.Schema{},
 		Content: entity.Content{
 			Entity: "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 			Id:     "c0fdd76d-a5b5-4f35-8784-e6238d6933ab",

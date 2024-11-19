@@ -73,8 +73,8 @@ type SEntity struct {
 func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
 	// 1. Extract `_entity`
 	entitySection := heryContent["_entity"].(string)
-	if entity.Entity != "" {
-		entitySection = entity.Entity
+	if entity.Uri != "" {
+		entitySection = entity.Uri
 	} else if entitySection == "" {
 		return Content{}, errors.New("no entity section found")
 	}
@@ -118,7 +118,7 @@ func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Con
 // FindDir can find pseudo versioned entity directories and static versioned entities
 func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	if !s.EntityVersionValidation.PseudoFormat(entityVals.Version) {
-		exactPath := entityVals.Entity
+		exactPath := entityVals.Uri
 
 		// Check if the directory exists
 		if _, err := osStat(exactPath); osIsNotExist(err) {

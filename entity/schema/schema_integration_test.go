@@ -2,8 +2,32 @@ package schema
 
 import (
 	"github.com/stretchr/testify/assert"
+	"path/filepath"
 	"testing"
 )
+
+func TestLoad(t *testing.T) {
+	// Arrange
+	//schemaPath, err := filepath.Abs(filepath.Join("..", "..", "test", "fixture", "valid-entity", ".amadla", "schema.hery.json"))
+	schemaPath, err := filepath.Abs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
+	if err != nil {
+		t.Fatalf("Failed to get absolute path for schema fixture: %v", err)
+	}
+
+	schemaLoader := &SSchema{}
+
+	// Act
+	loadedSchema, err := schemaLoader.Load(schemaPath)
+
+	// Assert
+	assert.NoError(t, err, "Expected no error when loading a valid schema")
+	assert.NotNil(t, loadedSchema.CompiledSchema, "CompiledSchema should not be nil")
+	assert.NotEmpty(t, loadedSchema.Schema, "Schema map should not be empty")
+	assert.Equal(t, schemaPath, loadedSchema.SchemaPath, "SchemaPath should match the provided path")
+
+	// Optionally validate the compiled schema
+	t.Logf("Loaded schema: %+v", loadedSchema)
+}
 
 // FIXME: It seems that the jsonschema.Schema{} is ver deep... So maybe just check some of the values or check if valid jsonschema.Schema?
 /*func TestLoad(t *testing.T) {
@@ -326,3 +350,18 @@ func TestMergeSchemas(t *testing.T) {
 		assert.Nil(t, schema)
 	})
 }*/
+
+// TODO: Maybe there a better way to test this.
+func TestLoadSchemaFile(t *testing.T) {
+	entitySchemaService := NewEntitySchemaService()
+	absPath, err := filepath.Abs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
+	if err != nil {
+		return
+	}
+	got, err := entitySchemaService.loadSchemaFile(absPath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.NotNil(t, got)
+}

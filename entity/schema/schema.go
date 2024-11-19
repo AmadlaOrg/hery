@@ -13,7 +13,7 @@ import (
 
 // ISchema used by mockery
 type ISchema interface {
-	Load(schemaPath string) (*jsonschema.Schema, error)
+	Load(schemaPath string) (*Schema, error)
 	GenerateSchemaPath(collectionName, entityPath string) string
 	GenerateURNPrefix(collectionName string) string
 	GenerateURN(urnPrefix, entityUri string) string
@@ -29,48 +29,53 @@ type SSchema struct{}
 // Help with mocking
 var (
 	osOpen                = os.Open
-	filepathAbs           = filepath.Abs
 	jsonNewDecoder        = json.NewDecoder
 	jsonschemaNewCompiler = jsonschema.NewCompiler
 )
 
 // Load loads the JSON schema from a file and merges it with a base schema
-func (s *SSchema) Load(schemaPath string) (*jsonschema.Schema, error) {
-	// 1. Load the main schema
-	mainSchemaData, err := s.loadSchemaFile(schemaPath)
+func (s *SSchema) Load(schemaPath string) (*Schema, error) {
+	// 1. Read the schema file into memory
+	schemaData, err := s.loadSchemaFile(schemaPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load main schema: %w", err)
+		return nil, err
 	}
 
-	// 2. Load the HERY base schema from .schema/entity.schema.json
-	baseSchemaPath, err := filepathAbs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve base schema path: %w", err)
-	}
-	baseSchemaData, err := s.loadSchemaFile(baseSchemaPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load base schema: %w", err)
-	}
+	schemaName := filepath.Base(schemaPath)
 
-	// 3. Merge the two schemas
-	mergedSchemaData := s.mergeSchemas(baseSchemaData, mainSchemaData)
-
-	// 4. Create a new compiler
+	// 2. Create a new compiler
 	compiler := jsonschemaNewCompiler()
 
-	// 5. Add the merged schema to the compiler as a resource
-	err = compiler.AddResource("merged_schema.json", mergedSchemaData) //bytes.NewReader(mergedSchemaJSON))
+	// 3. Add the merged schema to the compiler as a resource
+	err = compiler.AddResource(schemaName, schemaData) //bytes.NewReader(mergedSchemaJSON))
 	if err != nil {
 		return nil, fmt.Errorf("failed to add merged schema to the compiler: %w", err)
 	}
 
-	// 6. Compile the merged schema
-	schema, err := compiler.Compile("merged_schema.json")
+	// 4. Compile the merged schema
+	compiledSchema, err := compiler.Compile(schemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compile merged schema: %w", err)
 	}
 
-	return schema, nil
+	var schemaId string
+	if schemaData["$id"] == nil {
+		schemaId = ""
+	} else {
+		if schemaId = schemaData["$id"].(string); schemaId != "" {
+			// TODO: Better handling of warnings
+			log.Printf("Warning! Schema $id from %s to %s is empty", schemaName, schemaId)
+		}
+	}
+
+	// 5. Return the Schema struct
+	return &Schema{
+		CompiledSchema: compiledSchema,
+		SchemaPath:     schemaPath,
+		SchemaName:     schemaName,
+		SchemaId:       schemaId,
+		Schema:         schemaData,
+	}, nil
 }
 
 // GenerateSchemaPath returns the absolute path for the entity's schema
@@ -96,6 +101,7 @@ func (s *SSchema) GenerateURN(urnPrefix, entityUri string) string {
 
 // loadSchemaFile reads a JSON schema file and returns it as a map
 func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
+	// 1. Read the schema file into memory
 	file, err := osOpen(schemaPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open schema file: %w", err)
@@ -103,10 +109,11 @@ func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-			log.Printf("failed to close schema file: %s", err)
+			log.Printf("failed to close schema file: %v", err)
 		}
 	}(file)
 
+	// 2. Decode the schema
 	var schemaData map[string]any
 	if err = jsonNewDecoder(file).Decode(&schemaData); err != nil {
 		return nil, fmt.Errorf("failed to decode schema file: %w", err)

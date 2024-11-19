@@ -1,8 +1,9 @@
 ---
 _entity: "github.com/AmadlaOrg/Entity@latest"
-name: Entity
-description: The root Entity definition.
-category: General
-tags:
-  - main
-  - master
+_body:
+  name: Entity
+  description: The root Entity definition.
+  category: General
+  tags:
+    - main
+    - master

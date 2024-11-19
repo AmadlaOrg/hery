@@ -94,8 +94,8 @@ func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, 
 		}
 	}
 
-	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Entity)
-	entityVals.Id = uuidNew().String()
+	entityVals.AbsPath = filepath.Join(paths.Entities, entityVals.Uri)
+	entityVals.Id = uuidNew()
 	entityVals.Exist = true
 
 	return entityVals, nil
@@ -125,8 +125,8 @@ func (s *SBuild) metaFromLocalWithVersion(entityUri, entityVersion string) (enti
 	entityVals.IsPseudoVersion = false
 	entityVals.Name = filepath.Base(entityUriWithoutVersion)
 	entityVals.Version = entityVersion
-	entityVals.Entity = entityUri
-	entityVals.Origin = s.constructOrigin(entityVals.Entity, entityVals.Name, entityVals.Version)
+	entityVals.Uri = entityUri
+	entityVals.Origin = s.constructOrigin(entityVals.Uri, entityVals.Name, entityVals.Version)
 
 	return entityVals, nil
 }
@@ -168,8 +168,8 @@ func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, 
 
 	entityVals.Name = filepath.Base(entityUri)
 	entityVals.Version = entityVersion
-	entityVals.Entity = fmt.Sprintf("%s@%s", entityUri, entityVersion)
-	entityVals.Origin = s.constructOrigin(entityVals.Entity, entityVals.Name, entityVals.Version)
+	entityVals.Uri = fmt.Sprintf("%s@%s", entityUri, entityVersion)
+	entityVals.Origin = s.constructOrigin(entityVals.Uri, entityVals.Name, entityVals.Version)
 
 	return entityVals, nil
 }
@@ -220,8 +220,8 @@ func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (ent
 
 	entityVals.Name = filepath.Base(entityUriWithoutVersion)
 	entityVals.Version = entityVersion
-	entityVals.Entity = entityUri
-	entityVals.Origin = s.constructOrigin(entityVals.Entity, entityVals.Name, entityVals.Version)
+	entityVals.Uri = entityUri
+	entityVals.Origin = s.constructOrigin(entityVals.Uri, entityVals.Name, entityVals.Version)
 
 	return entityVals, nil
 }
