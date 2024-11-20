@@ -18,6 +18,7 @@ type Column struct {
 	ColumnName string
 	DataType   string
 	Constraint string
+	Default    string
 }
 
 // Relationships so to create relationships
