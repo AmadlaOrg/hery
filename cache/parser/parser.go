@@ -87,13 +87,17 @@ func (s *SParser) Entity(entity entity.Entity) ([]database.Table, error) {
 					continue // Skip if schemaPropertyValue is not a map
 				}
 
-				var dataType string
+				var dataType database.DataType
 
 				// Change the data type if the "format" property is present
 				if formatValue, ok := propertyDetails["format"].(string); ok {
-					dataType = parseJsonSchemaFormatToSQLiteType(formatValue)
+					if dataFormat, valid := schemaStringToDataFormat(formatValue); valid {
+						dataType = parseJsonSchemaFormatToSQLiteType(dataFormat)
+					}
 				} else if typeValue, ok := propertyDetails["type"].(string); ok {
-					dataType = parseJsonSchemaToSQLiteType(typeValue)
+					if dataTypeValue, valid := schemaStringToDataType(typeValue); valid {
+						dataType = parseJsonSchemaToSQLiteType(dataTypeValue)
+					}
 				}
 
 				// Append the column definition

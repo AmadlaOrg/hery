@@ -6,6 +6,8 @@ const (
 	ErrorDatabaseNotInitialized = "database not initialized"
 )
 
+type DataType string
+
 // Data types
 /*
 SQLite 3 data type:
@@ -24,20 +26,20 @@ SQLite 3 data type:
 	DATE, DATETIME	       NUMERIC	TEXT, REAL, or INTEGER depending on the format
 */
 const (
-	DataTypeInteger    = "INTEGER"
-	DataTypeTinyint    = "TINYINT"
-	DataTypeBigInteger = "BIGINT"
-	DataTypeReal       = "REAL"
-	DataTypeNumeric    = "NUMERIC"
-	DataTypeDecimal    = "DECIMAL"
-	DataTypeBoolean    = "BOOLEAN"
-	DataTypeText       = "TEXT"
-	DataTypeCharacter  = "CHARACTER"
-	DataTypeVarchar    = "VARCHAR"
-	DataTypeClob       = "CLOB"
-	DataTypeBlob       = "BLOB"
-	DataTypeDate       = "DATE"
-	DataTypeDateTime   = "DATETIME"
+	DataTypeInteger    DataType = "INTEGER"
+	DataTypeTinyint    DataType = "TINYINT"
+	DataTypeBigInteger DataType = "BIGINT"
+	DataTypeReal       DataType = "REAL"
+	DataTypeNumeric    DataType = "NUMERIC"
+	DataTypeDecimal    DataType = "DECIMAL"
+	DataTypeBoolean    DataType = "BOOLEAN"
+	DataTypeText       DataType = "TEXT"
+	DataTypeCharacter  DataType = "CHARACTER"
+	DataTypeVarchar    DataType = "VARCHAR"
+	DataTypeClob       DataType = "CLOB"
+	DataTypeBlob       DataType = "BLOB"
+	DataTypeDate       DataType = "DATE"
+	DataTypeDateTime   DataType = "DATETIME"
 )
 
 // Table is a basic representation in a struct of a table in a SQL DB
@@ -51,7 +53,7 @@ type Table struct {
 // Column is a basic representation in a struct of a column in a SQL DB
 type Column struct {
 	ColumnName string
-	DataType   string
+	DataType   DataType
 	Constraint string
 	Default    string
 }

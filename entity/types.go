@@ -24,7 +24,8 @@ const (
 // There are multiple attributes that are attached to an Entity. They are used for selecting and working with entities.
 type Entity struct {
 	// TODO: switch to UUID
-	Id uuid.UUID // uuid (e.g.: 97d4b783-f448-483c-8111-380d6082ae1c)
+	Id       uuid.UUID // Id is in uuid format (e.g.: 97d4b783-f448-483c-8111-380d6082ae1c)
+	CustomId string    // CustomId is only fill
 
 	// TODO: Change it to Entity to EntityUri or Uri
 	Uri             string         // Reserved (e.g.: github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0)

@@ -6,77 +6,79 @@ import (
 )
 
 var (
-	Ids = database.Table{
-		Name: "Ids",
-		Columns: []database.Column{
-			column.Id,
-			{
-				ColumnName: "CustomId",
-				DataType:   "TEXT",
-			},
-			{
-				ColumnName: "RefId",
-				DataType:   "TEXT",
-			},
-			column.InsertDateTime,
-			column.UpdateDateTime,
-		},
-	}
 	Entities = database.Table{
 		Name: "Entities",
 		Columns: []database.Column{
 			column.Id,
 			{
-				ColumnName: "Entity",
-				DataType:   "TEXT",
+				ColumnName: "CustomId",
+				DataType:   database.DataTypeText,
+				Constraint: "",
+			},
+			{
+				ColumnName: "Uri",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Name",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "RepoUrl",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Origin",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Version",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "IsLatestVersion",
-				DataType:   "BOOLEAN",
+				DataType:   database.DataTypeBoolean,
+				Constraint: "",
 			},
 			{
 				ColumnName: "IsPseudoVersion",
-				DataType:   "BOOLEAN",
+				DataType:   database.DataTypeBoolean,
+				Constraint: "",
 			},
 			{
 				ColumnName: "AbsPath",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Have",
-				DataType:   "BOOLEAN",
+				DataType:   database.DataTypeBoolean,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Hash",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Exist",
-				DataType:   "BOOLEAN",
+				DataType:   database.DataTypeBoolean,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Schema",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			{
 				ColumnName: "Content",
-				DataType:   "TEXT",
+				DataType:   database.DataTypeText,
+				Constraint: "",
 			},
 			column.InsertDateTime,
 			column.UpdateDateTime,
