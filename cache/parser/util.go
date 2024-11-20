@@ -1,43 +1,64 @@
 package parser
 
+import (
+	"fmt"
+	"strings"
+)
+
 // parseJsonSchemaToSQLiteType
 func parseJsonSchemaToSQLiteType(jsonSchemaType string) string {
-	var sqliteType string
 	switch jsonSchemaType {
 	case "string":
-		sqliteType = "TEXT"
+		return "TEXT"
 	case "number":
-		sqliteType = "BIGINT"
+		return "BIGINT"
 	case "integer":
-		sqliteType = "BIGINT"
+		return "BIGINT"
 	case "object":
-		sqliteType = "TEXT"
+		return "TEXT"
 	case "array":
-		sqliteType = "TEXT"
+		return "TEXT"
 	case "boolean":
-		sqliteType = "BOOLEAN"
+		return "BOOLEAN"
 	case "null":
-		sqliteType = "TEXT" // SQLite has no direct equivalent; treat as NULL
+		return "TEXT" // SQLite has no direct equivalent; treat as NULL
 	default:
-		sqliteType = "TEXT"
+		return "TEXT"
 	}
-
-	return sqliteType
 }
 
 // parseJsonSchemaFormatToSQLiteType
 func parseJsonSchemaFormatToSQLiteType(jsonSchemaType string) string {
-	var sqliteType string
 	switch jsonSchemaType {
 	case "date-time":
-		sqliteType = "DATETIME"
+		return "DATETIME"
 	case "time":
-		sqliteType = "TEXT"
+		return "TEXT"
 	case "date":
-		sqliteType = "DATE"
+		return "DATE"
 	case "duration":
-		sqliteType = "TEXT"
+		return "TEXT"
+	default:
+		return "TEXT"
 	}
+}
 
-	return sqliteType
+// parseJsonSchemaToSQLiteConstraint
+func parseJsonSchemaToSQLiteConstraint(jsonSchemaConstraint, value any) string {
+	switch jsonSchemaConstraint {
+	case "minLength":
+		return fmt.Sprintf("LENGTH(column_name) >= %d", value.(int))
+	case "maxLength":
+		return fmt.Sprintf("LENGTH(column_name) <= %d", value.(int))
+	default:
+		return ""
+	}
+}
+
+// joinSQLiteConstraints
+func joinSQLiteConstraints(constraints ...string) string {
+	if len(constraints) > 0 {
+		return fmt.Sprintf("CHECK (%s)", strings.Join(constraints, " AND "))
+	}
+	return ""
 }
