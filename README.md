@@ -72,15 +72,15 @@ Amadla tries to follow the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_
 
 It can be thought as an abstraction of a RDBMS and a Package Manager.
 
-## How Fast Is It?
+## 🏎 How Fast Is It?
 For the downloading of entities it will depend on how heavy the repository is. But generally an entity is just text so
 should be quick.
 
 For the query of data via HERY, it should be pretty quick since it uses [SQLite3](https://www.sqlite.org/) in the
 backend.
 
-## Install
-### With Go
+## 📥 Install
+### With Go 🐹
 ```bash
 go install github.com/AmadlaOrg/hery
 ```
@@ -89,7 +89,7 @@ go install github.com/AmadlaOrg/hery
 go build -o hery
 ```
 
-## Quickstart
+## 🚀 Quickstart
 HERY does not require a lot of learning to get started. All you need to know is the four reserved properties, the
 `.hery` file format that the reserved properties are found, that there is a SQLite caching system, a few of the
 commands and understand some of the basics of the query language.
@@ -127,12 +127,13 @@ the entity content `_entity` is not allowed since it takes the value from the re
 When validation happens it takes for account the entity URI and validates what is in the `_body` whilst everything else
 is ignored.
 
-### Caching
-Since the querying on YAML files would be a bit slow and resource demanding, SQLite is used to store all the entities.
+### 🚛 Caching
+Since the querying on [YAML](https://yaml.org/) files would be a bit slow and resource demanding, [SQLite3](https://www.sqlite.org/)
+is used to store all the entities.
 
 Each entity has its own table, and it is found: `~/.hery/collection/<collection name>/<collection name>.cache`.
 
-### Basic Commands
+### 🖥️ Basic Commands
 To verify that it was installed properly:
 ```bash
 hery --version
@@ -155,7 +156,7 @@ hery collection list
 hery entity --collection amadla get github.com/Repository/EntityName
 ```
 
-### Query
+### 🔍 Query
 ```bash
 hery entity --collection {collection name} query 'entities'
 ```
@@ -163,7 +164,7 @@ hery entity --collection {collection name} query 'entities'
 ### More...
 To get more details on the functioning and commands: [.docs](.docs).
 
-## Dev
+## ⌨ Dev
 ## Developer Benefits
 A developer should find the code of this project to be well organized. It also comes with generated mocks that can make
 it very easy to write unit tests without needing to make mocks. It also comes with interfaces for each packages making
