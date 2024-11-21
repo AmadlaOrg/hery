@@ -10,7 +10,7 @@ efficient data organization and interaction.
 Additionally, the term "hery" in British English, pronounced /ˈhɛrɪ/, is an obsolete verb meaning "to glorify; praise."
 This name reflects the utility's aim to elevate and celebrate structured data management.
 
-## Long Description
+## 👐 Apropos
 
 HERY differs with [YAML](https://yaml.org/) only by the four "reserved" properties: `_meta`, `_entity`, `_id` and `_body`. In other
 words any `.hery` can be read by any [YAML](https://yaml.org/) library or editor. HERY's reserved properties are there to organize
@@ -38,13 +38,12 @@ as row in a RDBMS database. To overwrite a specific entity content ("row"), the 
 
 Entities are grouped by collections. A collection can be thought as a database.
 
-A simple definition list:
-
-- **Collection** -> Database
-- **Entity** -> Table
-- **Entity content** -> Row
-- **Meta** -> HTML `<meta>`
-- **id** -> An `id` for a row in a RDBMS database
+✅ A simple definition list:
+- 🛒 **Collection** -> Database
+- 📦 **Entity** -> Table
+- 🎁 **Entity content** -> Row
+- 🔖 **Meta** -> HTML `<meta>`
+- 🪪 **id** -> An `id` for a row in a RDBMS database
 
 To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a file
 that is named after the collection and with the extension `.hery`. This means that it is possible to have multiple
@@ -61,7 +60,7 @@ to use custom tools since HERY can easily be used as a library in a custom [Gola
 
 Amadla tries to follow the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_philosophy) as much as possible.
 
-## Why Not Just Use SQLite 🐘?
+## :suspect: Why Not Just Use SQLite 🐘?
 - Entities concept with [YAML](https://yaml.org/) is simpler to use
 - Lower learning curve
 - It manages the download of separate entities automatically
@@ -80,11 +79,11 @@ For the query of data via HERY, it should be pretty quick since it uses [SQLite3
 backend.
 
 ## 📥 Install
-### With Go 🐹
+### 🐹 With Go
 ```bash
 go install github.com/AmadlaOrg/hery
 ```
-### Build
+### 🔨 Build
 ```bash
 go build -o hery
 ```
@@ -94,7 +93,7 @@ HERY does not require a lot of learning to get started. All you need to know is 
 `.hery` file format that the reserved properties are found, that there is a SQLite caching system, a few of the
 commands and understand some of the basics of the query language.
 
-### `.hery` File Format
+### 📑 `.hery` File Format
 The `.hery` file format is the same as a `.yml`/`.yaml` file format. The reason the extension is different is so that
 `hery` CLI is able to find it and so that IDEs can have better support.
 
@@ -139,17 +138,17 @@ To verify that it was installed properly:
 hery --version
 ```
 
-### Create a collection
+### 🔩 Create a collection
 ```bash
 hery collection init collection_name
 ```
 
-### List collections
+### 📃 List collections
 ```bash
 hery collection list
 ```
 
-### Download an entity
+### 📥 Download an entity
 ```bash
 # Without version it will get the latest version or if no version found then it will generate a pseudo version number using the commit hash
 # To add a version: @v{version}
@@ -161,11 +160,11 @@ hery entity --collection amadla get github.com/Repository/EntityName
 hery entity --collection {collection name} query 'entities'
 ```
 
-### More...
+### ➕ More...
 To get more details on the functioning and commands: [.docs](.docs).
 
 ## ⌨ Dev
-## Developer Benefits
+### 🔥 Developer Benefits
 A developer should find the code of this project to be well organized. It also comes with generated mocks that can make
 it very easy to write unit tests without needing to make mocks. It also comes with interfaces for each packages making
 it easy to overwrite. The only functions that are not in the interface are generally just simple utility functions.
@@ -174,7 +173,7 @@ There are also a lot of text and code editor plugins that make it a breeze for t
 
 > PRs are always welcome!
 
-### IDE Plugins
+### 📝 IDE Plugins
        ![Vim icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vim.png) [Vim](.editor/.vimrc)
 
        ![Code icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vscode.png) [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
