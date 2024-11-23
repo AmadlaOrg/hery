@@ -7,44 +7,6 @@ import (
 	"strings"
 )
 
-// schemaStringToDataType Convert string to DataType
-func schemaStringToDataType(value string) (schema.DataType, bool) {
-	switch value {
-	case string(schema.DataTypeString):
-		return schema.DataTypeString, true
-	case string(schema.DataTypeNumber):
-		return schema.DataTypeNumber, true
-	case string(schema.DataTypeInteger):
-		return schema.DataTypeInteger, true
-	case string(schema.DataTypeObject):
-		return schema.DataTypeObject, true
-	case string(schema.DataTypeArray):
-		return schema.DataTypeArray, true
-	case string(schema.DataTypeBoolean):
-		return schema.DataTypeBoolean, true
-	case string(schema.DataTypeNull):
-		return schema.DataTypeNull, true
-	default:
-		return "", false
-	}
-}
-
-// schemaStringToDataFormat Convert string to DataFormat
-func schemaStringToDataFormat(value string) (schema.DataFormat, bool) {
-	switch value {
-	case string(schema.DataFormatDateTime):
-		return schema.DataFormatDateTime, true
-	case string(schema.DataFormatTime):
-		return schema.DataFormatTime, true
-	case string(schema.DataFormatDate):
-		return schema.DataFormatDate, true
-	case string(schema.DataFormatDuration):
-		return schema.DataFormatDuration, true
-	default:
-		return "", false
-	}
-}
-
 // parseJsonSchemaToSQLiteType
 func parseJsonSchemaToSQLiteType(jsonSchemaType schema.DataType) database.DataType {
 	switch jsonSchemaType {

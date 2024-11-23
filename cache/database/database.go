@@ -105,11 +105,7 @@ func (s *SDatabase) IsInitialized() bool {
 }
 
 // CreateTable creates a new table
-func (s *SDatabase) CreateTable(table Table) error {
-	if !s.IsInitialized() {
-		return fmt.Errorf(ErrorDatabaseNotInitialized)
-	}
-
+func (s *SDatabase) CreateTable(table Table) string {
 	var sqlColumns string
 	for _, column := range table.Columns {
 		sqlColumn := fmt.Sprintf(",\n%s %s %s", column.ColumnName, column.DataType, column.Constraint)
@@ -130,11 +126,6 @@ func (s *SDatabase) CreateTable(table Table) error {
 
 	createTableSQL := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (%s%s);`, table.Name, sqlColumns, sqlRelationships)
 
-	_, err := db.Exec(createTableSQL)
-	if err != nil {
-		return fmt.Errorf("error creating table: %v", err)
-	}
-
 	var sqlIndexes string
 	for _, index := range table.Columns {
 		// TODO: `idx_` what is this? Is this needed?
@@ -148,55 +139,17 @@ func (s *SDatabase) CreateTable(table Table) error {
 		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
 	}
 
-	_, err = db.Exec(sqlIndexes)
-	if err != nil {
-		return fmt.Errorf("error creating index: %v", err)
-	}
-
-	return nil
+	return fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes)
 }
 
 // Insert inserts records into the table
-func (s *SDatabase) Insert(table Table, names []string) error {
-	if !s.IsInitialized() {
-		return fmt.Errorf(ErrorDatabaseNotInitialized)
-	}
-
-	insertSQL := fmt.Sprintf(`INSERT INTO %s (name) VALUES (?)`, table.Name)
-	stmt, err := db.Prepare(insertSQL)
-	if err != nil {
-		return fmt.Errorf("error preparing insert statement: %v", err)
-	}
-	defer func(stmt *sql.Stmt) {
-		err := stmt.Close()
-		if err != nil {
-			// TODO:
-			return
-		}
-	}(stmt)
-
-	for _, name := range names {
-		_, err := stmt.Exec(name)
-		if err != nil {
-			return fmt.Errorf("error inserting record: %v", err)
-		}
-	}
-
-	return nil
+func (s *SDatabase) Insert(table Table, names []string) string {
+	return fmt.Sprintf(`INSERT INTO %s (name) VALUES (?)`, table.Name)
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table, id int, newName string) error {
-	if !s.IsInitialized() {
-		return fmt.Errorf(ErrorDatabaseNotInitialized)
-	}
-
-	updateSQL := fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name)
-	_, err := db.Exec(updateSQL, newName, id)
-	if err != nil {
-		return fmt.Errorf("error updating record: %v", err)
-	}
-	return nil
+func (s *SDatabase) Update(table Table, id int, newName string) string {
+	return fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name)
 }
 
 // Select retrieves a record from the table
@@ -219,29 +172,32 @@ func (s *SDatabase) Select(table Table, name string) (string, error) {
 }
 
 // Delete deletes a record from the table
-func (s *SDatabase) Delete(table Table, id int) error {
-	if !s.IsInitialized() {
-		return fmt.Errorf(ErrorDatabaseNotInitialized)
-	}
-
-	deleteSQL := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name)
-	_, err := db.Exec(deleteSQL, id)
-	if err != nil {
-		return fmt.Errorf("error deleting record: %v", err)
-	}
-	return nil
+func (s *SDatabase) Delete(table Table, id int) string {
+	return fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name)
 }
 
 // DropTable drops the table from the database
-func (s *SDatabase) DropTable(table Table) error {
+func (s *SDatabase) DropTable(table Table) string {
+	return fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name)
+}
+
+// Apply all the SQL scripts that are in a string array that are combined into one SQL script
+func (s *SDatabase) Apply(sqlQueries *[]string) error {
 	if !s.IsInitialized() {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
-	dropTableSQL := fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name)
-	_, err := db.Exec(dropTableSQL)
+	stmt, err := db.Prepare(mergeSqlQueries(sqlQueries))
 	if err != nil {
-		return fmt.Errorf("error dropping table: %v", err)
+		return fmt.Errorf("error preparing insert statement: %v", err)
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			// TODO:
+			return
+		}
+	}(stmt)
+
 	return nil
 }

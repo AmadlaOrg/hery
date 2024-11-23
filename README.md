@@ -43,7 +43,7 @@ Entities are grouped by collections. A collection can be thought as a database.
 - 📦 **Entity** -> Table
 - 🎁 **Entity content** -> Row
 - 🔖 **Meta** -> HTML `<meta>`
-- 🪪 **id** -> An `id` for a row in a RDBMS database
+- 🪪 **Id** -> An `id` for a row in a RDBMS database
 
 To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a file
 that is named after the collection and with the extension `.hery`. This means that it is possible to have multiple

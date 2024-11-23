@@ -11,9 +11,9 @@ import (
 type ICache interface {
 	Open() error
 	Close() error
-	AddEntity(entity entity.Entity) error
+	AddEntity(entity *entity.Entity) error
 	InsertInEntity() error
-	SelectEntity() (entity.Entity, error)
+	SelectEntity() (*entity.Entity, error)
 }
 
 // SCache
@@ -48,8 +48,8 @@ func (s *SCache) Close() error {
 	return nil
 }
 
-// AddEntity
-func (s *SCache) AddEntity(entity entity.Entity) error {
+// AddEntity will
+func (s *SCache) AddEntity(entity *entity.Entity) error {
 	entitiesTable := database.Table{
 		Name:    "entities",
 		Columns: []database.Column{},
@@ -61,14 +61,16 @@ func (s *SCache) AddEntity(entity entity.Entity) error {
 		return err
 	}
 
-	parseEntity, err := s.Parser.ParseEntity(entity)
+	parsedEntity, err := s.Parser.Entity(entity)
 	if err != nil {
 		return err
 	}
 
-	err = s.Database.CreateTable(parseEntity)
-	if err != nil {
-		return err
+	for _, table := range parsedEntity {
+		err = s.Database.CreateTable(table)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

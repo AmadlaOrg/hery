@@ -42,6 +42,19 @@ const (
 	DataTypeDateTime   DataType = "DATETIME"
 )
 
+// ConstraintType represents a SQLite constraint.
+type ConstraintType string
+
+const (
+	ConstraintPrimaryKey    ConstraintType = "PRIMARY KEY"
+	ConstraintNotNull       ConstraintType = "NOT NULL"
+	ConstraintUnique        ConstraintType = "UNIQUE"
+	ConstraintCheck         ConstraintType = "CHECK"
+	ConstraintDefault       ConstraintType = "DEFAULT"
+	ConstraintForeignKey    ConstraintType = "FOREIGN KEY"
+	ConstraintAutoincrement ConstraintType = "AUTOINCREMENT"
+)
+
 // Table is a basic representation in a struct of a table in a SQL DB
 type Table struct {
 	Name          string
@@ -52,10 +65,10 @@ type Table struct {
 
 // Column is a basic representation in a struct of a column in a SQL DB
 type Column struct {
-	ColumnName string
-	DataType   DataType
-	Constraint string
-	Default    string
+	ColumnName  string
+	DataType    DataType
+	Constraints []Constraint
+	Default     string
 }
 
 // Relationships so to create relationships
@@ -63,4 +76,12 @@ type Relationships struct {
 	ColumnName           string
 	ReferencesTableName  string
 	ReferencesColumnName string
+}
+
+// Constraint represents a SQLite constraint.
+type Constraint struct {
+	Type       ConstraintType
+	Condition  string // Used for CHECK constraints
+	Default    string // Used for DEFAULT values
+	References string // Used for FOREIGN KEY references
 }

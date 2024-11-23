@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"github.com/AmadlaOrg/hery/cache/database"
 	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/schema"
 	"regexp"
 	"strings"
 )
 
 type IParser interface {
-	Entity(entity entity.Entity) ([]database.Table, error)
+	Entity(entity *entity.Entity) ([]database.Table, error)
 	EntityToTableName(entity string) string
 	DatabaseTable(data []byte) (entity.Entity, error)
 	DatabaseRow(data []byte) (entity.Entity, error)
@@ -22,7 +23,7 @@ var (
 )
 
 // Entity parses the entity to SQLite 3 struct that can be used in the query builder in the database package
-func (s *SParser) Entity(entity entity.Entity) ([]database.Table, error) {
+func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
 	// TODO: Use schema to determine the data type for the SQL
 	// string == TEXT
 	// TODO: Convert schema from the struct to the JSON-Schema string
@@ -63,7 +64,7 @@ func (s *SParser) Entity(entity entity.Entity) ([]database.Table, error) {
 		);
 	*/
 
-	schema := entity.Schema.Schema
+	entitySchema := entity.Schema.Schema
 
 	// TODO:
 	//entity.Schema.CompiledSchema.Types
@@ -72,7 +73,7 @@ func (s *SParser) Entity(entity entity.Entity) ([]database.Table, error) {
 		dynamicColumns       []database.Column
 		dynamicRelationships []database.Relationships
 	)
-	for key, value := range schema {
+	for key, value := range entitySchema {
 		// Ensure "properties" is being processed
 		if key == "properties" {
 			properties, ok := value.(map[string]any)
@@ -91,11 +92,11 @@ func (s *SParser) Entity(entity entity.Entity) ([]database.Table, error) {
 
 				// Change the data type if the "format" property is present
 				if formatValue, ok := propertyDetails["format"].(string); ok {
-					if dataFormat, valid := schemaStringToDataFormat(formatValue); valid {
+					if dataFormat, valid := schema.StringToDataFormat(formatValue); valid {
 						dataType = parseJsonSchemaFormatToSQLiteType(dataFormat)
 					}
 				} else if typeValue, ok := propertyDetails["type"].(string); ok {
-					if dataTypeValue, valid := schemaStringToDataType(typeValue); valid {
+					if dataTypeValue, valid := schema.StringToDataType(typeValue); valid {
 						dataType = parseJsonSchemaToSQLiteType(dataTypeValue)
 					}
 				}
@@ -174,6 +175,7 @@ func (s *SParser) databaseInsertTableEntities(entity entity.Entity) (*[]database
 			Rows: []map[string]any{
 				{
 					"Id":              entity.Id.String(),
+					"CustomId":        entity.CustomId,
 					"Uri":             entity.Uri,
 					"Name":            entity.Name,
 					"RepoUrl":         entity.RepoUrl,
@@ -186,17 +188,7 @@ func (s *SParser) databaseInsertTableEntities(entity entity.Entity) (*[]database
 					"Hash":            entity.Hash,
 					"Exist":           entity.Exist,
 					"Schema":          schemaJsonString,
-					"Content":         ``,
-				},
-			},
-		},
-		{
-			Name: "Ids",
-			Rows: []map[string]any{
-				{
-					"Id":   entity.Id.String(),
-					"Uri":  entity.Uri,
-					"Name": entity.Name,
+					"Content":         entity.ContentJson,
 				},
 			},
 		},
