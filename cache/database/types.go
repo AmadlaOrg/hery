@@ -68,7 +68,6 @@ type Column struct {
 	ColumnName  string
 	DataType    DataType
 	Constraints []Constraint
-	Default     string
 }
 
 // Relationships so to create relationships

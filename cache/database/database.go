@@ -24,7 +24,9 @@ type IDatabase interface {
 }
 
 // SDatabase implements IDatabase
-type SDatabase struct{}
+type SDatabase struct {
+	queries *[]string
+}
 
 var (
 	db          *sql.DB
@@ -42,7 +44,7 @@ func (s *SDatabase) Initialize() error {
 		return nil // Already initialized successfully
 	}
 
-	dbPath := "/tmp/amadla.cache"
+	dbPath := "/tmp/hery.test.cache"
 	var err error
 	db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -105,10 +107,10 @@ func (s *SDatabase) IsInitialized() bool {
 }
 
 // CreateTable creates a new table
-func (s *SDatabase) CreateTable(table Table) string {
+func (s *SDatabase) CreateTable(table Table) {
 	var sqlColumns string
 	for _, column := range table.Columns {
-		sqlColumn := fmt.Sprintf(",\n%s %s %s", column.ColumnName, column.DataType, column.Constraint)
+		sqlColumn := fmt.Sprintf(",\n%s %s %s", column.ColumnName, column.DataType, column.Constraints)
 		sqlColumns = fmt.Sprintf("%s %s", sqlColumns, sqlColumn)
 	}
 
@@ -139,17 +141,17 @@ func (s *SDatabase) CreateTable(table Table) string {
 		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
 	}
 
-	return fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes)
+	*s.queries = append(*s.queries, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes))
 }
 
 // Insert inserts records into the table
-func (s *SDatabase) Insert(table Table, names []string) string {
-	return fmt.Sprintf(`INSERT INTO %s (name) VALUES (?)`, table.Name)
+func (s *SDatabase) Insert(table Table, names []string) {
+	*s.queries = append(*s.queries, fmt.Sprintf(`INSERT INTO %s (name) VALUES (?)`, table.Name))
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table, id int, newName string) string {
-	return fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name)
+func (s *SDatabase) Update(table Table, id int, newName string) {
+	*s.queries = append(*s.queries, fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name))
 }
 
 // Select retrieves a record from the table
@@ -172,25 +174,26 @@ func (s *SDatabase) Select(table Table, name string) (string, error) {
 }
 
 // Delete deletes a record from the table
-func (s *SDatabase) Delete(table Table, id int) string {
-	return fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name)
+func (s *SDatabase) Delete(table Table, id int) {
+	*s.queries = append(*s.queries, fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name))
 }
 
 // DropTable drops the table from the database
-func (s *SDatabase) DropTable(table Table) string {
-	return fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name)
+func (s *SDatabase) DropTable(table Table) {
+	*s.queries = append(*s.queries, fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name))
 }
 
 // Apply all the SQL scripts that are in a string array that are combined into one SQL script
-func (s *SDatabase) Apply(sqlQueries *[]string) error {
+func (s *SDatabase) Apply() error {
 	if !s.IsInitialized() {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
-	stmt, err := db.Prepare(mergeSqlQueries(sqlQueries))
+	stmt, err := db.Prepare(mergeSqlQueries(s.queries))
 	if err != nil {
 		return fmt.Errorf("error preparing insert statement: %v", err)
 	}
+
 	defer func(stmt *sql.Stmt) {
 		err := stmt.Close()
 		if err != nil {

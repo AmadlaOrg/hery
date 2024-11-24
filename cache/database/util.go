@@ -10,7 +10,18 @@ func mergeSqlQueries(sqlQueries *[]string) string {
 	return strings.Replace(strings.Join(*sqlQueries, ";\n")+";", ";;", ";", -1)
 }
 
-func (c Constraint) ToSQL(columnName string) string {
+// ToSQL for Column
+func (col Column) ToSQL() string {
+	var constraints []string
+	for _, constraint := range col.Constraints {
+		constraints = append(constraints, constraint.ToSQL())
+	}
+
+	return fmt.Sprintf("%s %s %s", col.ColumnName, col.DataType, strings.Join(constraints, " "))
+}
+
+// ToSQL for Constraint
+func (c Constraint) ToSQL() string {
 	switch c.Type {
 	case ConstraintNotNull:
 		return "NOT NULL"
@@ -28,7 +39,7 @@ func (c Constraint) ToSQL(columnName string) string {
 		}
 	case ConstraintForeignKey:
 		if c.References != "" {
-			return fmt.Sprintf("FOREIGN KEY (%s)", c.References)
+			return fmt.Sprintf("FOREIGN KEY REFERENCES %s", c.References)
 		}
 	case ConstraintAutoincrement:
 		return "AUTOINCREMENT"
