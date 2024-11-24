@@ -15,12 +15,13 @@ type IDatabase interface {
 	Initialize() error
 	Close() error
 	IsInitialized() bool
-	CreateTable(table Table) error
-	Insert(table Table, names []string) error
-	Update(table Table, id int, newName string) error
+	CreateTable(table Table)
+	Insert(table Table)
+	Update(table Table)
 	Select(table Table, name string) (string, error)
-	Delete(table Table, id int) error
-	DropTable(table Table) error
+	Delete(table Table, id int)
+	DropTable(table Table)
+	Apply() error
 }
 
 // SDatabase implements IDatabase
@@ -145,12 +146,43 @@ func (s *SDatabase) CreateTable(table Table) {
 }
 
 // Insert inserts records into the table
-func (s *SDatabase) Insert(table Table, names []string) {
-	*s.queries = append(*s.queries, fmt.Sprintf(`INSERT INTO %s (name) VALUES (?)`, table.Name))
+func (s *SDatabase) Insert(table Table) {
+	var queries []string
+	for _, row := range table.Rows {
+		var (
+			columnNames       []string
+			valuesPlaceholder []string
+			columnValues      []any
+		)
+
+		// Iterate over columns in a single row
+		for rowColumnName, rowValue := range row {
+			columnNames = append(columnNames, rowColumnName)
+			valuesPlaceholder = append(valuesPlaceholder, "?")
+			columnValues = append(columnValues, rowValue)
+		}
+
+		// Construct the query for this row
+		query := fmt.Sprintf(
+			`INSERT INTO %s (%s) VALUES (%s)`,
+			table.Name,
+			strings.Join(columnNames, ", "),
+			strings.Join(valuesPlaceholder, ", "),
+		)
+
+		// Append the query to the list
+		queries = append(queries, query)
+
+		// Log the query (Optional: Useful for debugging)
+		//fmt.Printf("Query: %s\nValues: %v\n", query, columnValues)
+
+		// Add to s.queries if needed
+		*s.queries = append(*s.queries, query)
+	}
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table, id int, newName string) {
+func (s *SDatabase) Update(table Table) {
 	*s.queries = append(*s.queries, fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name))
 }
 

@@ -186,7 +186,7 @@ func TestParseEntity(t *testing.T) {
 		},
 	}
 
-	dbTable, err := parserService.Entity(e)
+	dbTable, err := parserService.Entity(&e)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, dbTable)
 }
