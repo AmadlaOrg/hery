@@ -38,12 +38,15 @@ as row in a RDBMS database. To overwrite a specific entity content ("row"), the 
 
 Entities are grouped by collections. A collection can be thought as a database.
 
-✅ A simple definition list:
-- 🛒 **Collection** -> Database
-- 📦 **Entity** -> Table
-- 🎁 **Entity content** -> Row
-- 🔖 **Meta** -> HTML `<meta>`
-- 🪪 **Id** -> An `id` for a row in a RDBMS database
+✅ A simple definition parallel:
+
+| Component               | Parallel                               |
+|-------------------------|----------------------------------------|
+| 🛒 **Collection**       | Database                               |
+| 📦 **Entity**           | Table                                  |
+| 🎁 **Entity content**   | Row                                    |
+| 🔖 **Meta**             | HTML `<meta>`                          |
+| 🪪 **Id**               | An `id` for a row in a RDBMS database  |
 
 To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a file
 that is named after the collection and with the extension `.hery`. This means that it is possible to have multiple
@@ -53,7 +56,7 @@ The other component required is the collection directory. It is named after the 
 For example: `.amadla/`. Inside is the `schema.hery.json` file that is a [JSON-Schema](https://json-schema.org/) definition.
 The directory can also contain any files that an entity might need.
 
-## Amadla 🐰 ❤️ HERY 🐻
+## 🐰 Amadla ❤️ HERY 🐻
 Amadla uses HERY as storage system. All the other tools in the Amadla ecosystem uses it for storage. It is also possible
 to use custom tools since HERY can easily be used as a library in a custom [Golang](https://go.dev/) project. Or the
 [JSON](https://www.json.org/) output by HERY can be piped into anything.
@@ -98,10 +101,13 @@ The `.hery` file format is the same as a `.yml`/`.yaml` file format. The reason 
 `hery` CLI is able to find it and so that IDEs can have better support.
 
 HERY format comes with four different reserved properties:
-- `_meta` - For metadata for the relative entity
-- `_entity` - Contains the entity URI with the version
-- `_id` - To be able to make reference to a specific entity content
-- `_body` - Contains the content of the entity
+
+| Property   | Description                                                |
+|------------|------------------------------------------------------------|
+| `_meta`    | For metadata for the relative entity                       |
+| `_entity`  | Contains the entity URI with the version                   |
+| `_id`      | To be able to make reference to a specific entity content  |
+| `_body`    | Contains the content of the entity                         |
 
 Here is an example:
 ```yaml
