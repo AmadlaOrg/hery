@@ -87,25 +87,17 @@ type Constraint struct {
 
 // Queries is used by apply to execute each of the queries in the right order
 type Queries struct {
-	CreateTable []string
-	DropTable   []string
-	Insert      []QueryInsert
-	Update      []QueryUpdate
-	Delete      []string
-	Select      []QuerySelect
+	CreateTable []Query
+	DropTable   []Query
+	Insert      []Query
+	Update      []Query
+	Delete      []Query
+	Select      []Query
 }
 
-type QueryInsert struct {
+// Query contains what is needed when executing a query
+type Query struct {
 	Query  string
 	Values []string
-}
-
-type QueryUpdate struct {
-	Query  string
-	Values []string
-}
-
-type QuerySelect struct {
-	Query  string
-	Values []string
+	Result string
 }

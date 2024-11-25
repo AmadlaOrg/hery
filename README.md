@@ -180,15 +180,9 @@ There are also a lot of text and code editor plugins that make it a breeze for t
 
        ![IntelliJ icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/IntelliJ_IDEA.png) [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
 
-       ![Zed icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/zed.png) [Zed](.editor/zed.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-zed-editor-plugin))
-
        ![Sublime Text icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/sublime.png) [Sublime Text](.editor/sublime.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-sublime-editor-plugin))
 
        ![GNU Emacs icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/Emacs.png) [GNU Emacs](.editor/emacs.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-emacs-editor-plugin))
-
-       ![Brackets icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/brackets.png) [Brackets](.editor/brackets.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-brackets-editor-plugin))
-
-       ![Atom icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/atom.png) [Atom](.editor/atom.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-atom-editor-plugin))
 
 ## ©️ Copyright
 - "[The Bear and Honey.](https://www.flickr.com/photos/97123293@N07/29003630251)" by [Swallowtail Garden Seeds](https://www.flickr.com/photos/97123293@N07) is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/?ref=openverse).

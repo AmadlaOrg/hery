@@ -178,7 +178,7 @@ func (s *SDatabase) Insert(table Table) {
 		queries = append(queries, query)
 
 		// Add to s.queries if needed
-		queryInsert := QueryInsert{
+		queryInsert := Query{
 			Query:  query,
 			Values: columnValues,
 		}
