@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"testing"
 )
 
@@ -10,30 +11,77 @@ func TestCreateTable(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	databaseService := NewDatabaseService()
-	databaseService.Insert(Table{
+	// Arrange: Initialize the in-memory database
+	dbPath := ":memory:"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("Failed to open database: %v", err)
+	}
+	defer db.Close()
+
+	// Initialize database service
+	databaseService := &SDatabase{
+		queries: &[]string{},
+	}
+
+	// Create table
+	table := Table{
 		Name: "Net",
 		Columns: []Column{
 			{
 				ColumnName: "Id",
-				DataType:   "string",
+				DataType:   "TEXT",
+				Constraints: []Constraint{
+					{
+						Type: ConstraintPrimaryKey,
+					},
+				},
 			},
 			{
 				ColumnName: "server_name",
-				DataType:   "string",
+				DataType:   "TEXT",
 			},
 			{
 				ColumnName: "listen",
-				DataType:   "string",
+				DataType:   "TEXT",
 			},
 		},
 		Rows: []map[string]any{
 			{
-				"Id":    "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
-				"ports": "[80, 443]",
+				"Id":          "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
+				"server_name": "localhost",
+				"listen":      "[80, 443]",
 			},
 		},
-	})
+	}
+
+	// Act: Create table and insert rows
+	databaseService.CreateTable(table)
+	for _, query := range *databaseService.queries {
+		_, err := db.Exec(query)
+		if err != nil {
+			t.Fatalf("Failed to execute query: %v\nQuery: %s", err, query)
+		}
+	}
+
+	databaseService.Insert(table)
+	for _, query := range *databaseService.queries {
+		_, err := db.Exec(query)
+		if err != nil {
+			t.Fatalf("Failed to execute query: %v\nQuery: %s", err, query)
+		}
+	}
+
+	// Assert: Verify the data is inserted correctly
+	var id, serverName, listen string
+	err = db.QueryRow("SELECT Id, server_name, listen FROM Net WHERE Id = ?", "c6beaec1-90c4-4d2a-aaef-211ab00b86bd").Scan(&id, &serverName, &listen)
+	if err != nil {
+		t.Fatalf("Failed to query inserted row: %v", err)
+	}
+
+	if id != "c6beaec1-90c4-4d2a-aaef-211ab00b86bd" || serverName != "localhost" || listen != "[80, 443]" {
+		t.Errorf("Inserted row does not match expected values: got (%s, %s, %s)", id, serverName, listen)
+	}
 }
 
 func TestUpdate(t *testing.T) {}

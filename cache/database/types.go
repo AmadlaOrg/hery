@@ -84,3 +84,28 @@ type Constraint struct {
 	Default    string // Used for DEFAULT values
 	References string // Used for FOREIGN KEY references
 }
+
+// Queries is used by apply to execute each of the queries in the right order
+type Queries struct {
+	CreateTable []string
+	DropTable   []string
+	Insert      []QueryInsert
+	Update      []QueryUpdate
+	Delete      []string
+	Select      []QuerySelect
+}
+
+type QueryInsert struct {
+	Query  string
+	Values []string
+}
+
+type QueryUpdate struct {
+	Query  string
+	Values []string
+}
+
+type QuerySelect struct {
+	Query  string
+	Values []string
+}

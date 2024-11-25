@@ -26,7 +26,7 @@ type IDatabase interface {
 
 // SDatabase implements IDatabase
 type SDatabase struct {
-	queries *[]string
+	queries *Queries
 }
 
 var (
@@ -111,11 +111,15 @@ func (s *SDatabase) IsInitialized() bool {
 func (s *SDatabase) CreateTable(table Table) {
 	var sqlColumns string
 	for _, column := range table.Columns {
-		sqlColumn := fmt.Sprintf(",\n%s %s %s", column.ColumnName, column.DataType, column.Constraints)
+		var columnConstraints string
+		for _, constraint := range column.Constraints {
+			columnConstraints = constraint.ToSQL()
+		}
+		sqlColumn := fmt.Sprintf("\n%s %s %s,", column.ColumnName, column.DataType, columnConstraints)
 		sqlColumns = fmt.Sprintf("%s %s", sqlColumns, sqlColumn)
 	}
 
-	sqlColumns = strings.TrimPrefix(sqlColumns, ",")
+	sqlColumns = strings.TrimSuffix(sqlColumns, " ,")
 
 	var sqlRelationships string
 	for _, relationship := range table.Relationships {
@@ -127,7 +131,7 @@ func (s *SDatabase) CreateTable(table Table) {
 		sqlRelationships = fmt.Sprintf("%s %s", sqlRelationships, sqlRelationship)
 	}
 
-	createTableSQL := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (%s%s);`, table.Name, sqlColumns, sqlRelationships)
+	createTableSQL := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s%s\n);", table.Name, sqlColumns, sqlRelationships)
 
 	var sqlIndexes string
 	for _, index := range table.Columns {
@@ -142,7 +146,7 @@ func (s *SDatabase) CreateTable(table Table) {
 		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
 	}
 
-	*s.queries = append(*s.queries, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes))
+	s.queries.CreateTable = append(s.queries.CreateTable, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes))
 }
 
 // Insert inserts records into the table
@@ -152,14 +156,14 @@ func (s *SDatabase) Insert(table Table) {
 		var (
 			columnNames       []string
 			valuesPlaceholder []string
-			columnValues      []any
+			columnValues      []string
 		)
 
 		// Iterate over columns in a single row
 		for rowColumnName, rowValue := range row {
 			columnNames = append(columnNames, rowColumnName)
 			valuesPlaceholder = append(valuesPlaceholder, "?")
-			columnValues = append(columnValues, rowValue)
+			columnValues = append(columnValues, rowValue) // TODO: Maybe use a struct and then attach a function to parse
 		}
 
 		// Construct the query for this row
@@ -173,11 +177,12 @@ func (s *SDatabase) Insert(table Table) {
 		// Append the query to the list
 		queries = append(queries, query)
 
-		// Log the query (Optional: Useful for debugging)
-		//fmt.Printf("Query: %s\nValues: %v\n", query, columnValues)
-
 		// Add to s.queries if needed
-		*s.queries = append(*s.queries, query)
+		queryInsert := QueryInsert{
+			Query:  query,
+			Values: columnValues,
+		}
+		s.queries.Insert = append(s.queries.Insert, queryInsert)
 	}
 }
 
