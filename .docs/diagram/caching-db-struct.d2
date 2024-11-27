@@ -1,0 +1,45 @@
+entities: {
+  shape: sql_table
+  id: INT {constraint: primary_key}
+  _id: TEXT {constraint: unique}
+  _entity: TEXT {constraint: unique}
+  _meta: TEXT
+  _body: TEXT
+  Name: TEXT
+  RepoUrl: TEXT
+  Origin: TEXT
+  Version: TEXT
+  IsLatestVersion: BOOLEAN
+  IsPseudoVersion: BOOLEAN
+  AbsPath: TEXT
+  Have: BOOLEAN
+  Hash: TEXT
+  Exist: BOOLEAN
+  Schema: TEXT
+  insert_date_time: DATETIME
+  update_date_time: DATETIME
+}
+
+meta: {
+  shape: sql_table
+  id: INT {constraint: primary_key}
+  entities_id: INT {constraint: foreign_key}
+  data_id: INT {constraint: foreign_key}
+  insert_date_time: DATETIME
+  update_date_time: DATETIME
+}
+
+data: {
+  shape: sql_table
+  id: INT {constraint: primary_key}
+  entities_id: INT {constraint: foreign_key}
+  _id: TEXT
+  property_name: TEXT
+  property_value: TEXT
+  insert_date_time: DATETIME
+  update_date_time: DATETIME
+}
+
+entities.id -> meta.entities_id
+meta.data_id -> data.id
+entities.id -> data.entities_id

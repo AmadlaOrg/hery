@@ -63,9 +63,6 @@ work. HERY is an optional storage source that is chiefly recommended for the Ama
 It is also possible to use HERY as a library in a custom [Golang](https://go.dev/) project. Or the [JSON](https://www.json.org/) output by HERY can be
 piped.
 
-HERY is there to make storage easier but is not needed to use any of the other tools that Amadla has since they support
-other sources.
-
 ## :suspect: Why Not Just Use SQLite 🐘?
 - Entities concept with [YAML](https://yaml.org/) is simpler to use
 - Lower learning curve
