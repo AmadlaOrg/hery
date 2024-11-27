@@ -59,8 +59,8 @@ const (
 type Table struct {
 	Name          string
 	Columns       []Column
-	Relationships []Relationships
-	Rows          []map[string]any
+	Relationships []Relationship
+	Rows          []Row
 }
 
 // Column is a basic representation in a struct of a column in a SQL DB
@@ -70,12 +70,15 @@ type Column struct {
 	Constraints []Constraint
 }
 
-// Relationships so to create relationships
-type Relationships struct {
+// Relationship so to create relationships
+type Relationship struct {
 	ColumnName           string
 	ReferencesTableName  string
 	ReferencesColumnName string
 }
+
+// Row is where the data is being passed compared to the structure in the Column struct
+type Row = map[string]any
 
 // Constraint represents a SQLite constraint.
 type Constraint struct {

@@ -146,49 +146,84 @@ func (s *SDatabase) CreateTable(table Table) {
 		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
 	}
 
-	s.queries.CreateTable = append(s.queries.CreateTable, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes))
+	queryCreateTable := Query{
+		Query: fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes),
+	}
+
+	s.queries.CreateTable = append(s.queries.CreateTable, queryCreateTable)
 }
 
 // Insert inserts records into the table
 func (s *SDatabase) Insert(table Table) {
-	var queries []string
-	for _, row := range table.Rows {
-		var (
-			columnNames       []string
-			valuesPlaceholder []string
-			columnValues      []string
-		)
+	var (
+		columnNames       []string
+		valuesPlaceholder []string
+		columnValues      []string
+	)
 
-		// Iterate over columns in a single row
-		for rowColumnName, rowValue := range row {
-			columnNames = append(columnNames, rowColumnName)
-			valuesPlaceholder = append(valuesPlaceholder, "?")
-			columnValues = append(columnValues, rowValue) // TODO: Maybe use a struct and then attach a function to parse
-		}
-
-		// Construct the query for this row
-		query := fmt.Sprintf(
-			`INSERT INTO %s (%s) VALUES (%s)`,
-			table.Name,
-			strings.Join(columnNames, ", "),
-			strings.Join(valuesPlaceholder, ", "),
-		)
-
-		// Append the query to the list
-		queries = append(queries, query)
-
-		// Add to s.queries if needed
-		queryInsert := Query{
-			Query:  query,
-			Values: columnValues,
-		}
-		s.queries.Insert = append(s.queries.Insert, queryInsert)
+	// Iterate over columns in a single row
+	for rowColumnName, rowValue := range table.Rows {
+		// TODO: Add validation to the name
+		columnNames = append(columnNames, rowColumnName)
+		valuesPlaceholder = append(valuesPlaceholder, "?")
+		columnValues = append(columnValues, rowValue) // TODO: Maybe use a struct and then attach a function to parse
 	}
+
+	// Construct the query for this row
+	query := fmt.Sprintf(
+		`INSERT INTO %s (%s) VALUES (%s)`,
+		table.Name,
+		strings.Join(columnNames, ", "),
+		strings.Join(valuesPlaceholder, ", "),
+	)
+
+	// Append the query to the list
+
+	// TODO: Do I keep?
+	//queries = append(queries, query)
+
+	// Add to s.queries if needed
+	queryInsert := Query{
+		Query:  query,
+		Values: columnValues,
+	}
+	s.queries.Insert = append(s.queries.Insert, queryInsert)
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table) {
-	*s.queries = append(*s.queries, fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name))
+func (s *SDatabase) Update(table Table, where []map[string]any) {
+	var (
+		columnsWhere       []string
+		columnsWhereValues []string
+		valuesPlaceholder  []string
+		columnValues       []string
+	)
+
+	for _, whereColumnElement := range where {
+		for columnName, value := range row {
+			// TODO: Add validation to the name
+			columnsWhere = append(columnsWhere, fmt.Sprintf("%s = ?", whereColumnName))
+			columnsWhereValues = append(columnsWhereValues, valueToSQL(whereColumnValue))
+		}
+	}
+
+	// Iterate over columns in a single row
+	for rowColumnName, rowValue := range table.Rows {
+		for columnName, value := range row {
+			//columnNames = append(columnNames, rowColumnName)
+			// TODO: Add validation to the name
+			valuesPlaceholder = append(valuesPlaceholder, fmt.Sprintf("%s = ?,", rowColumnName))
+			columnValues = append(columnValues, valueToSQL(rowValue)) // TODO: Maybe use a struct and then attach a function to parse
+		}
+	}
+
+	values := make([]string, len(table.Rows)+len(columnsWhere))
+	values = append(columnValues, columnsWhereValues...)
+	queryUpdate := Query{
+		Query:  fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name),
+		Values: values,
+	}
+	s.queries.Update = append(s.queries.Update, queryUpdate)
 }
 
 // Select retrieves a record from the table

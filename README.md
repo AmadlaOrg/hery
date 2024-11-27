@@ -57,11 +57,14 @@ For example: `.amadla/`. Inside is the `schema.hery.json` file that is a [JSON-S
 The directory can also contain any files that an entity might need.
 
 ## 🐰 Amadla ❤️ HERY 🐻
-Amadla uses HERY as storage system. All the other tools in the Amadla ecosystem uses it for storage. It is also possible
-to use custom tools since HERY can easily be used as a library in a custom [Golang](https://go.dev/) project. Or the
-[JSON](https://www.json.org/) output by HERY can be piped into anything.
+Amadla ecosystem follows as best as possible the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). So any storage sources that can `stdout` will
+work. HERY is an optional storage source that is chiefly recommended for the Amadla ecosystem.
 
-Amadla tries to follow the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_philosophy) as much as possible.
+It is also possible to use HERY as a library in a custom [Golang](https://go.dev/) project. Or the [JSON](https://www.json.org/) output by HERY can be
+piped.
+
+HERY is there to make storage easier but is not needed to use any of the other tools that Amadla has since they support
+other sources.
 
 ## :suspect: Why Not Just Use SQLite 🐘?
 - Entities concept with [YAML](https://yaml.org/) is simpler to use
