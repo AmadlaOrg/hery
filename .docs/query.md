@@ -179,11 +179,7 @@ JSON:
     "directory": "/var/www/",
     "listen": [
       {
-        "_id": "90397be7-fe81-4159-90cf-e7ddd1857fed",
-        "_entity": "github.com/AmadlaOrg/EntitySystem/Net@v1.0.0",
-        "_body": {
           "ports": [80, 443]
-        }
       }
     ]
   }
