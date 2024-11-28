@@ -26,7 +26,7 @@ meta: {
   shape: sql_table
   id: INT {constraint: primary_key}
   entities_id: INT {constraint: foreign_key}
-  body_id: INT {constraint: foreign_key}
+  body__id: INT {constraint: foreign_key}
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -45,8 +45,8 @@ body: {
 
 entity_inclusion: {
   shape: sql_table
-  parent_body_id: INT {constraint: foreign_key}
-  child_body_id: INT {constraint: foreign_key}
+  parent_body__id: INT {constraint: foreign_key}
+  child_body__id: INT {constraint: foreign_key}
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -78,6 +78,7 @@ schema_property: {
   shape: sql_table
   id: INT {constraint: primary_key}
   root_schema_id: INT {constraint: foreign_key}
+  schema_item_id: INT {constraint: foreign_key}
   name: TEXT
   type: ENUM \[string, number, integer, boolean, array, object, null\]
   format: TEXT
@@ -90,7 +91,6 @@ schema_property: {
   minimum: INT
   maximum: INT
   multipleOf: FLOAT
-  items_id: INT {constraint: foreign_key}
   description: TEXT
   insert_date_time: DATETIME
   update_date_time: DATETIME
@@ -101,7 +101,6 @@ schema_item_properties: {
   id: INT {constraint: primary_key}
   schema_item_id: INT {constraint: foreign_key}
   schema_property_id: INT {constraint: foreign_key}
-  description: TEXT
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -116,7 +115,7 @@ schema_item: {
 }
 
 entities.id -> meta.entities_id
-meta.body_id -> body.id
+meta.body__id -> body._id
 entities.id -> body.entities_id
 entities.id -> schema.entities_id
 
@@ -124,9 +123,10 @@ schema.id -> schema_properties.schema_id
 schema_properties.schema_property_id -> schema_property.id
 schema_item_properties.schema_item_id -> schema_item.id
 schema_item_properties.schema_property_id -> schema_property.id
+schema_property.schema_item_id -> schema_item.id
 
-entity_inclusion.parent_body_id -> body.id
-entity_inclusion.child_body_id -> body.id
+entity_inclusion.parent_body__id -> body.id
+entity_inclusion.child_body__id -> body.id
 
 body.schema_property_id -> schema_property.id
 
