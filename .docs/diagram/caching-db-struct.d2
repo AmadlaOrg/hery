@@ -3,10 +3,7 @@
 entities: {
   shape: sql_table
   id: INT {constraint: primary_key}
-  _id: TEXT {constraint: unique}
   _entity: TEXT
-  _meta: TEXT
-  _body: TEXT
   Name: TEXT
   RepoUrl: TEXT
   Origin: TEXT
@@ -18,6 +15,33 @@ entities: {
   Hash: TEXT
   Exist: BOOLEAN
   Schema: TEXT
+  insert_date_time: DATETIME
+  update_date_time: DATETIME
+}
+
+_id: {
+  shape: sql_table
+  id: INT {constraint: primary_key}
+  entities_id: INT {constraint: foreign_key}
+  _id: TEXT {constraint: unique}
+  insert_date_time: DATETIME
+  update_date_time: DATETIME
+}
+
+_meta: {
+  shape: sql_table
+  id: INT {constraint: primary_key}
+  _id_id: TEXT {constraint: foreign_key}
+  content: TEXT
+  insert_date_time: DATETIME
+  update_date_time: DATETIME
+}
+
+_body: {
+  shape: sql_table
+  id: INT {constraint: primary_key}
+  _id_id: TEXT {constraint: foreign_key}
+  content: TEXT
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -131,3 +155,7 @@ entity_inclusion.child_body__id -> body.id
 body.schema_property_id -> schema_property.id
 
 schema_property.root_schema_id -> schema.id
+
+entities.id -> _id.entities_id
+_id.id -> _meta._id_id
+_id.id -> _body._id_id
