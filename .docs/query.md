@@ -189,11 +189,18 @@ JSON:
 
 ### Function
 
-| Function                                 | Description |
-|------------------------------------------|-------------|
-| contains(<property name>, <filter with>) |             |
-| exact(<property name>, <filter with>)    |             |
-| and(<functions>...)                      |             |
-| or(<functions>...)                       |             |
-| limit()                                  |             |
-| sort_by()                                |             |
+| Function                                                    | Description                                                                                                                           |
+|-------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| equal(&lt;property name&gt;, &lt;filter with&gt;)           |                                                                                                                                       |
+| like(&lt;property name&gt;, &lt;filter with&gt;)            | Used for pattern matching in string comparisons, often with wildcards (% for any sequence of characters and _ for a single character) |
+| in(&lt;property name&gt;, &lt;values&gt;...)                | Used to filter rows where a column's value matches any value in a specified list                                                      |
+| not_equal(&lt;property name&gt;, &lt;filter with&gt;)       |                                                                                                                                       |
+| not_like(&lt;property name&gt;, &lt;filter with&gt;)        |                                                                                                                                       |
+| not_in(&lt;property name&gt;, &lt;values&gt;...)            |                                                                                                                                       |
+| and(&lt;functions&gt;...)                                   |                                                                                                                                       |
+| or(&lt;functions&gt;...)                                    |                                                                                                                                       |
+| limit(&lt;number&gt;)                                       | Limit specifies the maximum number of rows to return in a query                                                                       |
+| offset(&lt;number&gt;)                                      | Offset specifies the number of rows to skip before starting to return results in a query                                              |
+| order_by(&lt;property name&gt; [, &lt;ASC\|DESC&gt;])       | Using a property to order the output and optionally choose `DESC` or `ASC`                                                            |
+| group_by(&lt;property name&gt; [, &lt;property name&gt...]) | Group a property or multiple-properties                                                                                               |
+| jq()                                                        | Used to query JSON content with [jq](https://jqlang.github.io/jq/)                                                                    |

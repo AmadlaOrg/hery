@@ -1,15 +1,44 @@
 # Cache | Docs | HERY
 To be able to have an efficient querying system caching is essentials.
 
-The command compose puts the different entities together to then generate a lock file. Using this lock file and the 
+The command compose puts the different entities together to then generate a lock file. Using this lock file and the
 multiple [JSON Schemas](https://json-schema.org/) it generates an [SQLite](https://www.sqlite.org/) DB that is saved
 to the root of the collection's storage directory (e.g.: `amadla.cache`).
 
-> When `hery`-cli is run in server mode it will load the DB in memory for quicker reads. Also, to note server mode is 
+> When `hery`-cli is run in server mode it will load the DB in memory for quicker reads. Also, to note server mode is
 > not for writing. Creation and updating of the cache is done outside the server mode.
 
-Here is an example what it looks like inside the cache DB: 
+Here is an example what it looks like inside the cache DB:
 
 ![Example of a cache DB structure](./diagram/caching-example.svg)
 
 > `hery`-cli does not support other DBs, and it comes with its own [SQLite](https://github.com/mattn/go-sqlite3).
+
+## Internals
+### Common columns
+#### `id`
+The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no
+two rows have the same value in the id column, enabling efficient indexing and relationships between tables.
+
+### Tables
+#### `entities`
+| Column Name      | Column Type                       | Description                                                                                                                                      | Example                                                 |
+|------------------|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| id               | INT `{constraint: primary_key}`   | Found in the "Common columns" section (unique)                                                                                                   | 1                                                       |
+| _id              | TEXT `{constraint: unique}`       | To uniquely identifying each entity (unique)                                                                                                     | 97d4b783-f448-483c-8111-380d6082ae1c                    |
+| _entity          | TEXT                              | Contains the entities URI (not unique)                                                                                                           | github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0 |
+| _meta            | TEXT                              | Contains the related meta entities (the [YAML](https://yaml.org/) content) (not unique)                                                          |                                                         |
+| _body            | TEXT                              | Contains the entity body content (the [YAML](https://yaml.org/) content) (not unique)                                                            |                                                         |
+| Name             | TEXT                              | Just the name of the entity (not unique)                                                                                                         |                                                         |
+| RepoUrl          | TEXT                              | The full URL to the repository containing the entity                                                                                             |                                                         |
+| Origin           | TEXT                              | Contains the partial path of the entity (from the domain directory to the root directory of the entity)                                          |                                                         |
+| Version          | TEXT                              | The entity version (not unique in the context of the table but for the entities yes)                                                             |                                                         |
+| IsLatestVersion  | BOOLEAN                           | If the entity with this version is latest then this true (not unique in the context of the table but for the entities yes)                       |                                                         |
+| IsPseudoVersion  | BOOLEAN                           | Sometimes there a no fix version, if that is the case then this is set to true (not unique in the context of the table but for the entities yes) |                                                         |
+| AbsPath          | TEXT `{constraint: unique}`       | The full system path to the entity files (unique)                                                                                                |                                                         |
+| Have             | BOOLEAN                           | This flag indicates that the content of the entity is on the local machine                                                                       |                                                         |
+| Hash             | TEXT                              | This the hash of the content (files, etc) for quick comparison and validation                                                                    |                                                         |
+| Exist            | BOOLEAN                           | This flag indicates that the entitie's repository was found                                                                                      |                                                         |
+| Schema           | TEXT                              | The entire [JSON-Schema](https://json-schema.org/) content                                                                                       |                                                         |
+| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                              |                                                         |
+| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                  |                                                         |
