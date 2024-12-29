@@ -23,6 +23,7 @@ _id: {
   shape: sql_table
   id: INT {constraint: primary_key}
   entities_id: INT {constraint: foreign_key}
+  entities_id_with_id: TEXT {constraint: unique}
   _id: TEXT {constraint: unique}
   insert_date_time: DATETIME
   update_date_time: DATETIME
@@ -49,8 +50,8 @@ _body: {
 meta: {
   shape: sql_table
   id: INT {constraint: primary_key}
-  entities_id: INT {constraint: foreign_key}
-  body__id: INT {constraint: foreign_key}
+  parent_id_id: INT {constraint: foreign_key}
+  _id_id: INT {constraint: foreign_key}
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -58,9 +59,8 @@ meta: {
 body: {
   shape: sql_table
   id: INT {constraint: primary_key}
-  entities_id: INT {constraint: foreign_key}
+  _id_id: INT {constraint: foreign_key}
   schema_property_id: INT {constraint: foreign_key}
-  _id: TEXT
   property_name: TEXT
   property_value: TEXT
   insert_date_time: DATETIME
@@ -139,8 +139,8 @@ schema_item: {
 }
 
 entities.id -> meta.entities_id
-meta.body__id -> body._id
-entities.id -> body.entities_id
+meta.parent_id_id -> _id.id
+meta._id_id -> _id.id
 entities.id -> schema.entities_id
 
 schema.id -> schema_properties.schema_id
@@ -152,6 +152,7 @@ schema_property.schema_item_id -> schema_item.id
 entity_inclusion.parent_body__id -> body.id
 entity_inclusion.child_body__id -> body.id
 
+body._id_id -> _id.id
 body.schema_property_id -> schema_property.id
 
 schema_property.root_schema_id -> schema.id
