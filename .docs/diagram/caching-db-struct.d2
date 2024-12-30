@@ -23,26 +23,8 @@ _id: {
   shape: sql_table
   id: INT {constraint: primary_key}
   entities_id: INT {constraint: foreign_key}
-  entities_id_with_id: TEXT {constraint: unique}
+  id_with_entities_id: TEXT {constraint: unique}
   _id: TEXT {constraint: unique}
-  insert_date_time: DATETIME
-  update_date_time: DATETIME
-}
-
-_meta: {
-  shape: sql_table
-  id: INT {constraint: primary_key}
-  _id_id: TEXT {constraint: foreign_key}
-  content: TEXT
-  insert_date_time: DATETIME
-  update_date_time: DATETIME
-}
-
-_body: {
-  shape: sql_table
-  id: INT {constraint: primary_key}
-  _id_id: TEXT {constraint: foreign_key}
-  content: TEXT
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -51,12 +33,12 @@ meta: {
   shape: sql_table
   id: INT {constraint: primary_key}
   parent_id_id: INT {constraint: foreign_key}
-  _id_id: INT {constraint: foreign_key}
+  child_id_id: INT {constraint: foreign_key}
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
 
-body: {
+content: {
   shape: sql_table
   id: INT {constraint: primary_key}
   _id_id: INT {constraint: foreign_key}
@@ -69,8 +51,8 @@ body: {
 
 entity_inclusion: {
   shape: sql_table
-  parent_body__id: INT {constraint: foreign_key}
-  child_body__id: INT {constraint: foreign_key}
+  parent_content_id: INT {constraint: foreign_key}
+  child_content_id: INT {constraint: foreign_key}
   insert_date_time: DATETIME
   update_date_time: DATETIME
 }
@@ -138,25 +120,22 @@ schema_item: {
   update_date_time: DATETIME
 }
 
-entities.id -> meta.entities_id
-meta.parent_id_id -> _id.id
-meta._id_id -> _id.id
-entities.id -> schema.entities_id
+_id.entities_id -> entities.id
 
+meta.parent_id_id -> _id.id
+meta.child_id_id -> _id.id
+
+schema.entities_id -> entities.id
 schema.id -> schema_properties.schema_id
 schema_properties.schema_property_id -> schema_property.id
 schema_item_properties.schema_item_id -> schema_item.id
 schema_item_properties.schema_property_id -> schema_property.id
 schema_property.schema_item_id -> schema_item.id
 
-entity_inclusion.parent_body__id -> body.id
-entity_inclusion.child_body__id -> body.id
+entity_inclusion.parent_content_id -> content.id
+entity_inclusion.child_content_id -> content.id
 
-body._id_id -> _id.id
-body.schema_property_id -> schema_property.id
+content._id_id -> _id.id
+content.schema_property_id -> schema_property.id
 
 schema_property.root_schema_id -> schema.id
-
-entities.id -> _id.entities_id
-_id.id -> _meta._id_id
-_id.id -> _body._id_id
