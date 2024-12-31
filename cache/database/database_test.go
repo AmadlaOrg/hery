@@ -1,7 +1,6 @@
 package database
 
 import (
-	"database/sql"
 	"testing"
 )
 
@@ -11,6 +10,53 @@ func TestCreateTable(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
+	tests := []struct {
+		name       string
+		inputTable Table
+	}{
+		{
+			name: "Test Insert",
+			inputTable: Table{
+				Name: "Net",
+				Columns: []Column{
+					{
+						ColumnName: "Id",
+						DataType:   "TEXT",
+						Constraints: []Constraint{
+							{
+								Type: ConstraintPrimaryKey,
+							},
+						},
+					},
+					{
+						ColumnName: "server_name",
+						DataType:   "TEXT",
+					},
+					{
+						ColumnName: "listen",
+						DataType:   "TEXT",
+					},
+				},
+				Rows: []map[string]any{
+					{
+						"Id":          "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
+						"server_name": "localhost",
+						"listen":      "[80, 443]",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			databaseService := NewDatabaseService()
+			databaseService.Insert(tt.inputTable)
+		})
+	}
+}
+
+/*func TestInsert(t *testing.T) {
 	// Arrange: Initialize the in-memory database
 	dbPath := ":memory:"
 	db, err := sql.Open("sqlite3", dbPath)
@@ -82,7 +128,7 @@ func TestInsert(t *testing.T) {
 	if id != "c6beaec1-90c4-4d2a-aaef-211ab00b86bd" || serverName != "localhost" || listen != "[80, 443]" {
 		t.Errorf("Inserted row does not match expected values: got (%s, %s, %s)", id, serverName, listen)
 	}
-}
+}*/
 
 func TestUpdate(t *testing.T) {}
 

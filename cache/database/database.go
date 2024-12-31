@@ -17,7 +17,7 @@ type IDatabase interface {
 	IsInitialized() bool
 	CreateTable(table Table)
 	Insert(table Table)
-	Update(table Table)
+	Update(table Table, where []map[string]any)
 	Select(table Table, name string) (string, error)
 	Delete(table Table, id int)
 	DropTable(table Table)
@@ -107,6 +107,10 @@ func (s *SDatabase) IsInitialized() bool {
 	return initialized
 }
 
+func (s *SDatabase) AddQuery(action string, query Query) {
+
+}
+
 // CreateTable creates a new table
 func (s *SDatabase) CreateTable(table Table) {
 	var sqlColumns string
@@ -162,12 +166,43 @@ func (s *SDatabase) Insert(table Table) {
 	)
 
 	// Iterate over columns in a single row
-	for rowColumnName, rowValue := range table.Rows {
+	/*for rowIndex, rowValue := range table.Rows {
+		println(rowIndex)
+		rowKey := rowValue["key"]
+		println(rowKey)
 		// TODO: Add validation to the name
-		columnNames = append(columnNames, rowColumnName)
+		//columnNames = append(columnNames, rowColumnName)
+
+		// For each loop it adds to a string list `?` for a safe query
 		valuesPlaceholder = append(valuesPlaceholder, "?")
-		columnValues = append(columnValues, rowValue) // TODO: Maybe use a struct and then attach a function to parse
+		//columnValues = append(columnValues, rowValue) // TODO: Maybe use a struct and then attach a function to parse
 	}
+	println(columnValues)*/
+
+	// Iterate over rows in the table
+	for rowIndex, row := range table.Rows {
+		println("Row Index:", rowIndex)
+
+		// Iterate over keys and values in the row
+		for key, value := range row {
+			println("Column Name:", key)
+			println("Value:", value)
+
+			// Add the column name to columnNames
+			columnNames = append(columnNames, key)
+
+			// Add a placeholder for each value
+			valuesPlaceholder = append(valuesPlaceholder, "?")
+
+			// Convert the value to a string and add it to columnValues
+			columnValues = append(columnValues, fmt.Sprintf("%v", value))
+		}
+	}
+
+	// Debug output
+	println("Column Names:", strings.Join(columnNames, ", "))
+	println("Placeholders:", strings.Join(valuesPlaceholder, ", "))
+	println("Column Values:", strings.Join(columnValues, ", "))
 
 	// Construct the query for this row
 	query := fmt.Sprintf(
@@ -177,22 +212,24 @@ func (s *SDatabase) Insert(table Table) {
 		strings.Join(valuesPlaceholder, ", "),
 	)
 
+	println(query)
+
 	// Append the query to the list
 
 	// TODO: Do I keep?
 	//queries = append(queries, query)
 
 	// Add to s.queries if needed
-	queryInsert := Query{
+	/*queryInsert := Query{
 		Query:  query,
 		Values: columnValues,
 	}
-	s.queries.Insert = append(s.queries.Insert, queryInsert)
+	s.queries.Insert = append(s.queries.Insert, queryInsert)*/
 }
 
 // Update updates a record in the table
 func (s *SDatabase) Update(table Table, where []map[string]any) {
-	var (
+	/*var (
 		columnsWhere       []string
 		columnsWhereValues []string
 		valuesPlaceholder  []string
@@ -223,7 +260,7 @@ func (s *SDatabase) Update(table Table, where []map[string]any) {
 		Query:  fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name),
 		Values: values,
 	}
-	s.queries.Update = append(s.queries.Update, queryUpdate)
+	s.queries.Update = append(s.queries.Update, queryUpdate)*/
 }
 
 // Select retrieves a record from the table
@@ -247,17 +284,17 @@ func (s *SDatabase) Select(table Table, name string) (string, error) {
 
 // Delete deletes a record from the table
 func (s *SDatabase) Delete(table Table, id int) {
-	*s.queries = append(*s.queries, fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name))
+	//*s.queries = append(*s.queries, fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name))
 }
 
 // DropTable drops the table from the database
 func (s *SDatabase) DropTable(table Table) {
-	*s.queries = append(*s.queries, fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name))
+	//*s.queries = append(*s.queries, fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name))
 }
 
 // Apply all the SQL scripts that are in a string array that are combined into one SQL script
 func (s *SDatabase) Apply() error {
-	if !s.IsInitialized() {
+	/*if !s.IsInitialized() {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
@@ -272,7 +309,7 @@ func (s *SDatabase) Apply() error {
 			// TODO:
 			return
 		}
-	}(stmt)
+	}(stmt)*/
 
 	return nil
 }
