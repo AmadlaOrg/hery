@@ -16,7 +16,7 @@ type IDatabase interface {
 	IsInitialized() bool
 	CreateTable(table Table)
 	Insert(table Table)
-	Update(table Table, where map[string]any)
+	Update(table Table, where []Condition)
 	Select(table Table, name string)
 	Delete(table Table, id int)
 	DropTable(table Table)
@@ -196,7 +196,7 @@ func (s *SDatabase) Insert(table Table) {
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table, where map[string]any) {
+func (s *SDatabase) Update(table Table, where []Condition) {
 	s.query(
 		&s.queries.Update,
 		table,

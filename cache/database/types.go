@@ -173,6 +173,14 @@ type JoinClauses struct {
 // JoinType enumerates the types of JOIN operations
 type JoinType string
 
+const (
+	JoinTypeInner JoinType = "INNER"
+	JoinTypeLeft  JoinType = "LEFT"
+	JoinTypeRight JoinType = "RIGHT"
+	JoinTypeFull  JoinType = "FULL"
+	JoinTypeCross JoinType = "CROSS"
+)
+
 // JoinCondition struct for expressing conditions in the ON clause
 type JoinCondition struct {
 	Column1  string // First column in the condition (with optional table prefix)

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/AmadlaOrg/hery/util/pointer"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -114,36 +115,39 @@ func TestProcessRow(t *testing.T) {
 	}
 }
 
-func TestProcessWhere(t *testing.T) {
+func TestBuildWhere(t *testing.T) {
 	tests := []struct {
 		name       string
-		inputWhere map[string]any
-		expected   []string
+		inputWhere []Condition
+		expected   string
 	}{
 		{
 			name:       "empty",
-			inputWhere: make(map[string]any),
-			expected:   []string{},
+			inputWhere: []Condition{},
+			expected:   "",
 		},
 		{
-			name: "single",
-			inputWhere: map[string]any{
-				"Id":          "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
-				"server_name": "localhost",
-				"listen":      "[80, 443]",
+			name: "single condition",
+			inputWhere: []Condition{
+				{Column: "Id", Operator: "=", Value: "c6beaec1-90c4-4d2a-aaef-211ab00b86bd"},
 			},
-			expected: []string{
-				"Id = 'c6beaec1-90c4-4d2a-aaef-211ab00b86bd'",
-				"server_name = 'localhost'",
-				"listen = '[80, 443]'",
+			expected: " WHERE Id = 'c6beaec1-90c4-4d2a-aaef-211ab00b86bd'",
+		},
+		{
+			name: "multiple conditions",
+			inputWhere: []Condition{
+				{Column: "Id", Operator: "=", Value: "c6beaec1-90c4-4d2a-aaef-211ab00b86bd"},
+				{Column: "server_name", Operator: "LIKE", Value: "localhost"},
+				{Column: "listen", Operator: "IN", Value: "[80, 443]"},
 			},
+			expected: " WHERE Id = 'c6beaec1-90c4-4d2a-aaef-211ab00b86bd' AND server_name LIKE 'localhost' AND listen IN '[80, 443]'",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := buildWhere(tt.inputWhere)
-			assert.ElementsMatch(t, tt.expected, got)
+			assert.Equal(t, tt.expected, got)
 		})
 	}
 }
@@ -170,12 +174,25 @@ func TestBuildGroupBy(t *testing.T) {
 func TestBuildHaving(t *testing.T) {
 	tests := []struct {
 		name     string
-		having   map[string]any
+		having   []Condition
 		expected string
 	}{
-		{name: "Empty Having", having: map[string]any{}, expected: ""},
-		{name: "Single Having", having: map[string]any{"column1": "value1"}, expected: " HAVING column1 = 'value1'"},
-		{name: "Multiple Having", having: map[string]any{"column1": "value1", "column2": "value2"}, expected: " HAVING column1 = 'value1' column2 = 'value2'"},
+		{name: "Empty Having", having: []Condition{}, expected: ""},
+		{
+			name: "Single Having",
+			having: []Condition{
+				{Column: "column1", Operator: "=", Value: "value1"},
+			},
+			expected: " HAVING column1 = 'value1'",
+		},
+		{
+			name: "Multiple Having",
+			having: []Condition{
+				{Column: "column1", Operator: ">", Value: 10},
+				{Column: "column2", Operator: "LIKE", Value: "value%"},
+			},
+			expected: " HAVING column1 > '10' AND column2 LIKE 'value%'",
+		},
 	}
 
 	for _, tt := range tests {
@@ -189,12 +206,25 @@ func TestBuildHaving(t *testing.T) {
 func TestBuildOrderBy(t *testing.T) {
 	tests := []struct {
 		name     string
-		orderBy  map[string]any
+		orderBy  []OrderBy
 		expected string
 	}{
-		{name: "Empty OrderBy", orderBy: map[string]any{}, expected: ""},
-		{name: "Single OrderBy", orderBy: map[string]any{"column1": "ASC"}, expected: " ORDER BY column1 ASC"},
-		{name: "Multiple OrderBy", orderBy: map[string]any{"column1": "ASC", "column2": "DESC"}, expected: " ORDER BY column1 ASC column2 DESC"},
+		{name: "Empty OrderBy", orderBy: []OrderBy{}, expected: ""},
+		{
+			name: "Single OrderBy",
+			orderBy: []OrderBy{
+				{Column: "column1", Direction: "ASC"},
+			},
+			expected: " ORDER BY column1 ASC",
+		},
+		{
+			name: "Multiple OrderBy",
+			orderBy: []OrderBy{
+				{Column: "column1", Direction: "ASC"},
+				{Column: "column2", Direction: "DESC"},
+			},
+			expected: " ORDER BY column1 ASC, column2 DESC",
+		},
 	}
 
 	for _, tt := range tests {
@@ -238,6 +268,82 @@ func TestBuildOffset(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := buildOffset(tt.offset)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestBuildJoinClauses(t *testing.T) {
+	tests := []struct {
+		name     string
+		joins    []JoinClauses
+		expected string
+	}{
+		{
+			name:     "No Joins",
+			joins:    []JoinClauses{},
+			expected: "",
+		},
+		{
+			name: "Single Inner Join with ON",
+			joins: []JoinClauses{
+				{
+					Table: "orders",
+					Type:  JoinTypeInner,
+					On: []JoinCondition{
+						{Column1: "users.id", Operator: "=", Column2: "orders.user_id"},
+					},
+				},
+			},
+			expected: "INNER JOIN orders ON users.id = orders.user_id",
+		},
+		{
+			name: "Left Join with Alias and USING",
+			joins: []JoinClauses{
+				{
+					Table: "departments",
+					Alias: pointer.ToPtr("d"),
+					Type:  JoinTypeLeft,
+					Using: []string{"department_id"},
+				},
+			},
+			expected: "LEFT JOIN departments AS d USING (department_id)",
+		},
+		{
+			name: "Multiple Joins",
+			joins: []JoinClauses{
+				{
+					Table: "orders",
+					Type:  JoinTypeInner,
+					On: []JoinCondition{
+						{Column1: "users.id", Operator: "=", Column2: "orders.user_id"},
+					},
+				},
+				{
+					Table: "departments",
+					Alias: pointer.ToPtr("d"),
+					Type:  JoinTypeLeft,
+					Using: []string{"department_id"},
+				},
+			},
+			expected: "INNER JOIN orders ON users.id = orders.user_id LEFT JOIN departments AS d USING (department_id)",
+		},
+		{
+			name: "Join with Additional Raw SQL",
+			joins: []JoinClauses{
+				{
+					Table:      "projects",
+					Type:       JoinTypeRight,
+					Additional: pointer.ToPtr("ON projects.owner_id = employees.id AND projects.status = 'active'"),
+				},
+			},
+			expected: "RIGHT JOIN projects ON projects.owner_id = employees.id AND projects.status = 'active'",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := buildJoinClauses(tt.joins)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

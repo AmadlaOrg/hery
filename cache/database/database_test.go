@@ -202,10 +202,10 @@ func TestUpdate(t *testing.T) {
 					Select:      []Query{},
 				},
 			}
-			databaseService.Update(tt.inputTable, map[string]any{
-				"Id":          "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
-				"server_name": "localhost",
-				"listen":      "[80, 443]",
+			databaseService.Update(tt.inputTable, []Condition{
+				{Column: "Id", Operator: "=", Value: "c6beaec1-90c4-4d2a-aaef-211ab00b86bd"},
+				{Column: "server_name", Operator: "LIKE", Value: "localhost"},
+				{Column: "listen", Operator: "IN", Value: "[80, 443]"},
 			})
 			assert.Equal(t, tt.expected, databaseService.queries)
 		})

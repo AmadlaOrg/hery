@@ -115,14 +115,14 @@ func processRow(row map[string]any) ([]string, []string, []string) {
 	return columnNames, valuesPlaceholder, columnValues
 }
 
-// buildWhere build the WHERE clause
-func buildWhere(where map[string]any) string {
-	if len(where) <= 0 {
+// buildWhere constructs the WHERE clause from a slice of Condition structs.
+func buildWhere(where []Condition) string {
+	if len(where) == 0 {
 		return ""
 	}
 	var whereClauses []string
-	for key, value := range where {
-		whereClauses = append(whereClauses, fmt.Sprintf("%s = '%v'", key, value))
+	for _, condition := range where {
+		whereClauses = append(whereClauses, fmt.Sprintf("%s %s '%v'", condition.Column, condition.Operator, condition.Value))
 	}
 	return fmt.Sprintf(" WHERE %s", strings.Join(whereClauses, " AND "))
 }
@@ -139,28 +139,28 @@ func buildGroupBy(orderBy map[string]any) string {
 	return fmt.Sprintf(" GROUP BY %s", strings.Join(orderByClauses, " "))
 }
 
-// buildHaving
-func buildHaving(having map[string]any) string {
-	if len(having) <= 0 {
+// buildHaving constructs the HAVING clause from a slice of Condition structs.
+func buildHaving(having []Condition) string {
+	if len(having) == 0 {
 		return ""
 	}
 	var havingClauses []string
-	for key, value := range having {
-		havingClauses = append(havingClauses, fmt.Sprintf("%s = '%v'", key, value))
+	for _, condition := range having {
+		havingClauses = append(havingClauses, fmt.Sprintf("%s %s '%v'", condition.Column, condition.Operator, condition.Value))
 	}
-	return fmt.Sprintf(" HAVING %s", strings.Join(havingClauses, " "))
+	return fmt.Sprintf(" HAVING %s", strings.Join(havingClauses, " AND "))
 }
 
-// buildOrderBy
-func buildOrderBy(orderBy map[string]any) string {
-	if len(orderBy) <= 0 {
+// buildOrderBy constructs the ORDER BY clause from a slice of OrderBy structs.
+func buildOrderBy(orderBy []OrderBy) string {
+	if len(orderBy) == 0 {
 		return ""
 	}
 	var orderByClauses []string
-	for key, value := range orderBy {
-		orderByClauses = append(orderByClauses, fmt.Sprintf("%s %s", key, value))
+	for _, ob := range orderBy {
+		orderByClauses = append(orderByClauses, fmt.Sprintf("%s %s", ob.Column, ob.Direction))
 	}
-	return fmt.Sprintf(" ORDER BY %s", strings.Join(orderByClauses, " "))
+	return fmt.Sprintf(" ORDER BY %s", strings.Join(orderByClauses, ", "))
 }
 
 // buildLimit
@@ -177,4 +177,47 @@ func buildOffset(offset int64) string {
 		return ""
 	}
 	return fmt.Sprintf(" OFFSET %d", offset)
+}
+
+// buildJoinClauses constructs the JOIN clause(s) from a slice of JoinClauses.
+func buildJoinClauses(joins []JoinClauses) string {
+	if len(joins) == 0 {
+		return ""
+	}
+
+	var joinClauses []string
+	for _, join := range joins {
+		var clause strings.Builder
+
+		// Add join type
+		clause.WriteString(string(join.Type))
+		clause.WriteString(" JOIN ")
+
+		// Add table name and optional alias
+		clause.WriteString(join.Table)
+		if join.Alias != nil {
+			clause.WriteString(fmt.Sprintf(" AS %s", *join.Alias))
+		}
+
+		// Add USING clause if provided
+		if len(join.Using) > 0 {
+			clause.WriteString(fmt.Sprintf(" USING (%s)", strings.Join(join.Using, ", ")))
+		} else if len(join.On) > 0 {
+			// Add ON clause if USING is not provided
+			var onClauses []string
+			for _, condition := range join.On {
+				onClauses = append(onClauses, fmt.Sprintf("%s %s %s", condition.Column1, condition.Operator, condition.Column2))
+			}
+			clause.WriteString(fmt.Sprintf(" ON %s", strings.Join(onClauses, " AND ")))
+		}
+
+		// Add additional raw SQL if provided
+		if join.Additional != nil {
+			clause.WriteString(fmt.Sprintf(" %s", *join.Additional))
+		}
+
+		joinClauses = append(joinClauses, clause.String())
+	}
+
+	return strings.Join(joinClauses, " ")
 }
