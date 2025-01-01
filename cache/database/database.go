@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -17,7 +16,7 @@ type IDatabase interface {
 	IsInitialized() bool
 	CreateTable(table Table)
 	Insert(table Table)
-	Update(table Table, where []map[string]any)
+	Update(table Table, where map[string]any)
 	Select(table Table, name string) (string, error)
 	Delete(table Table, id int)
 	DropTable(table Table)
@@ -107,8 +106,28 @@ func (s *SDatabase) IsInitialized() bool {
 	return initialized
 }
 
-func (s *SDatabase) AddQuery(action string, query Query) {
+func (s *SDatabase) query(
+	addTo *[]Query,
+	table Table,
+	buildQueryFunc func(table Table, columnNames, valuesPlaceholder []string) string,
+) {
+	for _, row := range table.Rows {
+		columnNames, valuesPlaceholder, columnValues := processRow(row)
 
+		// Build the query using the provided function
+		query := buildQueryFunc(table, columnNames, valuesPlaceholder)
+
+		// Add the query to the queries list
+		s.addQuery(addTo, query, columnValues)
+	}
+}
+
+// addQuery
+func (s *SDatabase) addQuery(slice *[]Query, query string, values []string) {
+	*slice = append(*slice, Query{
+		Query:  query,
+		Values: values,
+	})
 }
 
 // CreateTable creates a new table
@@ -159,127 +178,54 @@ func (s *SDatabase) CreateTable(table Table) {
 
 // Insert inserts records into the table
 func (s *SDatabase) Insert(table Table) {
-	var (
-		columnNames       []string
-		valuesPlaceholder []string
-		columnValues      []string
+	s.query(
+		&s.queries.Insert,
+		table,
+		func(table Table, columnNames, valuesPlaceholder []string) string {
+			var b strings.Builder
+			b.WriteString("INSERT INTO ")
+			b.WriteString(table.Name)
+			b.WriteString(" (")
+			b.WriteString(strings.Join(columnNames, ", "))
+			b.WriteString(") VALUES (")
+			b.WriteString(strings.Join(valuesPlaceholder, ", "))
+			b.WriteString(");")
+			return b.String()
+		},
 	)
-
-	// Iterate over columns in a single row
-	/*for rowIndex, rowValue := range table.Rows {
-		println(rowIndex)
-		rowKey := rowValue["key"]
-		println(rowKey)
-		// TODO: Add validation to the name
-		//columnNames = append(columnNames, rowColumnName)
-
-		// For each loop it adds to a string list `?` for a safe query
-		valuesPlaceholder = append(valuesPlaceholder, "?")
-		//columnValues = append(columnValues, rowValue) // TODO: Maybe use a struct and then attach a function to parse
-	}
-	println(columnValues)*/
-
-	// Iterate over rows in the table
-	for rowIndex, row := range table.Rows {
-		println("Row Index:", rowIndex)
-
-		// Iterate over keys and values in the row
-		for key, value := range row {
-			println("Column Name:", key)
-			println("Value:", value)
-
-			// Add the column name to columnNames
-			columnNames = append(columnNames, key)
-
-			// Add a placeholder for each value
-			valuesPlaceholder = append(valuesPlaceholder, "?")
-
-			// Convert the value to a string and add it to columnValues
-			columnValues = append(columnValues, fmt.Sprintf("%v", value))
-		}
-	}
-
-	// Debug output
-	println("Column Names:", strings.Join(columnNames, ", "))
-	println("Placeholders:", strings.Join(valuesPlaceholder, ", "))
-	println("Column Values:", strings.Join(columnValues, ", "))
-
-	// Construct the query for this row
-	query := fmt.Sprintf(
-		`INSERT INTO %s (%s) VALUES (%s)`,
-		table.Name,
-		strings.Join(columnNames, ", "),
-		strings.Join(valuesPlaceholder, ", "),
-	)
-
-	println(query)
-
-	// Append the query to the list
-
-	// TODO: Do I keep?
-	//queries = append(queries, query)
-
-	// Add to s.queries if needed
-	/*queryInsert := Query{
-		Query:  query,
-		Values: columnValues,
-	}
-	s.queries.Insert = append(s.queries.Insert, queryInsert)*/
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table, where []map[string]any) {
-	/*var (
-		columnsWhere       []string
-		columnsWhereValues []string
-		valuesPlaceholder  []string
-		columnValues       []string
+func (s *SDatabase) Update(table Table, where map[string]any) {
+	s.query(
+		&s.queries.Update,
+		table,
+		func(table Table, columnNames, valuesPlaceholder []string) string {
+			var b strings.Builder
+			b.WriteString("UPDATE ")
+			b.WriteString(table.Name)
+			b.WriteString(" SET ")
+
+			var updates []string
+			for _, column := range columnNames {
+				updates = append(updates, fmt.Sprintf("%s = ?", column))
+			}
+
+			b.WriteString(strings.Join(updates, ", "))
+
+			if len(where) > 0 {
+				b.WriteString(" WHERE ")
+				b.WriteString(strings.Join(processWhere(where), " AND "))
+			}
+			return b.String()
+		},
 	)
-
-	for _, whereColumnElement := range where {
-		for columnName, value := range row {
-			// TODO: Add validation to the name
-			columnsWhere = append(columnsWhere, fmt.Sprintf("%s = ?", whereColumnName))
-			columnsWhereValues = append(columnsWhereValues, valueToSQL(whereColumnValue))
-		}
-	}
-
-	// Iterate over columns in a single row
-	for rowColumnName, rowValue := range table.Rows {
-		for columnName, value := range row {
-			//columnNames = append(columnNames, rowColumnName)
-			// TODO: Add validation to the name
-			valuesPlaceholder = append(valuesPlaceholder, fmt.Sprintf("%s = ?,", rowColumnName))
-			columnValues = append(columnValues, valueToSQL(rowValue)) // TODO: Maybe use a struct and then attach a function to parse
-		}
-	}
-
-	values := make([]string, len(table.Rows)+len(columnsWhere))
-	values = append(columnValues, columnsWhereValues...)
-	queryUpdate := Query{
-		Query:  fmt.Sprintf(`UPDATE %s SET name = ? WHERE id = ?`, table.Name),
-		Values: values,
-	}
-	s.queries.Update = append(s.queries.Update, queryUpdate)*/
 }
 
 // Select retrieves a record from the table
-func (s *SDatabase) Select(table Table, name string) (string, error) {
-	if !s.IsInitialized() {
-		return "", fmt.Errorf(ErrorDatabaseNotInitialized)
-	}
+func (s *SDatabase) Select(table Table, name string) {
+	//querySQL := fmt.Sprintf(`SELECT name FROM %s WHERE name = ?`, table.Name)
 
-	var result string
-	querySQL := fmt.Sprintf(`SELECT name FROM %s WHERE name = ?`, table.Name)
-	err := db.QueryRow(querySQL, name).Scan(&result)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return "", nil // No matching record found
-		}
-		return "", fmt.Errorf("error querying record: %v", err)
-	}
-
-	return result, nil
 }
 
 // Delete deletes a record from the table
@@ -310,6 +256,16 @@ func (s *SDatabase) Apply() error {
 			return
 		}
 	}(stmt)*/
+
+	/*
+		err := db.QueryRow(querySQL, name).Scan(&result)
+			if err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return "", nil // No matching record found
+				}
+				return "", fmt.Errorf("error querying record: %v", err)
+			}
+	*/
 
 	return nil
 }

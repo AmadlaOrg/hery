@@ -123,3 +123,28 @@ func ValidateColumnName(columnName string) error {
 
 	return nil
 }
+
+func processRow(row map[string]any) ([]string, []string, []string) {
+	var (
+		columnNames       []string
+		valuesPlaceholder []string
+		columnValues      []string
+	)
+
+	for key, value := range row {
+		columnNames = append(columnNames, key)
+		valuesPlaceholder = append(valuesPlaceholder, "?")
+		columnValues = append(columnValues, fmt.Sprintf("%v", value))
+	}
+
+	return columnNames, valuesPlaceholder, columnValues
+}
+
+// processWhere build the WHERE clause
+func processWhere(where map[string]any) []string {
+	var whereClauses []string
+	for key, value := range where {
+		whereClauses = append(whereClauses, fmt.Sprintf("%s = '%v'", key, value))
+	}
+	return whereClauses
+}
