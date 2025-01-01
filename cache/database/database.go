@@ -17,7 +17,7 @@ type IDatabase interface {
 	CreateTable(table Table)
 	Insert(table Table)
 	Update(table Table, where map[string]any)
-	Select(table Table, name string) (string, error)
+	Select(table Table, name string)
 	Delete(table Table, id int)
 	DropTable(table Table)
 	Apply() error
@@ -212,11 +212,8 @@ func (s *SDatabase) Update(table Table, where map[string]any) {
 			}
 
 			b.WriteString(strings.Join(updates, ", "))
+			b.WriteString(buildWhere(where))
 
-			if len(where) > 0 {
-				b.WriteString(" WHERE ")
-				b.WriteString(strings.Join(processWhere(where), " AND "))
-			}
 			return b.String()
 		},
 	)

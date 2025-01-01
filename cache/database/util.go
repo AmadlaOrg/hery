@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -70,38 +69,6 @@ func valueToSQL(value any) string {
 	}
 }
 
-// List of SQLite reserved keywords
-var sqliteKeywords = map[string]struct{}{
-	"ABORT": {}, "ACTION": {}, "ADD": {}, "AFTER": {}, "ALL": {},
-	"ALTER": {}, "ANALYZE": {}, "AND": {}, "AS": {}, "ASC": {},
-	"ATTACH": {}, "AUTOINCREMENT": {}, "BEFORE": {}, "BEGIN": {},
-	"BETWEEN": {}, "BY": {}, "CASCADE": {}, "CASE": {}, "CAST": {},
-	"CHECK": {}, "COLLATE": {}, "COLUMN": {}, "COMMIT": {}, "CONFLICT": {},
-	"CONSTRAINT": {}, "CREATE": {}, "CROSS": {}, "CURRENT_DATE": {},
-	"CURRENT_TIME": {}, "CURRENT_TIMESTAMP": {}, "DATABASE": {}, "DEFAULT": {},
-	"DEFERRABLE": {}, "DEFERRED": {}, "DELETE": {}, "DESC": {}, "DETACH": {},
-	"DISTINCT": {}, "DROP": {}, "EACH": {}, "ELSE": {}, "END": {},
-	"ESCAPE": {}, "EXCEPT": {}, "EXCLUSIVE": {}, "EXISTS": {}, "EXPLAIN": {},
-	"FAIL": {}, "FOR": {}, "FOREIGN": {}, "FROM": {}, "FULL": {}, "GLOB": {},
-	"GROUP": {}, "HAVING": {}, "IF": {}, "IGNORE": {}, "IMMEDIATE": {},
-	"IN": {}, "INDEX": {}, "INDEXED": {}, "INITIALLY": {}, "INNER": {},
-	"INSERT": {}, "INSTEAD": {}, "INTERSECT": {}, "INTO": {}, "IS": {},
-	"ISNULL": {}, "JOIN": {}, "KEY": {}, "LEFT": {}, "LIKE": {}, "LIMIT": {},
-	"MATCH": {}, "NATURAL": {}, "NO": {}, "NOT": {}, "NOTNULL": {}, "NULL": {},
-	"OF": {}, "OFFSET": {}, "ON": {}, "OR": {}, "ORDER": {}, "OUTER": {},
-	"PLAN": {}, "PRAGMA": {}, "PRIMARY": {}, "QUERY": {}, "RAISE": {},
-	"REFERENCES": {}, "REGEXP": {}, "REINDEX": {}, "RELEASE": {}, "RENAME": {},
-	"REPLACE": {}, "RESTRICT": {}, "RIGHT": {}, "ROLLBACK": {}, "ROW": {},
-	"SAVEPOINT": {}, "SELECT": {}, "SET": {}, "TABLE": {}, "TEMP": {},
-	"TEMPORARY": {}, "THEN": {}, "TO": {}, "TRANSACTION": {}, "TRIGGER": {},
-	"UNION": {}, "UNIQUE": {}, "UPDATE": {}, "USING": {}, "VACUUM": {},
-	"VALUES": {}, "VIEW": {}, "VIRTUAL": {}, "WHEN": {}, "WHERE": {}, "WITH": {},
-	"WITHOUT": {},
-}
-
-// Regular expression to validate column name syntax
-var validColumnNameRegex = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
-
 // ValidateColumnName validates the column name for SQLite compatibility.
 func ValidateColumnName(columnName string) error {
 	columnName = strings.TrimSpace(columnName)
@@ -124,6 +91,14 @@ func ValidateColumnName(columnName string) error {
 	return nil
 }
 
+// ValidateOperator validates if the operator is valid.
+func ValidateOperator(op string) error {
+	if _, valid := validOperators[op]; !valid {
+		return fmt.Errorf("invalid operator: %s", op)
+	}
+	return nil
+}
+
 func processRow(row map[string]any) ([]string, []string, []string) {
 	var (
 		columnNames       []string
@@ -140,11 +115,66 @@ func processRow(row map[string]any) ([]string, []string, []string) {
 	return columnNames, valuesPlaceholder, columnValues
 }
 
-// processWhere build the WHERE clause
-func processWhere(where map[string]any) []string {
+// buildWhere build the WHERE clause
+func buildWhere(where map[string]any) string {
+	if len(where) <= 0 {
+		return ""
+	}
 	var whereClauses []string
 	for key, value := range where {
 		whereClauses = append(whereClauses, fmt.Sprintf("%s = '%v'", key, value))
 	}
-	return whereClauses
+	return fmt.Sprintf(" WHERE %s", strings.Join(whereClauses, " AND "))
+}
+
+// buildGroupBy
+func buildGroupBy(orderBy map[string]any) string {
+	if len(orderBy) <= 0 {
+		return ""
+	}
+	var orderByClauses []string
+	for key, value := range orderBy {
+		orderByClauses = append(orderByClauses, fmt.Sprintf("%s %s", key, value))
+	}
+	return fmt.Sprintf(" GROUP BY %s", strings.Join(orderByClauses, " "))
+}
+
+// buildHaving
+func buildHaving(having map[string]any) string {
+	if len(having) <= 0 {
+		return ""
+	}
+	var havingClauses []string
+	for key, value := range having {
+		havingClauses = append(havingClauses, fmt.Sprintf("%s = '%v'", key, value))
+	}
+	return fmt.Sprintf(" HAVING %s", strings.Join(havingClauses, " "))
+}
+
+// buildOrderBy
+func buildOrderBy(orderBy map[string]any) string {
+	if len(orderBy) <= 0 {
+		return ""
+	}
+	var orderByClauses []string
+	for key, value := range orderBy {
+		orderByClauses = append(orderByClauses, fmt.Sprintf("%s %s", key, value))
+	}
+	return fmt.Sprintf(" ORDER BY %s", strings.Join(orderByClauses, " "))
+}
+
+// buildLimit
+func buildLimit(limit int64) string {
+	if limit <= 0 {
+		return ""
+	}
+	return fmt.Sprintf(" LIMIT %d", limit)
+}
+
+// buildOffset
+func buildOffset(offset int64) string {
+	if offset <= 0 {
+		return ""
+	}
+	return fmt.Sprintf(" OFFSET %d", offset)
 }

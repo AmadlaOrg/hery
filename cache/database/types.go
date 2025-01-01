@@ -1,10 +1,60 @@
 package database
 
+import "regexp"
+
 // Errors
 const (
 	ErrorClosingDatabase        = "closing database"
 	ErrorDatabaseNotInitialized = "database not initialized"
 )
+
+// ValidOperators is a map of allowed operators for fast lookup.
+var validOperators = map[string]struct{}{
+	"=":           {},
+	"<>":          {},
+	"!=":          {},
+	"<":           {},
+	"<=":          {},
+	">":           {},
+	">=":          {},
+	"LIKE":        {},
+	"GLOB":        {},
+	"IS":          {},
+	"IS NOT":      {},
+	"IN":          {},
+	"NOT IN":      {},
+	"BETWEEN":     {},
+	"NOT BETWEEN": {},
+}
+
+// List of SQLite reserved keywords
+var sqliteKeywords = map[string]struct{}{
+	"ABORT": {}, "ACTION": {}, "ADD": {}, "AFTER": {}, "ALL": {},
+	"ALTER": {}, "ANALYZE": {}, "AND": {}, "AS": {}, "ASC": {},
+	"ATTACH": {}, "AUTOINCREMENT": {}, "BEFORE": {}, "BEGIN": {},
+	"BETWEEN": {}, "BY": {}, "CASCADE": {}, "CASE": {}, "CAST": {},
+	"CHECK": {}, "COLLATE": {}, "COLUMN": {}, "COMMIT": {}, "CONFLICT": {},
+	"CONSTRAINT": {}, "CREATE": {}, "CROSS": {}, "CURRENT_DATE": {},
+	"CURRENT_TIME": {}, "CURRENT_TIMESTAMP": {}, "DATABASE": {}, "DEFAULT": {},
+	"DEFERRABLE": {}, "DEFERRED": {}, "DELETE": {}, "DESC": {}, "DETACH": {},
+	"DISTINCT": {}, "DROP": {}, "EACH": {}, "ELSE": {}, "END": {},
+	"ESCAPE": {}, "EXCEPT": {}, "EXCLUSIVE": {}, "EXISTS": {}, "EXPLAIN": {},
+	"FAIL": {}, "FOR": {}, "FOREIGN": {}, "FROM": {}, "FULL": {}, "GLOB": {},
+	"GROUP": {}, "HAVING": {}, "IF": {}, "IGNORE": {}, "IMMEDIATE": {},
+	"IN": {}, "INDEX": {}, "INDEXED": {}, "INITIALLY": {}, "INNER": {},
+	"INSERT": {}, "INSTEAD": {}, "INTERSECT": {}, "INTO": {}, "IS": {},
+	"ISNULL": {}, "JOIN": {}, "KEY": {}, "LEFT": {}, "LIKE": {}, "LIMIT": {},
+	"MATCH": {}, "NATURAL": {}, "NO": {}, "NOT": {}, "NOTNULL": {}, "NULL": {},
+	"OF": {}, "OFFSET": {}, "ON": {}, "OR": {}, "ORDER": {}, "OUTER": {},
+	"PLAN": {}, "PRAGMA": {}, "PRIMARY": {}, "QUERY": {}, "RAISE": {},
+	"REFERENCES": {}, "REGEXP": {}, "REINDEX": {}, "RELEASE": {}, "RENAME": {},
+	"REPLACE": {}, "RESTRICT": {}, "RIGHT": {}, "ROLLBACK": {}, "ROW": {},
+	"SAVEPOINT": {}, "SELECT": {}, "SET": {}, "TABLE": {}, "TEMP": {},
+	"TEMPORARY": {}, "THEN": {}, "TO": {}, "TRANSACTION": {}, "TRIGGER": {},
+	"UNION": {}, "UNIQUE": {}, "UPDATE": {}, "USING": {}, "VACUUM": {},
+	"VALUES": {}, "VIEW": {}, "VIRTUAL": {}, "WHEN": {}, "WHERE": {}, "WITH": {},
+	"WITHOUT": {},
+}
 
 type DataType string
 
@@ -54,6 +104,9 @@ const (
 	ConstraintForeignKey    ConstraintType = "FOREIGN KEY"
 	ConstraintAutoincrement ConstraintType = "AUTOINCREMENT"
 )
+
+// Regular expression to validate column name syntax
+var validColumnNameRegex = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 
 // Table is a basic representation in a struct of a table in a SQL DB
 type Table struct {
