@@ -220,49 +220,123 @@ func (s *SDatabase) Update(table Table, where []Condition) {
 }
 
 // Select retrieves a record from the table
-func (s *SDatabase) Select(table Table, name string) {
-	//querySQL := fmt.Sprintf(`SELECT name FROM %s WHERE name = ?`, table.Name)
+func (s *SDatabase) Select(table Table, clauses SelectClauses, joinClauses []JoinClauses) {
+	// Build the SELECT query
+	var b strings.Builder
+	b.WriteString("SELECT * FROM ")
+	b.WriteString(table.Name)
 
+	// Build JOIN clauses, if any
+	b.WriteString(" ")
+	b.WriteString(buildJoinClauses(joinClauses))
+
+	// Build WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET
+	b.WriteString(buildWhere(clauses.Where))
+	if len(clauses.GroupBy) > 0 {
+		// For SELECT, GroupBy is just: GROUP BY col1, col2 ...
+		b.WriteString(fmt.Sprintf(" GROUP BY %s", strings.Join(clauses.GroupBy, ", ")))
+	}
+	b.WriteString(buildHaving(clauses.Having))
+	b.WriteString(buildOrderBy(clauses.OrderBy))
+	if clauses.Limit != nil {
+		b.WriteString(buildLimit(int64(*clauses.Limit)))
+	}
+	if clauses.Offset != nil {
+		b.WriteString(buildOffset(int64(*clauses.Offset)))
+	}
+	b.WriteString(";")
+
+	// Add the query to s.queries.Select
+	s.queries.Select = append(s.queries.Select, Query{
+		Query:  b.String(),
+		Values: nil, // You could also populate this if you want parameter binding
+	})
 }
 
-// Delete deletes a record from the table
-func (s *SDatabase) Delete(table Table, id int) {
-	//*s.queries = append(*s.queries, fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, table.Name))
+// Delete deletes records from the table
+func (s *SDatabase) Delete(table Table, clauses SelectClauses, joinClauses []JoinClauses) {
+	var b strings.Builder
+	b.WriteString("DELETE FROM ")
+	b.WriteString(table.Name)
+
+	// Build JOIN clauses, if you'd like to support them (not standard for SQLite).
+	b.WriteString(" ")
+	b.WriteString(buildJoinClauses(joinClauses))
+
+	// Build WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET
+	b.WriteString(buildWhere(clauses.Where))
+	// Typically, GROUP BY / HAVING are not valid with DELETE in standard SQL/SQLite,
+	// but included here for completeness if your SQL variant allows it.
+	if len(clauses.GroupBy) > 0 {
+		b.WriteString(fmt.Sprintf(" GROUP BY %s", strings.Join(clauses.GroupBy, ", ")))
+	}
+	b.WriteString(buildHaving(clauses.Having))
+	b.WriteString(buildOrderBy(clauses.OrderBy))
+	// LIMIT / OFFSET in DELETE is also non-standard in SQLite,
+	// but some other DB engines do allow it.
+	if clauses.Limit != nil {
+		b.WriteString(buildLimit(int64(*clauses.Limit)))
+	}
+	if clauses.Offset != nil {
+		b.WriteString(buildOffset(int64(*clauses.Offset)))
+	}
+	b.WriteString(";")
+
+	s.queries.Delete = append(s.queries.Delete, Query{
+		Query:  b.String(),
+		Values: nil,
+	})
 }
 
 // DropTable drops the table from the database
 func (s *SDatabase) DropTable(table Table) {
-	//*s.queries = append(*s.queries, fmt.Sprintf(`DROP TABLE IF EXISTS %s`, table.Name))
+	dropSQL := fmt.Sprintf("DROP TABLE IF EXISTS %s;", table.Name)
+	s.queries.DropTable = append(s.queries.DropTable, Query{
+		Query:  dropSQL,
+		Values: nil,
+	})
 }
 
-// Apply all the SQL scripts that are in a string array that are combined into one SQL script
+// Apply executes all queued queries in s.queries
 func (s *SDatabase) Apply() error {
-	/*if !s.IsInitialized() {
+	if !s.IsInitialized() {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
-	stmt, err := db.Prepare(mergeSqlQueries(s.queries))
-	if err != nil {
-		return fmt.Errorf("error preparing insert statement: %v", err)
+	// Merge all queries in the desired order.
+	// You can adapt the order as needed.
+	var allQueries []string
+
+	for _, q := range s.queries.CreateTable {
+		allQueries = append(allQueries, q.Query)
+	}
+	for _, q := range s.queries.DropTable {
+		allQueries = append(allQueries, q.Query)
+	}
+	for _, q := range s.queries.Insert {
+		allQueries = append(allQueries, q.Query)
+	}
+	for _, q := range s.queries.Update {
+		allQueries = append(allQueries, q.Query)
+	}
+	for _, q := range s.queries.Delete {
+		allQueries = append(allQueries, q.Query)
+	}
+	for _, q := range s.queries.Select {
+		allQueries = append(allQueries, q.Query)
 	}
 
-	defer func(stmt *sql.Stmt) {
-		err := stmt.Close()
-		if err != nil {
-			// TODO:
-			return
-		}
-	}(stmt)*/
+	// Join them into one script, separated by semicolons.
+	finalSQL := strings.Join(allQueries, "\n")
 
-	/*
-		err := db.QueryRow(querySQL, name).Scan(&result)
-			if err != nil {
-				if errors.Is(err, sql.ErrNoRows) {
-					return "", nil // No matching record found
-				}
-				return "", fmt.Errorf("error querying record: %v", err)
-			}
-	*/
+	// Execute the merged SQL script
+	_, err := db.Exec(finalSQL)
+	if err != nil {
+		return fmt.Errorf("error applying queries: %w", err)
+	}
+
+	// Optionally, clear the queries after applying
+	s.queries = &Queries{}
 
 	return nil
 }
