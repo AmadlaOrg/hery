@@ -1,4 +1,6 @@
-with-expecter: True
+resolve-type-alias: False
+issue-845-fix: True
+
 packages:
   github.com/AmadlaOrg/hery/cache:
     interfaces:
@@ -18,12 +20,10 @@ packages:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockSqlDb"
-          inpackage: True
       ISqlTx:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockSqlTx"
-          inpackage: True
   github.com/AmadlaOrg/hery/cache/parser:
     interfaces:
       IParser:
@@ -137,9 +137,8 @@ packages:
   sync:
     interfaces:
       Locker:
-        dir: cache/database
-        with-expecter: True
-        mockname: MockSyncLocker
-        inpackage: False
-        outpkg: database
-        output: cache/database
+        config:
+          dir: cache/database
+          mockName: MockSyncLocker
+          inpackage: False
+          outpkg: database

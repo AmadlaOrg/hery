@@ -2,14 +2,8 @@ package database
 
 import (
 	"database/sql"
-	"sync"
 	"time"
 )
-
-// ILocker
-type ILocker interface {
-	sync.Locker
-}
 
 // ISqlDb
 type ISqlDb interface {
