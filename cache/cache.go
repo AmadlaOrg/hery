@@ -50,13 +50,13 @@ func (s *SCache) Close() error {
 
 // AddEntity will
 func (s *SCache) AddEntity(entity *entity.Entity) error {
-	entitiesTable := database.Table{
+	/*entitiesTable := database.Table{
 		Name:    "entities",
 		Columns: []database.Column{},
-	}
+	}*/
 
 	// TODO: Maybe create a method to just check if exist instead of creating a new one
-	err := s.Database.CreateTable(entitiesTable)
+	/*err := s.Database.CreateTable(entitiesTable)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (s *SCache) AddEntity(entity *entity.Entity) error {
 		if err != nil {
 			return err
 		}
-	}
+	}*/
 
 	return nil
 }
@@ -82,6 +82,6 @@ func (s *SCache) InsertInEntity() error {
 }
 
 // SelectEntity
-func (s *SCache) SelectEntity() (entity.Entity, error) {
-	return entity.Entity{}, nil
+func (s *SCache) SelectEntity() (*entity.Entity, error) {
+	return &entity.Entity{}, nil
 }

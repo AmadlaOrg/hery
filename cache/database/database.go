@@ -17,8 +17,8 @@ type IDatabase interface {
 	CreateTable(table Table)
 	Insert(table Table)
 	Update(table Table, where []Condition)
-	Select(table Table, name string)
-	Delete(table Table, id int)
+	Select(table Table, clauses SelectClauses, joinClauses []JoinClauses)
+	Delete(table Table, clauses SelectClauses, joinClauses []JoinClauses)
 	DropTable(table Table)
 	Apply() error
 }
@@ -33,6 +33,8 @@ var (
 	dbMutex     sync.Mutex
 	initErr     error
 	initialized bool
+	sqlOpen     = sql.Open
+	dbBegin     = db.Begin
 )
 
 // Initialize establishes the database connection
@@ -46,7 +48,7 @@ func (s *SDatabase) Initialize() error {
 
 	dbPath := "/tmp/hery.test.cache"
 	var err error
-	db, err = sql.Open("sqlite3", dbPath)
+	db, err = sqlOpen("sqlite3", dbPath)
 	if err != nil {
 		initErr = fmt.Errorf("error opening database: %v", err)
 		return initErr
@@ -303,10 +305,14 @@ func (s *SDatabase) Apply() error {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
-	// Merge all queries in the desired order.
-	// You can adapt the order as needed.
-	var allQueries []string
+	// Begin a transaction
+	tx, err := dbBegin()
+	if err != nil {
+		return fmt.Errorf("error starting transaction: %w", err)
+	}
 
+	// Merge all queries in the desired order.
+	var allQueries []string
 	for _, q := range s.queries.CreateTable {
 		allQueries = append(allQueries, q.Query)
 	}
@@ -326,17 +332,26 @@ func (s *SDatabase) Apply() error {
 		allQueries = append(allQueries, q.Query)
 	}
 
-	// Join them into one script, separated by semicolons.
-	finalSQL := strings.Join(allQueries, "\n")
+	// Execute each query individually within the transaction.
+	// This approach is more flexible if you want to handle parameter binding or errors per query.
+	for _, queryString := range allQueries {
+		_, execErr := tx.Exec(queryString)
+		if execErr != nil {
+			// Roll back the entire transaction on error
+			rbErr := tx.Rollback()
+			if rbErr != nil {
+				return fmt.Errorf("error rolling back transaction: %w (original error: %v)", rbErr, execErr)
+			}
+			return fmt.Errorf("error applying query (%s): %w", queryString, execErr)
+		}
+	}
 
-	// Execute the merged SQL script
-	_, err := db.Exec(finalSQL)
-	if err != nil {
-		return fmt.Errorf("error applying queries: %w", err)
+	// If all queries succeeded, commit the transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("error committing transaction: %w", err)
 	}
 
 	// Optionally, clear the queries after applying
 	s.queries = &Queries{}
-
 	return nil
 }

@@ -14,7 +14,6 @@ import (
 	"github.com/AmadlaOrg/hery/message"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/AmadlaOrg/hery/util/file"
-	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 )
 
@@ -80,12 +79,14 @@ func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Con
 	}
 
 	// 2. Extract `_id`
-	idSection := heryContent["_id"].(string)
+	// TODO: Needs to be adapted for `uuid`
+	idSection := ""
+	/*idSection := heryContent["_id"].(uuid)
 	if entity.Id != "" {
 		idSection = entity.Id
 	} else if idSection == "" {
 		idSection = uuid.New().String()
-	}
+	}*/
 
 	// 3. Extract `_meta`
 	metaSection := heryContent["_meta"].(map[string]any)

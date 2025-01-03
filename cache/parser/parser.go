@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/AmadlaOrg/hery/cache/database"
 	"github.com/AmadlaOrg/hery/entity"
-	"github.com/AmadlaOrg/hery/entity/schema"
 	"regexp"
 	"strings"
 )
@@ -64,12 +63,12 @@ func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
 		);
 	*/
 
-	entitySchema := entity.Schema.Schema
+	//entitySchema := entity.Schema.Schema
 
 	// TODO:
 	//entity.Schema.CompiledSchema.Types
 
-	var (
+	/*var (
 		dynamicColumns       []database.Column
 		dynamicRelationships []database.Relationships
 	)
@@ -111,7 +110,7 @@ func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
 		}
 	}
 
-	entityBody := entity.Content.Body
+	entityBody := entity.Content.Body*/
 
 	// TODO: It needs data type and constrain
 	//var dynamicColumns []database.Column
