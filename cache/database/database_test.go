@@ -113,34 +113,55 @@ func TestInitialize(t *testing.T) {
 	}
 }
 
-// FIXME
-/*func TestClose(t *testing.T) {
+func TestClose(t *testing.T) {
 	tests := []struct {
-		name       string
-		externalDb ISqlDb
-		hasError   bool
+		name                string
+		externalInitialized bool
+		externalDb          ISqlDb
+		hasError            bool
 	}{
 		{
-			name: "Close database",
+			name:                "Close database",
+			externalInitialized: true,
+			externalDb: func() ISqlDb {
+				mockSqlDb := NewMockSqlDb(t)
+				mockSqlDb.EXPECT().Close().Return(nil)
+				return mockSqlDb
+			}(),
+			hasError: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			db = nil
-			initialized = false
+			db = tt.externalDb
+			initialized = tt.externalInitialized
+
+			mockSyncLocker := NewMockSyncLocker(t)
+			mockSyncLocker.EXPECT().Lock()
+			mockSyncLocker.EXPECT().Unlock()
+
+			dbMutex = mockSyncLocker
 
 			databaseService := NewDatabaseService()
-			err := databaseService.Initialize("/tmp/hery.test.cache")
+			err := databaseService.Close()
 
 			if tt.hasError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
+
+			var ii = initialized
+			println(ii)
+			var dd = db
+			println(dd)
+
+			assert.False(t, initialized)
+			assert.Nil(t, db)
 		})
 	}
-}*/
+}
 
 func TestCreateTable(t *testing.T) {
 	//databaseService := NewDatabaseService()
