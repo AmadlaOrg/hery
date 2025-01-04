@@ -29,8 +29,7 @@ type SDatabase struct {
 
 var (
 	db          ISqlDb //*sql.DB
-	dbMutex     sync.Mutex
-	initErr     error
+	dbMutex     sync.Locker
 	initialized bool
 	sqlOpen     = func(driverName, dataSourceName string) (ISqlDb, error) {
 		d, err := sql.Open(driverName, dataSourceName)
@@ -58,13 +57,12 @@ func (s *SDatabase) Initialize(dbPath string) error {
 	// Doc: https://stackoverflow.com/questions/57118674/go-sqlite3-with-journal-mode-wal-gives-database-is-locked-error
 	_, err = db.Exec("PRAGMA journal_mode = WAL;")
 	if err != nil {
-		initErr = fmt.Errorf("error setting journal mode: %v", err)
 		err := db.Close()
 		if err != nil {
 			return err
 		}
 		db = nil
-		return initErr
+		return fmt.Errorf("error setting journal mode: %v", err)
 	}
 
 	// Configure the database connection pool
@@ -73,7 +71,6 @@ func (s *SDatabase) Initialize(dbPath string) error {
 	db.SetConnMaxLifetime(0)
 
 	// Initialization successful
-	initErr = nil
 	initialized = true
 
 	return nil

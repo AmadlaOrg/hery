@@ -7,6 +7,24 @@ import (
 	"testing"
 )
 
+func TestInitialize_db_set(t *testing.T) {
+	// Reset
+	db = nil
+	initialized = false
+
+	mockSyncLocker := NewMockSyncLocker(t)
+	mockSyncLocker.EXPECT().Lock()
+	mockSyncLocker.EXPECT().Unlock()
+
+	dbMutex = mockSyncLocker
+	db = NewMockSqlDb(t)
+
+	databaseService := NewDatabaseService()
+	err := databaseService.Initialize("/tmp/hery.test.cache")
+
+	assert.NoError(t, err)
+}
+
 func TestInitialize(t *testing.T) {
 	tests := []struct {
 		name              string
@@ -20,8 +38,7 @@ func TestInitialize(t *testing.T) {
 			inputDbPath: "/tmp/hery.test.cache",
 			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
 				mockSqlDb := NewMockSqlDb(t)
-				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, assert.AnError)
-				mockSqlDb.EXPECT().Close()
+				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, nil)
 				mockSqlDb.EXPECT().SetMaxOpenConns(mock.Anything)
 				mockSqlDb.EXPECT().SetMaxIdleConns(mock.Anything)
 				mockSqlDb.EXPECT().SetConnMaxLifetime(mock.Anything)
@@ -33,7 +50,7 @@ func TestInitialize(t *testing.T) {
 		// Error
 		//
 		{
-			name:        "Initialize database with error",
+			name:        "Error: db Open fail",
 			inputDbPath: "/tmp/hery.test.cache",
 			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
 				return nil, assert.AnError
@@ -41,13 +58,43 @@ func TestInitialize(t *testing.T) {
 			expectedErr: errors.New("error opening database: "),
 			hasError:    true,
 		},
+		{
+			name:        "Error: db Exec function throws error",
+			inputDbPath: "/tmp/hery.test.cache",
+			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+				mockSqlDb := NewMockSqlDb(t)
+				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, assert.AnError) // assert.AnError
+				mockSqlDb.EXPECT().Close().Return(nil)
+				return mockSqlDb, nil
+			},
+			expectedErr: errors.New("error setting journal mode: "),
+			hasError:    true,
+		},
+		{
+			name:        "Error: db Exec function throws error also db Close",
+			inputDbPath: "/tmp/hery.test.cache",
+			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+				mockSqlDb := NewMockSqlDb(t)
+				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, assert.AnError) // assert.AnError
+				mockSqlDb.EXPECT().Close().Return(assert.AnError)
+				return mockSqlDb, nil
+			},
+			expectedErr: assert.AnError,
+			hasError:    true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Reset
+			db = nil
+			initialized = false
+
 			mockSyncLocker := NewMockSyncLocker(t)
 			mockSyncLocker.EXPECT().Lock()
 			mockSyncLocker.EXPECT().Unlock()
+
+			dbMutex = mockSyncLocker
 
 			originalSqlOpen := sqlOpen
 			defer func() { sqlOpen = originalSqlOpen }()
@@ -64,8 +111,36 @@ func TestInitialize(t *testing.T) {
 			}
 		})
 	}
-
 }
+
+// FIXME
+/*func TestClose(t *testing.T) {
+	tests := []struct {
+		name       string
+		externalDb ISqlDb
+		hasError   bool
+	}{
+		{
+			name: "Close database",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db = nil
+			initialized = false
+
+			databaseService := NewDatabaseService()
+			err := databaseService.Initialize("/tmp/hery.test.cache")
+
+			if tt.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}*/
 
 func TestCreateTable(t *testing.T) {
 	//databaseService := NewDatabaseService()
