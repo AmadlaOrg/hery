@@ -3,15 +3,14 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"strings"
 	"sync"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // IDatabase defines the database interface
 type IDatabase interface {
-	Initialize() error
+	Initialize(dbPath string) error
 	Close() error
 	IsInitialized() bool
 	CreateTable(table Table)
@@ -29,16 +28,18 @@ type SDatabase struct {
 }
 
 var (
-	db          *sql.DB
+	db          ISqlDb //*sql.DB
 	dbMutex     sync.Mutex
 	initErr     error
 	initialized bool
-	sqlOpen     = sql.Open
-	dbBegin     = db.Begin
+	sqlOpen     = func(driverName, dataSourceName string) (ISqlDb, error) {
+		d, err := sql.Open(driverName, dataSourceName)
+		return d, err
+	}
 )
 
 // Initialize establishes the database connection
-func (s *SDatabase) Initialize() error {
+func (s *SDatabase) Initialize(dbPath string) error {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 
@@ -46,12 +47,10 @@ func (s *SDatabase) Initialize() error {
 		return nil // Already initialized successfully
 	}
 
-	dbPath := "/tmp/hery.test.cache"
 	var err error
 	db, err = sqlOpen("sqlite3", dbPath)
 	if err != nil {
-		initErr = fmt.Errorf("error opening database: %v", err)
-		return initErr
+		return fmt.Errorf("error opening database: %v", err)
 	}
 
 	// Set PRAGMA statements for performance
@@ -306,7 +305,7 @@ func (s *SDatabase) Apply() error {
 	}
 
 	// Begin a transaction
-	tx, err := dbBegin()
+	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("error starting transaction: %w", err)
 	}

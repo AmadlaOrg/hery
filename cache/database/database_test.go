@@ -1,9 +1,71 @@
 package database
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"testing"
 )
+
+func TestInitialize(t *testing.T) {
+	tests := []struct {
+		name              string
+		inputDbPath       string
+		internalSqlOpenFn func(driverName, dataSourceName string) (ISqlDb, error)
+		expectedErr       error
+		hasError          bool
+	}{
+		{
+			name:        "Initialize database",
+			inputDbPath: "/tmp/hery.test.cache",
+			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+				mockSqlDb := NewMockSqlDb(t)
+				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, assert.AnError)
+				mockSqlDb.EXPECT().Close()
+				mockSqlDb.EXPECT().SetMaxOpenConns(mock.Anything)
+				mockSqlDb.EXPECT().SetMaxIdleConns(mock.Anything)
+				mockSqlDb.EXPECT().SetConnMaxLifetime(mock.Anything)
+				return mockSqlDb, nil
+			},
+			hasError: false,
+		},
+		//
+		// Error
+		//
+		{
+			name:        "Initialize database with error",
+			inputDbPath: "/tmp/hery.test.cache",
+			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+				return nil, assert.AnError
+			},
+			expectedErr: errors.New("error opening database: "),
+			hasError:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockSyncLocker := NewMockSyncLocker(t)
+			mockSyncLocker.EXPECT().Lock()
+			mockSyncLocker.EXPECT().Unlock()
+
+			originalSqlOpen := sqlOpen
+			defer func() { sqlOpen = originalSqlOpen }()
+			sqlOpen = tt.internalSqlOpenFn
+
+			databaseService := NewDatabaseService()
+			err := databaseService.Initialize("/tmp/hery.test.cache")
+
+			if tt.hasError {
+				assert.Error(t, err)
+				assert.ErrorContains(t, err, tt.expectedErr.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+
+}
 
 func TestCreateTable(t *testing.T) {
 	//databaseService := NewDatabaseService()
