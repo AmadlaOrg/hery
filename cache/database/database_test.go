@@ -130,6 +130,27 @@ func TestClose(t *testing.T) {
 			}(),
 			hasError: false,
 		},
+		{
+			name:                "Database is closed",
+			externalInitialized: true,
+			externalDb: func() ISqlDb {
+				return nil
+			}(),
+			hasError: false,
+		},
+		//
+		// Error
+		//
+		{
+			name:                "Error: Close database",
+			externalInitialized: true,
+			externalDb: func() ISqlDb {
+				mockSqlDb := NewMockSqlDb(t)
+				mockSqlDb.EXPECT().Close().Return(assert.AnError)
+				return mockSqlDb
+			}(),
+			hasError: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -148,24 +169,82 @@ func TestClose(t *testing.T) {
 
 			if tt.hasError {
 				assert.Error(t, err)
+				assert.True(t, initialized)
+				assert.NotNil(t, db)
 			} else {
 				assert.NoError(t, err)
+				assert.False(t, initialized)
+				assert.Nil(t, db)
 			}
 
-			var ii = initialized
-			println(ii)
-			var dd = db
-			println(dd)
+		})
+	}
+}
 
-			assert.False(t, initialized)
-			assert.Nil(t, db)
+func TestIsInitialized(t *testing.T) {
+	tests := []struct {
+		name                string
+		externalInitialized bool
+		expectedInitialized bool
+	}{
+		{
+			name:                "IsInitialized is true",
+			externalInitialized: true,
+			expectedInitialized: true,
+		},
+		{
+			name:                "IsInitialized is false",
+			externalInitialized: false,
+			expectedInitialized: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			initialized = tt.externalInitialized
+
+			mockSyncLocker := NewMockSyncLocker(t)
+			mockSyncLocker.EXPECT().Lock()
+			mockSyncLocker.EXPECT().Unlock()
+
+			dbMutex = mockSyncLocker
+
+			databaseService := NewDatabaseService()
+			got := databaseService.IsInitialized()
+			assert.Equal(t, tt.expectedInitialized, got)
 		})
 	}
 }
 
 func TestCreateTable(t *testing.T) {
-	//databaseService := NewDatabaseService()
-	//databaseService.CreateTable()
+	tests := []struct {
+		name       string
+		inputTable Table
+		expected   *Queries
+	}{
+		{
+			name:       "Create table successfully",
+			inputTable: Table{},
+			expected:   &Queries{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			databaseService := SDatabase{
+				queries: &Queries{
+					CreateTable: []Query{},
+					DropTable:   []Query{},
+					Insert:      []Query{},
+					Update:      []Query{},
+					Delete:      []Query{},
+					Select:      []Query{},
+				},
+			}
+			databaseService.CreateTable(tt.inputTable)
+			assert.Equal(t, tt.expected, databaseService.queries)
+		})
+	}
 }
 
 func TestInsert(t *testing.T) {

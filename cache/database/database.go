@@ -88,9 +88,12 @@ func (s *SDatabase) Close() error {
 
 	if db != nil {
 		err := db.Close()
+		if err != nil {
+			return err
+		}
 		db = nil
 		initialized = false
-		return err
+		return nil
 	}
 
 	initialized = false
