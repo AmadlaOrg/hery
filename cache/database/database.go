@@ -137,13 +137,13 @@ func (s *SDatabase) CreateTable(table Table) {
 	for _, column := range table.Columns {
 		var columnConstraints string
 		for _, constraint := range column.Constraints {
-			columnConstraints = constraint.ToSQL()
+			columnConstraints += " " + constraint.ToSQL()
 		}
-		sqlColumn := fmt.Sprintf("\n%s %s %s,", column.ColumnName, column.DataType, columnConstraints)
+		sqlColumn := fmt.Sprintf("\n%s %s%s,", column.ColumnName, column.DataType, columnConstraints)
 		sqlColumns = fmt.Sprintf("%s %s", sqlColumns, sqlColumn)
 	}
 
-	sqlColumns = strings.TrimSuffix(sqlColumns, " ,")
+	sqlColumns = strings.TrimSuffix(sqlColumns, ",")
 
 	var sqlRelationships string
 	for _, relationship := range table.Relationships {
@@ -170,11 +170,8 @@ func (s *SDatabase) CreateTable(table Table) {
 		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
 	}
 
-	queryCreateTable := Query{
-		Query: fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes),
-	}
-
-	s.queries.CreateTable = append(s.queries.CreateTable, queryCreateTable)
+	s.addQuery(&s.queries.CreateTable, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes), nil)
+	//s.queries.CreateTable = append(s.queries.CreateTable, queryCreateTable)
 }
 
 // Insert inserts records into the table

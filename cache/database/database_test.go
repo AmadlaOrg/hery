@@ -223,9 +223,68 @@ func TestCreateTable(t *testing.T) {
 		expected   *Queries
 	}{
 		{
-			name:       "Create table successfully",
-			inputTable: Table{},
-			expected:   &Queries{},
+			name: "Create table successfully",
+			inputTable: Table{
+				Name: "table_name",
+				Columns: []Column{
+					{
+						ColumnName: "name",
+						DataType:   DataTypeText,
+						Constraints: []Constraint{
+							{
+								Type: ConstraintNotNull,
+								//Condition:  "", // Used for CHECK constraints
+								//Default:    "", // Used for DEFAULT values
+								//References: "", // Used for FOREIGN KEY references
+							},
+						},
+					},
+					{
+						ColumnName: "type",
+						DataType:   DataTypeText,
+						Constraints: []Constraint{
+							{
+								Type:    ConstraintDefault,
+								Default: "'foo'",
+							},
+						},
+					},
+					{
+						ColumnName: "date",
+						DataType:   DataTypeDate,
+						Constraints: []Constraint{
+							{
+								Type:    ConstraintDefault,
+								Default: "CURRENT_DATE",
+							},
+						},
+					},
+					{
+						ColumnName: "create_datetime",
+						DataType:   DataTypeDateTime,
+						Constraints: []Constraint{
+							{
+								Type:    ConstraintDefault,
+								Default: "CURRENT_TIMESTAMP",
+							},
+						},
+					},
+				},
+				Relationships: []Relationship{},
+				Rows:          []Row{},
+			},
+			expected: &Queries{
+				CreateTable: []Query{
+					{
+						Query: "CREATE TABLE IF NOT EXISTS table_name ( \nname TEXT NOT NULL, \ntype TEXT DEFAULT 'foo', \ndate DATE DEFAULT CURRENT_DATE, \ncreate_datetime DATETIME DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX IF NOT EXISTS idx_table_name_name ON table_name(name);\nCREATE INDEX IF NOT EXISTS idx_table_name_type ON table_name(type);\nCREATE INDEX IF NOT EXISTS idx_table_name_date ON table_name(date);\nCREATE INDEX IF NOT EXISTS idx_table_name_create_datetime ON table_name(create_datetime);",
+					},
+				},
+				DropTable: []Query{},
+				Insert:    []Query{},
+				Update:    []Query{},
+				Delete:    []Query{},
+				Select:    []Query{},
+			},
 		},
 	}
 
