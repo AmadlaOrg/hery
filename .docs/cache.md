@@ -16,6 +16,19 @@ Here is an example what it looks like inside the cache DB:
 > [!NOTE]
 > `hery`-cli does not support other DBs, and it comes with its own [SQLite](https://github.com/mattn/go-sqlite3).
 
+## Queries
+```sql
+.tables
+.schema <table name>
+.help
+```
+```sql
+SELECT * FROM entities;
+SELECT * FROM meta;
+SELECT * FROM body;
+SELECT * FROM body_merged;
+```
+
 ## Internals
 ### Tables
 #### `entities`
@@ -23,7 +36,6 @@ Here is an example what it looks like inside the cache DB:
 
 | Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
 |------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
 | _entity          | TEXT                              | Contains the entities URI (not unique)                                                                                                                                                                                                        | github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0                        |
 | Name             | TEXT                              | Just the name of the entity (not unique)                                                                                                                                                                                                      | WebServer                                                                      |
 | RepoUrl          | TEXT                              | The full URL to the repository containing the entity                                                                                                                                                                                          | https://github.com/AmadlaOrg/EntityApplication                                 |
@@ -49,7 +61,6 @@ for that entity. There can be multiple `_id` for an entity. In other words there
 
 | Column Name         | Column Type                     | Description                                                                                                                                                                                                                                   | Example                                             |
 |---------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| id                  | INT `{constraint: primary_key}` | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                   |
 | entities_id         | INT {constraint: foreign_key}   |                                                                                                                                                                                                                                               |                                                     |
 | id_with_entities_id | TEXT {constraint: unique}       | Only there to avoid caching collisions in the caching (it merges the `entities_id` with `_id`)                                                                                                                                                | 1-d4b783-f448-483c-8111-380d6082ae1c                |
 | _id                 | TEXT                            | To uniquely identifying each entity content (not unique in the caching, only unique for an entity type and version)                                                                                                                           | 97d4b783-f448-483c-8111-380d6082ae1c or a custom ID |
