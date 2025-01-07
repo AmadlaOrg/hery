@@ -133,45 +133,9 @@ func (s *SDatabase) addQuery(slice *[]Query, query string, values []string) {
 
 // CreateTable creates a new table
 func (s *SDatabase) CreateTable(table Table) {
-	var sqlColumns string
-	for _, column := range table.Columns {
-		var columnConstraints string
-		for _, constraint := range column.Constraints {
-			columnConstraints += " " + constraint.ToSQL()
-		}
-		sqlColumn := fmt.Sprintf("\n%s %s%s,", column.ColumnName, column.DataType, columnConstraints)
-		sqlColumns = fmt.Sprintf("%s %s", sqlColumns, sqlColumn)
-	}
-
-	sqlColumns = strings.TrimSuffix(sqlColumns, ",")
-
-	var sqlRelationships string
-	for _, relationship := range table.Relationships {
-		sqlRelationship := fmt.Sprintf(
-			",\nFOREIGN KEY(%s) REFERENCES %s(%s)",
-			relationship.ColumnName,
-			relationship.ReferencesTableName,
-			relationship.ReferencesColumnName)
-		sqlRelationships = fmt.Sprintf("%s %s", sqlRelationships, sqlRelationship)
-	}
-
-	createTableSQL := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s%s\n);", table.Name, sqlColumns, sqlRelationships)
-
-	var sqlIndexes string
-	for _, index := range table.Columns {
-		// TODO: `idx_` what is this? Is this needed?
-		//createIndexSQL := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS idx_%s_name ON %s(name);`, table.Name, table.Name)
-		sqlIndexe := fmt.Sprintf(
-			"CREATE INDEX IF NOT EXISTS idx_%s_%s ON %s(%s);",
-			table.Name,
-			index.ColumnName,
-			table.Name,
-			index.ColumnName)
-		sqlIndexes = fmt.Sprintf("%s\n%s", sqlIndexes, sqlIndexe)
-	}
-
+	// TODO: Added embedded for SQL
+	// TODO: Read the SQL content
 	s.addQuery(&s.queries.CreateTable, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes), nil)
-	//s.queries.CreateTable = append(s.queries.CreateTable, queryCreateTable)
 }
 
 // Insert inserts records into the table
