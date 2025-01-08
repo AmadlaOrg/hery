@@ -1,11 +1,13 @@
--- This table stores information about the tables different columns
-CREATE TABLE IF NOT EXISTS schema_metadata (
-   table_name TEXT,
-   column_name TEXT,
-   description TEXT
-);
+-- All the tables used in the caching
 
-CREATE INDEX IF NOT EXISTS idx_schema_metadata_table_name_and_column_name ON schema_metadata(table_name, column_name);
+-- This table stores information about the tables different columns
+--CREATE TABLE IF NOT EXISTS schema_metadata (
+--   table_name TEXT,
+--   column_name TEXT,
+--   description TEXT
+--);
+
+-- CREATE INDEX IF NOT EXISTS idx_schema_metadata_table_name_and_column_name ON schema_metadata(table_name, column_name);
 
 -- This table stores information about entities
 CREATE TABLE IF NOT EXISTS entities (
@@ -24,7 +26,6 @@ CREATE TABLE IF NOT EXISTS entities (
     update_date_time DATETIME   -- The latest date when the row was updated
 );
 
--- Indexes for frequently queried columns
 CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(Name);
 CREATE INDEX IF NOT EXISTS idx_entities_repo_url ON entities(RepoUrl);
 CREATE INDEX IF NOT EXISTS idx_entities_version ON entities(Version);
@@ -77,7 +78,7 @@ CREATE TABLE IF NOT EXISTS body_data_TEXT (
     FOREIGN KEY (body_rowid) REFERENCES body(rowid)
 );
 
-CREATE TABLE IF NOT EXISTS body_data_INTEGER (
+CREATE TABLE IF NOT EXISTS body_data_NUMERIC (
     body_rowid INTEGER,
     property_name TEXT,
     property_value INTEGER,
@@ -87,7 +88,7 @@ CREATE TABLE IF NOT EXISTS body_data_INTEGER (
     FOREIGN KEY (body_rowid) REFERENCES body(rowid)
 );
 
-CREATE INDEX IF NOT EXISTS idx_body_data_INTEGER_property_value ON body_data_INTEGER(property_value);
+CREATE INDEX IF NOT EXISTS idx_body_data_NUMERIC_property_value ON body_data_NUMERIC(property_value);
 
 CREATE TABLE IF NOT EXISTS body_data_REAL (
       body_rowid INTEGER,
@@ -113,3 +114,26 @@ CREATE TABLE IF NOT EXISTS body_data_BOOLEAN (
 
 CREATE INDEX IF NOT EXISTS idx_body_data_BOOLEAN_property_value ON body_data_BOOLEAN(property_value);
 
+CREATE TABLE IF NOT EXISTS body_data_DATE (
+     body_rowid INTEGER,
+     property_name TEXT,
+     property_value DATE,
+     insert_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,  -- The date when this row was added
+     update_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,  -- The latest date when this row was updated
+     PRIMARY KEY (body_rowid, property_name),
+     FOREIGN KEY (body_rowid) REFERENCES body(rowid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_body_data_DATE_property_value ON body_data_DATE(property_value);
+
+CREATE TABLE IF NOT EXISTS body_data_DATETIME (
+      body_rowid INTEGER,
+      property_name TEXT,
+      property_value DATETIME,
+      insert_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,  -- The date when this row was added
+      update_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,  -- The latest date when this row was updated
+      PRIMARY KEY (body_rowid, property_name),
+      FOREIGN KEY (body_rowid) REFERENCES body(rowid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_body_data_DATETIME_property_value ON body_data_DATETIME(property_value);

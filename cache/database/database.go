@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	_ "embed"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"strings"
@@ -36,6 +37,9 @@ var (
 		return d, err
 	}
 )
+
+//go:embed table/table.sql
+var sqlTables string
 
 // Initialize establishes the database connection
 func (s *SDatabase) Initialize(dbPath string) error {
@@ -133,9 +137,10 @@ func (s *SDatabase) addQuery(slice *[]Query, query string, values []string) {
 
 // CreateTable creates a new table
 func (s *SDatabase) CreateTable(table Table) {
+
 	// TODO: Added embedded for SQL
 	// TODO: Read the SQL content
-	s.addQuery(&s.queries.CreateTable, fmt.Sprintf("%s\n%s", createTableSQL, sqlIndexes), nil)
+	s.addQuery(&s.queries.CreateTable, sqlTables, nil)
 }
 
 // Insert inserts records into the table
