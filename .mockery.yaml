@@ -11,11 +11,6 @@ packages:
           inpackage: True
   github.com/AmadlaOrg/hery/cache/database:
     interfaces:
-      IFile:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: MockFile
-          inpackage: True
       IDatabase:
         config:
           dir: "{{.InterfaceDir}}"
@@ -139,6 +134,13 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockStorage"
           inpackage: True
+  github.com/AmadlaOrg/hery/util/file:
+    interfaces:
+      IFile:
+        config:
+          dir: "{{.InterfaceDir}}"
+          mockName: MockFile
+          inpackage: True
   sync:
     interfaces:
       Locker:
@@ -151,7 +153,7 @@ packages:
     interfaces:
       FileInfo:
         config:
-          dir: cache/database
+          dir: util/file
           mockName: MockFileInfo
           inpackage: False
-          outpkg: database
+          outpkg: file

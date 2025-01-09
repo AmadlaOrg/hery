@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-// IFile
-type IFile interface {
-	Close() error
-}
-
 // ISqlDb
 type ISqlDb interface {
 	Begin() (*sql.Tx, error)

@@ -1,57 +1,19 @@
 package database
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"os"
+	"github.com/AmadlaOrg/hery/util/file"
 	"strings"
 )
 
 var (
-	osStat     = os.Stat
-	osOpen     = os.Open
-	bytesEqual = bytes.Equal
+	fileIsValidMagic = file.IsValidMagic
 )
 
 // ValidateDbAbsPath validates the SQLite absolute path
 func ValidateDbAbsPath(path string) (bool, error) {
-	// Check if the file exists and is a regular file
-	info, err := osStat(path)
-	if err != nil {
-		// Return error if the file doesn't exist or there is an issue with the path
-		return false, fmt.Errorf("failed to stat file %s: %v", path, err)
-	}
-
-	if info.IsDir() {
-		// Return an error if the path points to a directory
-		return false, fmt.Errorf("the path %s is a directory, not a file", path)
-	}
-
-	// Check if the file is a valid SQLite3 file by reading the first 4 bytes
-	file, err := osOpen(path)
-	if err != nil {
-		return false, err
-	}
-	defer func(file *os.File) {
-		if closeErr := file.Close(); closeErr != nil {
-			err = fmt.Errorf("failed to close file %s: %v", path, closeErr)
-		}
-	}(file)
-
-	// Read the first 4 bytes of the file
-	header := make([]byte, 4)
-	_, err = file.Read(header)
-	if err != nil {
-		return false, err
-	}
-
-	// Check if the file starts with the SQLite magic header
-	if !bytesEqual(header, []byte("SQLite")) {
-		return false, fmt.Errorf("file %s is not a valid SQLite file", path)
-	}
-
-	return true, nil
+	return fileIsValidMagic(path, []byte("SQLite"))
 }
 
 // mergeSqlQueries takes an array of SQL query strings and merges them together
