@@ -7,6 +7,9 @@ import (
 	"testing"
 )
 
+// Fixtures
+var testDbAbsPath = "/tmp/hery.test.cache"
+
 func TestInitialize_db_set(t *testing.T) {
 	// Reset
 	db = nil
@@ -19,8 +22,8 @@ func TestInitialize_db_set(t *testing.T) {
 	dbMutex = mockSyncLocker
 	db = NewMockSqlDb(t)
 
-	databaseService := NewDatabaseService()
-	err := databaseService.Initialize("/tmp/hery.test.cache")
+	databaseService := NewDatabaseService(testDbAbsPath)
+	err := databaseService.Initialize()
 
 	assert.NoError(t, err)
 }
@@ -100,8 +103,8 @@ func TestInitialize(t *testing.T) {
 			defer func() { sqlOpen = originalSqlOpen }()
 			sqlOpen = tt.internalSqlOpenFn
 
-			databaseService := NewDatabaseService()
-			err := databaseService.Initialize("/tmp/hery.test.cache")
+			databaseService := NewDatabaseService(testDbAbsPath)
+			err := databaseService.Initialize()
 
 			if tt.hasError {
 				assert.Error(t, err)
@@ -164,7 +167,7 @@ func TestClose(t *testing.T) {
 
 			dbMutex = mockSyncLocker
 
-			databaseService := NewDatabaseService()
+			databaseService := NewDatabaseService(testDbAbsPath)
 			err := databaseService.Close()
 
 			if tt.hasError {
@@ -209,7 +212,7 @@ func TestIsInitialized(t *testing.T) {
 
 			dbMutex = mockSyncLocker
 
-			databaseService := NewDatabaseService()
+			databaseService := NewDatabaseService(testDbAbsPath)
 			got := databaseService.IsInitialized()
 			assert.Equal(t, tt.expectedInitialized, got)
 		})
@@ -217,93 +220,36 @@ func TestIsInitialized(t *testing.T) {
 }
 
 func TestCreateTable(t *testing.T) {
-	tests := []struct {
-		name       string
-		inputTable Table
-		expected   *Queries
-	}{
-		{
-			name: "Create table successfully",
-			inputTable: Table{
-				Name: "table_name",
-				Columns: []Column{
-					{
-						ColumnName: "name",
-						DataType:   DataTypeText,
-						Constraints: []Constraint{
-							{
-								Type: ConstraintNotNull,
-								//Condition:  "", // Used for CHECK constraints
-								//Default:    "", // Used for DEFAULT values
-								//References: "", // Used for FOREIGN KEY references
-							},
-						},
-					},
-					{
-						ColumnName: "type",
-						DataType:   DataTypeText,
-						Constraints: []Constraint{
-							{
-								Type:    ConstraintDefault,
-								Default: "'foo'",
-							},
-						},
-					},
-					{
-						ColumnName: "date",
-						DataType:   DataTypeDate,
-						Constraints: []Constraint{
-							{
-								Type:    ConstraintDefault,
-								Default: "CURRENT_DATE",
-							},
-						},
-					},
-					{
-						ColumnName: "create_datetime",
-						DataType:   DataTypeDateTime,
-						Constraints: []Constraint{
-							{
-								Type:    ConstraintDefault,
-								Default: "CURRENT_TIMESTAMP",
-							},
-						},
-					},
-				},
-				Relationships: []Relationship{},
-				Rows:          []Row{},
-			},
-			expected: &Queries{
-				CreateTable: []Query{
-					{
-						Query: "CREATE TABLE IF NOT EXISTS table_name ( \nname TEXT NOT NULL, \ntype TEXT DEFAULT 'foo', \ndate DATE DEFAULT CURRENT_DATE, \ncreate_datetime DATETIME DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX IF NOT EXISTS idx_table_name_name ON table_name(name);\nCREATE INDEX IF NOT EXISTS idx_table_name_type ON table_name(type);\nCREATE INDEX IF NOT EXISTS idx_table_name_date ON table_name(date);\nCREATE INDEX IF NOT EXISTS idx_table_name_create_datetime ON table_name(create_datetime);",
-					},
-				},
-				DropTable: []Query{},
-				Insert:    []Query{},
-				Update:    []Query{},
-				Delete:    []Query{},
-				Select:    []Query{},
-			},
+	orginalSqlTables := sqlTables
+	sqlTables = "SQL string to create table"
+	databaseService := SDatabase{
+		queries: &Queries{
+			CreateTable: []Query{},
+			DropTable:   []Query{},
+			Insert:      []Query{},
+			Update:      []Query{},
+			Delete:      []Query{},
+			Select:      []Query{},
 		},
 	}
+	databaseService.CreateTable()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			databaseService := SDatabase{
-				queries: &Queries{
-					CreateTable: []Query{},
-					DropTable:   []Query{},
-					Insert:      []Query{},
-					Update:      []Query{},
-					Delete:      []Query{},
-					Select:      []Query{},
-				},
-			}
-			databaseService.CreateTable(tt.inputTable)
-			assert.Equal(t, tt.expected, databaseService.queries)
-		})
+	expected := &Queries{
+		CreateTable: []Query{
+			{
+				Query: "SQL string to create table",
+			},
+		},
+		DropTable: []Query{},
+		Insert:    []Query{},
+		Update:    []Query{},
+		Delete:    []Query{},
+		Select:    []Query{},
 	}
+	assert.Equal(t, databaseService.queries, expected)
+
+	// Reset
+	sqlTables = orginalSqlTables
 }
 
 func TestInsert(t *testing.T) {
@@ -347,7 +293,7 @@ func TestInsert(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := NewDatabaseService()
+			databaseService := NewDatabaseService(testDbAbsPath)
 			databaseService.Insert(tt.inputTable)
 		})
 	}
@@ -508,6 +454,10 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {}
+func TestDelete(t *testing.T) {
 
-func TestDropTable(t *testing.T) {}
+}
+
+func TestDeleteDb(t *testing.T) {
+
+}

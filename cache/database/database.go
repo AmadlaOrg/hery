@@ -5,27 +5,29 @@ import (
 	_ "embed"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"os"
 	"strings"
 	"sync"
 )
 
 // IDatabase defines the database interface
 type IDatabase interface {
-	Initialize(dbPath string) error
+	Initialize() error
 	Close() error
 	IsInitialized() bool
-	CreateTable(table Table)
+	CreateTable()
 	Insert(table Table)
 	Update(table Table, where []Condition)
 	Select(table Table, clauses SelectClauses, joinClauses []JoinClauses)
 	Delete(table Table, clauses SelectClauses, joinClauses []JoinClauses)
-	DropTable(table Table)
+	DeleteDb() error
 	Apply() error
 }
 
 // SDatabase implements IDatabase
 type SDatabase struct {
-	queries *Queries
+	dbAbsPath string
+	queries   *Queries
 }
 
 var (
@@ -36,13 +38,14 @@ var (
 		d, err := sql.Open(driverName, dataSourceName)
 		return d, err
 	}
+	osRemove = os.Remove
 )
 
 //go:embed table/table.sql
 var sqlTables string
 
 // Initialize establishes the database connection
-func (s *SDatabase) Initialize(dbPath string) error {
+func (s *SDatabase) Initialize() error {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 
@@ -51,7 +54,7 @@ func (s *SDatabase) Initialize(dbPath string) error {
 	}
 
 	var err error
-	db, err = sqlOpen("sqlite3", dbPath)
+	db, err = sqlOpen("sqlite3", s.dbAbsPath)
 	if err != nil {
 		return fmt.Errorf("error opening database: %v", err)
 	}
@@ -136,10 +139,7 @@ func (s *SDatabase) addQuery(slice *[]Query, query string, values []string) {
 }
 
 // CreateTable creates a new table
-func (s *SDatabase) CreateTable(table Table) {
-
-	// TODO: Added embedded for SQL
-	// TODO: Read the SQL content
+func (s *SDatabase) CreateTable() {
 	s.addQuery(&s.queries.CreateTable, sqlTables, nil)
 }
 
@@ -255,13 +255,20 @@ func (s *SDatabase) Delete(table Table, clauses SelectClauses, joinClauses []Joi
 	})
 }
 
-// DropTable drops the table from the database
-func (s *SDatabase) DropTable(table Table) {
-	dropSQL := fmt.Sprintf("DROP TABLE IF EXISTS %s;", table.Name)
-	s.queries.DropTable = append(s.queries.DropTable, Query{
-		Query:  dropSQL,
-		Values: nil,
-	})
+// DeleteDb delete a db file
+// - Used when the caching will be reset
+func (s *SDatabase) DeleteDb() error {
+	if ok, err := ValidateDbAbsPath(s.dbAbsPath); !ok {
+		return err
+	}
+
+	// Proceed with deleting the database file
+	err := osRemove(s.dbAbsPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Apply executes all queued queries in s.queries

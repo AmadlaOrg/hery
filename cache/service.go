@@ -11,9 +11,9 @@ import (
 //
 // The cache service is using a db connection to handle the storage, so it needs to initialize the connection and
 // the closing of the db connection.
-func NewCacheService() ICache {
+func NewCacheService(cacheAbsPath string) ICache {
 	return &SCache{
-		Database: database.NewDatabaseService(),
+		Database: database.NewDatabaseService(cacheAbsPath),
 		Parser:   parser.NewParserService(),
 	}
 }
