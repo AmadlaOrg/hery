@@ -10,18 +10,20 @@ import (
 var (
 	osStat       = os.Stat
 	osIsNotExist = os.IsNotExist
-	osOpen       = os.Open
-	bytesEqual   = bytes.Equal
+	osOpen       = func(name string) (IFile, error) {
+		return os.Open(name)
+	}
+	bytesEqual = bytes.Equal
 )
 
-// Exists verify that a file or directory exists
+// Exists verifies that a file or directory exists
 func Exists(path string) bool {
 	_, err := osStat(path)
 	return err == nil || !osIsNotExist(err)
 }
 
-// IsValidMagic validates that the magic head matches what is in a file
-func IsValidMagic(path string, magic []byte) (bool, error) {
+// IsFile verifies that the path points to a file and not a directory
+func IsFile(path string) (bool, error) {
 	// Check if the file exists and is a regular file
 	info, err := osStat(path)
 	if err != nil {
@@ -34,12 +36,21 @@ func IsValidMagic(path string, magic []byte) (bool, error) {
 		return false, errors.Join(ErrorNotAFile, fmt.Errorf("the path %s is a directory", path))
 	}
 
+	return true, nil
+}
+
+// IsValidMagic validates that the magic head matches what is in a file
+func IsValidMagic(path string, magic []byte) (bool, error) {
+	if ok, err := IsFile(path); !ok {
+		return false, err
+	}
+
 	// Check if the file is a valid SQLite3 file by reading the first 4 bytes
 	file, err := osOpen(path)
 	if err != nil {
 		return false, err
 	}
-	defer func(file *os.File) {
+	defer func(file IFile) {
 		if closeErr := file.Close(); closeErr != nil {
 			err = fmt.Errorf("failed to close file %s: %v", path, closeErr)
 		}
