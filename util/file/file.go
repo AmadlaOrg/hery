@@ -10,10 +10,10 @@ import (
 var (
 	osStat       = os.Stat
 	osIsNotExist = os.IsNotExist
+	bytesEqual   = bytes.Equal
 	osOpen       = func(name string) (IFile, error) {
 		return os.Open(name)
 	}
-	bytesEqual = bytes.Equal
 )
 
 // Exists verifies that a file or directory exists
@@ -52,6 +52,7 @@ func IsValidMagic(path string, magic []byte) (bool, error) {
 	}
 	defer func(file IFile) {
 		if closeErr := file.Close(); closeErr != nil {
+			// TODO: The error is not pass to the return
 			err = fmt.Errorf("failed to close file %s: %v", path, closeErr)
 		}
 	}(file)
@@ -68,5 +69,5 @@ func IsValidMagic(path string, magic []byte) (bool, error) {
 		return false, errors.Join(ErrorMagicIsNotAMatch, fmt.Errorf("file %s does not match magic header", path))
 	}
 
-	return true, nil
+	return true, err
 }

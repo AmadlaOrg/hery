@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestExists(t *testing.T) {
+func Test_integration_Exists(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	t.Run("file exists", func(t *testing.T) {
