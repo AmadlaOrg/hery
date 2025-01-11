@@ -227,8 +227,10 @@ func (s *SDatabase) Delete(table Table, clauses SelectClauses, joinClauses []Joi
 	b.WriteString(table.Name)
 
 	// Build JOIN clauses, if you'd like to support them (not standard for SQLite).
-	b.WriteString(" ")
-	b.WriteString(buildJoinClauses(joinClauses))
+	if joinClauses != nil {
+		b.WriteString(" ")
+		b.WriteString(buildJoinClauses(joinClauses))
+	}
 
 	// Build WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET
 	b.WriteString(buildWhere(clauses.Where))

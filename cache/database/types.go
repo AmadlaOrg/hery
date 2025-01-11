@@ -8,6 +8,34 @@ const (
 	ErrorDatabaseNotInitialized = "database not initialized"
 )
 
+type Operator string
+
+const (
+	OperatorEqual              Operator = "="
+	OperatorIntegerNotEqual    Operator = "<>"
+	OperatorNotEqual           Operator = "!="
+	OperatorGreaterThan        Operator = ">"
+	OperatorGreaterThanOrEqual Operator = ">="
+	OperatorLessThan           Operator = "<"
+	OperatorLessThanOrEqual    Operator = "<="
+	OperatorLike               Operator = "LIKE"
+	OperatorILike              Operator = "ILIKE"
+	OperatorRLike              Operator = "RLIKE"
+	OperatorNotLike            Operator = "NOT LIKE"
+	OperatorNotILike           Operator = "NOT ILIKE"
+	OperatorNotRLike           Operator = "NOT RLIKE"
+	OperatorGlob               Operator = "GLOB"
+	OperatorIs                 Operator = "IS"
+	OperatorNotIs              Operator = "NOT IS"
+	OperatorIn                 Operator = "IN"
+	OperatorNotIn              Operator = "NOT IN"
+	OperatorBetween            Operator = "BETWEEN"
+	OperatorNotBetween         Operator = "NOT BETWEEN"
+	OperatorExists             Operator = "EXISTS"
+	OperatorMatch              Operator = "MATCH"
+	OperatorRegexp             Operator = "REGEXP"
+)
+
 // ValidOperators is a map of allowed operators for fast lookup.
 var validOperators = map[string]struct{}{
 	"=":           {},
@@ -18,6 +46,11 @@ var validOperators = map[string]struct{}{
 	">":           {},
 	">=":          {},
 	"LIKE":        {},
+	"ILIKE":       {},
+	"RLIKE":       {},
+	"NOT LIKE":    {},
+	"NOT ILIKE":   {},
+	"NOT RLIKE":   {},
 	"GLOB":        {},
 	"IS":          {},
 	"IS NOT":      {},
@@ -25,6 +58,9 @@ var validOperators = map[string]struct{}{
 	"NOT IN":      {},
 	"BETWEEN":     {},
 	"NOT BETWEEN": {},
+	"EXISTS":      {},
+	"MATCH":       {},
+	"REGEXP":      {},
 }
 
 // List of SQLite reserved keywords
@@ -152,7 +188,7 @@ type SelectClauses struct {
 
 type Condition struct {
 	Column   string
-	Operator string // e.g., '=', '<', '>', 'LIKE', etc.
+	Operator Operator
 	Value    any
 }
 

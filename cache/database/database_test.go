@@ -2,7 +2,7 @@ package database
 
 import (
 	"errors"
-	"github.com/AmadlaOrg/hery/util/pointer"
+	//"github.com/AmadlaOrg/hery/util/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -464,47 +464,95 @@ func TestDelete(t *testing.T) {
 		expected         *Queries
 	}{
 		{
-			name: "Test Delete",
+			name: "Simple WHERE clause with column selection",
 			inputTable: Table{
 				Name: "mock_table_name",
-				Columns: []Column{
-					{
-						ColumnName: "Id",
-						DataType:   "TEXT",
-					},
-				},
-				Relationships: []Relationship{
-					{
-						ColumnName:           "server_name",
-						ReferencesTableName:  "mock_table_name",
-						ReferencesColumnName: "server_name",
-					},
-				},
-				Rows: []Row{
-					{},
-				},
 			},
 			inputClauses: SelectClauses{
 				Where: []Condition{
 					{
-						Column:   "server_name",
-						Operator: "LIKE",
-						Value:    "localhost",
+						Column:   "Id",
+						Operator: OperatorEqual,
+						Value:    "mock_table_id",
 					},
 				},
-				GroupBy: []string{},
-				Having:  []Condition{},
-				OrderBy: []OrderBy{},
-				Limit:   nil,
-				Offset:  nil,
 			},
-			inputJoinClauses: []JoinClauses{},
 			expected: &Queries{
+				CreateTable: []Query{},
+				DropTable:   []Query{},
+				Insert:      []Query{},
+				Update:      []Query{},
 				Delete: []Query{
 					{
-						Query: "DELETE FROM mock_table_name WHERE Id = 'mock_table_name'",
+						Query: "DELETE FROM mock_table_name WHERE Id = 'mock_table_id';",
 					},
 				},
+				Select: []Query{},
+			},
+		},
+		{
+			name: "Simple WHERE clause with TWO column selection",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "Name",
+						Operator: OperatorEqual,
+						Value:    "mock_table_column_name",
+					},
+					{
+						Column:   "Type",
+						Operator: OperatorLike,
+						Value:    "%mock_table_column_type%",
+					},
+				},
+			},
+			expected: &Queries{
+				CreateTable: []Query{},
+				DropTable:   []Query{},
+				Insert:      []Query{},
+				Update:      []Query{},
+				Delete: []Query{
+					{
+						Query: "DELETE FROM mock_table_name WHERE Name = 'mock_table_column_name' AND Type LIKE '%mock_table_column_type%';",
+					},
+				},
+				Select: []Query{},
+			},
+		},
+		// TODO:
+		{
+			name: "Simple WHERE clause with TWO column selection",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "Name",
+						Operator: OperatorEqual,
+						Value:    "mock_table_column_name",
+					},
+					{
+						Column:   "Type",
+						Operator: OperatorLike,
+						Value:    "%mock_table_column_type%",
+					},
+				},
+			},
+			expected: &Queries{
+				CreateTable: []Query{},
+				DropTable:   []Query{},
+				Insert:      []Query{},
+				Update:      []Query{},
+				Delete: []Query{
+					{
+						Query: "DELETE FROM mock_table_name WHERE Name = 'mock_table_column_name' AND Type LIKE '%mock_table_column_type%';",
+					},
+				},
+				Select: []Query{},
 			},
 		},
 	}
@@ -522,6 +570,7 @@ func TestDelete(t *testing.T) {
 				},
 			}
 			databaseService.Delete(tt.inputTable, tt.inputClauses, tt.inputJoinClauses)
+			assert.Equal(t, tt.expected, databaseService.queries)
 		})
 	}
 }
