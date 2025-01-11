@@ -249,10 +249,7 @@ func (s *SDatabase) Delete(table Table, clauses SelectClauses, joinClauses []Joi
 	}
 	b.WriteString(";")
 
-	s.queries.Delete = append(s.queries.Delete, Query{
-		Query:  b.String(),
-		Values: nil,
-	})
+	s.addQuery(&s.queries.Delete, b.String(), nil)
 }
 
 // DeleteDb delete a db file

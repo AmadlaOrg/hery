@@ -58,7 +58,7 @@ func IsValidMagic(path string, magic []byte) (bool, error) {
 	}(file)
 
 	// Read the first 4 bytes of the file
-	header := make([]byte, 4)
+	header := make([]byte, 6)
 	_, err = file.Read(header)
 	if err != nil {
 		return false, err

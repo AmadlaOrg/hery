@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"github.com/AmadlaOrg/hery/util/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -455,9 +456,99 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	tests := []struct {
+		name             string
+		inputTable       Table
+		inputClauses     SelectClauses
+		inputJoinClauses []JoinClauses
+		expected         *Queries
+	}{
+		{
+			name: "Test Delete",
+			inputTable: Table{
+				Name: "mock_table_name",
+				Columns: []Column{
+					{
+						ColumnName: "Id",
+						DataType:   "TEXT",
+					},
+				},
+				Relationships: []Relationship{
+					{
+						ColumnName:           "server_name",
+						ReferencesTableName:  "mock_table_name",
+						ReferencesColumnName: "server_name",
+					},
+				},
+				Rows: []Row{
+					{},
+				},
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: "LIKE",
+						Value:    "localhost",
+					},
+				},
+				GroupBy: []string{},
+				Having:  []Condition{},
+				OrderBy: []OrderBy{},
+				Limit:   nil,
+				Offset:  nil,
+			},
+			inputJoinClauses: []JoinClauses{},
+			expected: &Queries{
+				Delete: []Query{
+					{
+						Query: "DELETE FROM mock_table_name WHERE Id = 'mock_table_name'",
+					},
+				},
+			},
+		},
+	}
 
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			databaseService := SDatabase{
+				queries: &Queries{
+					CreateTable: []Query{},
+					DropTable:   []Query{},
+					Insert:      []Query{},
+					Update:      []Query{},
+					Delete:      []Query{},
+					Select:      []Query{},
+				},
+			}
+			databaseService.Delete(tt.inputTable, tt.inputClauses, tt.inputJoinClauses)
+		})
+	}
 }
 
 func TestDeleteDb(t *testing.T) {
+	tests := []struct {
+		name       string
+		inputTable Table
+	}{
+		{
+			name: "Test Delete",
+		},
+	}
 
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			databaseService := SDatabase{
+				queries: &Queries{
+					CreateTable: []Query{},
+					DropTable:   []Query{},
+					Insert:      []Query{},
+					Update:      []Query{},
+					Delete:      []Query{},
+					Select:      []Query{},
+				},
+			}
+			databaseService.DeleteDb()
+		})
+	}
 }
