@@ -333,7 +333,7 @@ func TestBuildJoinClauses(t *testing.T) {
 					Table: "orders",
 					Type:  JoinTypeInner,
 					On: []JoinCondition{
-						{Column1: "users.id", Operator: "=", Column2: "orders.user_id"},
+						{Column1: "users.id", Operator: OperatorEqual, Column2: "orders.user_id"},
 					},
 				},
 			},
@@ -358,7 +358,7 @@ func TestBuildJoinClauses(t *testing.T) {
 					Table: "orders",
 					Type:  JoinTypeInner,
 					On: []JoinCondition{
-						{Column1: "users.id", Operator: "=", Column2: "orders.user_id"},
+						{Column1: "users.id", Operator: OperatorEqual, Column2: "orders.user_id"},
 					},
 				},
 				{

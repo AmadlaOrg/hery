@@ -19,7 +19,7 @@ type IDatabase interface {
 	Insert(table Table)
 	Update(table Table, where []Condition)
 	Select(table Table, clauses SelectClauses, joinClauses []JoinClauses)
-	Delete(table Table, clauses SelectClauses, joinClauses []JoinClauses)
+	Delete(table Table, clauses SelectClauses)
 	DeleteDb() error
 	Apply() error
 }
@@ -221,34 +221,11 @@ func (s *SDatabase) Select(table Table, clauses SelectClauses, joinClauses []Joi
 }
 
 // Delete deletes records from the table
-func (s *SDatabase) Delete(table Table, clauses SelectClauses, joinClauses []JoinClauses) {
+func (s *SDatabase) Delete(table Table, clauses SelectClauses) {
 	var b strings.Builder
 	b.WriteString("DELETE FROM ")
 	b.WriteString(table.Name)
-
-	// Build JOIN clauses, if you'd like to support them (not standard for SQLite).
-	if joinClauses != nil {
-		b.WriteString(" ")
-		b.WriteString(buildJoinClauses(joinClauses))
-	}
-
-	// Build WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET
 	b.WriteString(buildWhere(clauses.Where))
-	// Typically, GROUP BY / HAVING are not valid with DELETE in standard SQL/SQLite,
-	// but included here for completeness if your SQL variant allows it.
-	if len(clauses.GroupBy) > 0 {
-		b.WriteString(fmt.Sprintf(" GROUP BY %s", strings.Join(clauses.GroupBy, ", ")))
-	}
-	b.WriteString(buildHaving(clauses.Having))
-	b.WriteString(buildOrderBy(clauses.OrderBy))
-	// LIMIT / OFFSET in DELETE is also non-standard in SQLite,
-	// but some other DB engines do allow it.
-	if clauses.Limit != nil {
-		b.WriteString(buildLimit(int64(*clauses.Limit)))
-	}
-	if clauses.Offset != nil {
-		b.WriteString(buildOffset(int64(*clauses.Offset)))
-	}
 	b.WriteString(";")
 
 	s.addQuery(&s.queries.Delete, b.String(), nil)
@@ -318,7 +295,7 @@ func (s *SDatabase) Apply() error {
 	}
 
 	// If all queries succeeded, commit the transaction
-	if err := tx.Commit(); err != nil {
+	if err = tx.Commit(); err != nil {
 		return fmt.Errorf("error committing transaction: %w", err)
 	}
 

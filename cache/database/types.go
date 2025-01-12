@@ -219,9 +219,9 @@ const (
 
 // JoinCondition struct for expressing conditions in the ON clause
 type JoinCondition struct {
-	Column1  string // First column in the condition (with optional table prefix)
-	Operator string // Operator for the condition (e.g., '=', '<', etc.)
-	Column2  string // Second column in the condition (with optional table prefix)
+	Column1  string   // First column in the condition (with optional table prefix)
+	Operator Operator // Operator for the condition (e.g., '=', '<', etc.)
+	Column2  string   // Second column in the condition (with optional table prefix)
 }
 
 /*

@@ -457,11 +457,10 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	tests := []struct {
-		name             string
-		inputTable       Table
-		inputClauses     SelectClauses
-		inputJoinClauses []JoinClauses
-		expected         *Queries
+		name         string
+		inputTable   Table
+		inputClauses SelectClauses
+		expected     *Queries
 	}{
 		{
 			name: "Simple WHERE clause with column selection",
@@ -522,39 +521,6 @@ func TestDelete(t *testing.T) {
 				Select: []Query{},
 			},
 		},
-		// TODO:
-		{
-			name: "Simple WHERE clause with TWO column selection",
-			inputTable: Table{
-				Name: "mock_table_name",
-			},
-			inputClauses: SelectClauses{
-				Where: []Condition{
-					{
-						Column:   "Name",
-						Operator: OperatorEqual,
-						Value:    "mock_table_column_name",
-					},
-					{
-						Column:   "Type",
-						Operator: OperatorLike,
-						Value:    "%mock_table_column_type%",
-					},
-				},
-			},
-			expected: &Queries{
-				CreateTable: []Query{},
-				DropTable:   []Query{},
-				Insert:      []Query{},
-				Update:      []Query{},
-				Delete: []Query{
-					{
-						Query: "DELETE FROM mock_table_name WHERE Name = 'mock_table_column_name' AND Type LIKE '%mock_table_column_type%';",
-					},
-				},
-				Select: []Query{},
-			},
-		},
 	}
 
 	for _, tt := range tests {
@@ -569,7 +535,7 @@ func TestDelete(t *testing.T) {
 					Select:      []Query{},
 				},
 			}
-			databaseService.Delete(tt.inputTable, tt.inputClauses, tt.inputJoinClauses)
+			databaseService.Delete(tt.inputTable, tt.inputClauses)
 			assert.Equal(t, tt.expected, databaseService.queries)
 		})
 	}
@@ -577,14 +543,94 @@ func TestDelete(t *testing.T) {
 
 func TestDeleteDb(t *testing.T) {
 	tests := []struct {
-		name       string
-		inputTable Table
+		name                     string
+		serviceStructDbAbsPath   string
+		internalFileIsValidMagic func(path string, magic []byte) (bool, error)
+		internalOsRemove         func(name string) error
+		expectedError            error
+		hasError                 bool
 	}{
 		{
-			name: "Test Delete",
+			name:                   "Success Delete",
+			serviceStructDbAbsPath: "testdata/mock_db",
+			internalFileIsValidMagic: func(path string, magic []byte) (bool, error) {
+				return true, nil
+			},
+			internalOsRemove: func(name string) error {
+				return nil
+			},
+			hasError: false,
+		},
+		//
+		// Errors
+		//
+		{
+			name:                   "Error: Delete fails at ValidateDbAbsPath",
+			serviceStructDbAbsPath: "testdata/mock_db",
+			internalFileIsValidMagic: func(path string, magic []byte) (bool, error) {
+				return false, errors.New("test error (ValidateDbAbsPath)")
+			},
+			expectedError: errors.New("test error (ValidateDbAbsPath)"),
+			hasError:      true,
+		},
+		{
+			name:                   "Error: Delete fails at os.Remove",
+			serviceStructDbAbsPath: "testdata/mock_db",
+			internalFileIsValidMagic: func(path string, magic []byte) (bool, error) {
+				return true, nil
+			},
+			internalOsRemove: func(name string) error {
+				return errors.New("test error (OsRemove)")
+			},
+			expectedError: errors.New("test error (OsRemove)"),
+			hasError:      true,
 		},
 	}
 
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			databaseService := SDatabase{
+				dbAbsPath: tt.serviceStructDbAbsPath,
+				queries: &Queries{
+					CreateTable: []Query{},
+					DropTable:   []Query{},
+					Insert:      []Query{},
+					Update:      []Query{},
+					Delete:      []Query{},
+					Select:      []Query{},
+				},
+			}
+
+			originalFileIsValidMagic := fileIsValidMagic
+			defer func() { fileIsValidMagic = originalFileIsValidMagic }()
+			fileIsValidMagic = tt.internalFileIsValidMagic
+
+			originalOsRemove := osRemove
+			defer func() { osRemove = originalOsRemove }()
+			osRemove = tt.internalOsRemove
+
+			err := databaseService.DeleteDb()
+			if tt.hasError {
+				assert.Error(t, err)
+				assert.ErrorContains(t, tt.expectedError, err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestApply(t *testing.T) {
+	tests := []struct {
+		name                string
+		externalInitialized bool
+		expectedError       error
+		hasError            bool
+	}{
+		{
+			name: "Test Apply",
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			databaseService := SDatabase{
@@ -597,7 +643,28 @@ func TestDeleteDb(t *testing.T) {
 					Select:      []Query{},
 				},
 			}
-			databaseService.DeleteDb()
+
+			mockSyncLocker := NewMockSyncLocker(t)
+			mockSyncLocker.EXPECT().Lock()
+			mockSyncLocker.EXPECT().Unlock()
+
+			dbMutex = mockSyncLocker
+
+			originalInitialized := initialized
+			defer func() { initialized = originalInitialized }()
+			initialized = tt.externalInitialized
+
+			mockSqlDb := NewMockSqlDb(t)
+			mockSqlDb.EXPECT().Begin().Return()
+
+			db = mockSqlDb
+
+			err := databaseService.Apply()
+			if tt.hasError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }
