@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -13,6 +14,7 @@ type ISqlDb interface {
 	SetMaxOpenConns(n int)
 	SetMaxIdleConns(n int)
 	SetConnMaxLifetime(d time.Duration)
+	PingContext(ctx context.Context) error
 }
 
 // ISqlTx

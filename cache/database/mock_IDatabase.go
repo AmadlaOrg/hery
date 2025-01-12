@@ -139,9 +139,9 @@ func (_c *MockCacheDatabase_CreateTable_Call) RunAndReturn(run func()) *MockCach
 	return _c
 }
 
-// Delete provides a mock function with given fields: table, clauses, joinClauses
-func (_m *MockCacheDatabase) Delete(table Table, clauses SelectClauses, joinClauses []JoinClauses) {
-	_m.Called(table, clauses, joinClauses)
+// Delete provides a mock function with given fields: table, clauses
+func (_m *MockCacheDatabase) Delete(table Table, clauses SelectClauses) {
+	_m.Called(table, clauses)
 }
 
 // MockCacheDatabase_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
@@ -152,14 +152,13 @@ type MockCacheDatabase_Delete_Call struct {
 // Delete is a helper method to define mock.On call
 //   - table Table
 //   - clauses SelectClauses
-//   - joinClauses []JoinClauses
-func (_e *MockCacheDatabase_Expecter) Delete(table interface{}, clauses interface{}, joinClauses interface{}) *MockCacheDatabase_Delete_Call {
-	return &MockCacheDatabase_Delete_Call{Call: _e.mock.On("Delete", table, clauses, joinClauses)}
+func (_e *MockCacheDatabase_Expecter) Delete(table interface{}, clauses interface{}) *MockCacheDatabase_Delete_Call {
+	return &MockCacheDatabase_Delete_Call{Call: _e.mock.On("Delete", table, clauses)}
 }
 
-func (_c *MockCacheDatabase_Delete_Call) Run(run func(table Table, clauses SelectClauses, joinClauses []JoinClauses)) *MockCacheDatabase_Delete_Call {
+func (_c *MockCacheDatabase_Delete_Call) Run(run func(table Table, clauses SelectClauses)) *MockCacheDatabase_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(Table), args[1].(SelectClauses), args[2].([]JoinClauses))
+		run(args[0].(Table), args[1].(SelectClauses))
 	})
 	return _c
 }
@@ -169,7 +168,7 @@ func (_c *MockCacheDatabase_Delete_Call) Return() *MockCacheDatabase_Delete_Call
 	return _c
 }
 
-func (_c *MockCacheDatabase_Delete_Call) RunAndReturn(run func(Table, SelectClauses, []JoinClauses)) *MockCacheDatabase_Delete_Call {
+func (_c *MockCacheDatabase_Delete_Call) RunAndReturn(run func(Table, SelectClauses)) *MockCacheDatabase_Delete_Call {
 	_c.Run(run)
 	return _c
 }

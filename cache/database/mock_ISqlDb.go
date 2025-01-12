@@ -3,9 +3,11 @@
 package database
 
 import (
-	sql "database/sql"
+	context "context"
 
 	mock "github.com/stretchr/testify/mock"
+
+	sql "database/sql"
 
 	time "time"
 )
@@ -190,6 +192,52 @@ func (_c *MockSqlDb_Exec_Call) Return(_a0 sql.Result, _a1 error) *MockSqlDb_Exec
 }
 
 func (_c *MockSqlDb_Exec_Call) RunAndReturn(run func(string, ...any) (sql.Result, error)) *MockSqlDb_Exec_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PingContext provides a mock function with given fields: ctx
+func (_m *MockSqlDb) PingContext(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PingContext")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockSqlDb_PingContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PingContext'
+type MockSqlDb_PingContext_Call struct {
+	*mock.Call
+}
+
+// PingContext is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockSqlDb_Expecter) PingContext(ctx interface{}) *MockSqlDb_PingContext_Call {
+	return &MockSqlDb_PingContext_Call{Call: _e.mock.On("PingContext", ctx)}
+}
+
+func (_c *MockSqlDb_PingContext_Call) Run(run func(ctx context.Context)) *MockSqlDb_PingContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockSqlDb_PingContext_Call) Return(_a0 error) *MockSqlDb_PingContext_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockSqlDb_PingContext_Call) RunAndReturn(run func(context.Context) error) *MockSqlDb_PingContext_Call {
 	_c.Call.Return(run)
 	return _c
 }

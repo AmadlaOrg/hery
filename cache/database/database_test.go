@@ -650,14 +650,26 @@ func TestApply(t *testing.T) {
 
 			dbMutex = mockSyncLocker
 
+			// initialized
 			originalInitialized := initialized
 			defer func() { initialized = originalInitialized }()
 			initialized = tt.externalInitialized
 
-			mockSqlDb := NewMockSqlDb(t)
-			mockSqlDb.EXPECT().Begin().Return()
+			mockSqlTx := NewMockSqlTx(t)
+			mockSqlTx.EXPECT().Exec(mock.Anything).Return(nil, nil)
 
-			db = mockSqlDb
+			databaseService.sqlTx = mockSqlTx
+
+			/*originalTxExec := txExec
+			defer func() { txExec = originalTxExec }()
+			txExec = func(tx *sql.Tx, query string, args ...any) (sql.Result, error) {
+				return mockSqlTx.Exec(query, args...)
+			}*/
+
+			mockSqlDb := NewMockSqlDb(t)
+			mockSqlDb.EXPECT().Begin().Return(nil, nil)
+
+			//db = mockSqlDb
 
 			err := databaseService.Apply()
 			if tt.hasError {

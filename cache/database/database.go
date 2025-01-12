@@ -26,8 +26,11 @@ type IDatabase interface {
 
 // SDatabase implements IDatabase
 type SDatabase struct {
-	dbAbsPath string
-	queries   *Queries
+	dbAbsPath   string
+	queries     *Queries
+	sqlDB       ISqlDb
+	sqlTx       ISqlTx
+	initialized bool
 }
 
 var (
@@ -35,9 +38,17 @@ var (
 	dbMutex     sync.Locker
 	initialized bool
 	sqlOpen     = func(driverName, dataSourceName string) (ISqlDb, error) {
-		d, err := sql.Open(driverName, dataSourceName)
-		return d, err
+		return sql.Open(driverName, dataSourceName)
 	}
+	/*txExec = func(tx *sql.Tx, query string, args ...any) (sql.Result, error) {
+		return tx.Exec(query, args...)
+	}
+	txRollback = func(tx *sql.Tx) error {
+		return tx.Rollback()
+	}
+	txCommit = func(tx *sql.Tx) error {
+		return tx.Commit()
+	}*/
 	osRemove = os.Remove
 )
 
@@ -253,8 +264,10 @@ func (s *SDatabase) Apply() error {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
 
+	var err error
+
 	// Begin a transaction
-	tx, err := db.Begin()
+	s.sqlTx, err = db.Begin()
 	if err != nil {
 		return fmt.Errorf("error starting transaction: %w", err)
 	}
@@ -283,10 +296,10 @@ func (s *SDatabase) Apply() error {
 	// Execute each query individually within the transaction.
 	// This approach is more flexible if you want to handle parameter binding or errors per query.
 	for _, queryString := range allQueries {
-		_, execErr := tx.Exec(queryString)
+		_, execErr := s.sqlTx.Exec(queryString)
 		if execErr != nil {
 			// Roll back the entire transaction on error
-			rbErr := tx.Rollback()
+			rbErr := s.sqlTx.Rollback()
 			if rbErr != nil {
 				return fmt.Errorf("error rolling back transaction: %w (original error: %v)", rbErr, execErr)
 			}
@@ -295,7 +308,7 @@ func (s *SDatabase) Apply() error {
 	}
 
 	// If all queries succeeded, commit the transaction
-	if err = tx.Commit(); err != nil {
+	if err = s.sqlTx.Commit(); err != nil {
 		return fmt.Errorf("error committing transaction: %w", err)
 	}
 
