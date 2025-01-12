@@ -2,6 +2,8 @@ package database
 
 import (
 	"errors"
+	"fmt"
+
 	//"github.com/AmadlaOrg/hery/util/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -622,13 +624,49 @@ func TestDeleteDb(t *testing.T) {
 
 func TestApply(t *testing.T) {
 	tests := []struct {
-		name                string
-		externalInitialized bool
-		expectedError       error
-		hasError            bool
+		name                     string
+		internalInitialized      bool
+		internalDbBeginExpect    bool
+		internalDbBeginError     error
+		internalTxExecExpect     bool
+		internalTxExecError      error
+		internalTxRollbackExpect bool
+		internalTxRollbackError  error
+		internalTxCommitExpect   bool
+		internalTxCommitError    error
+		expectedQueries          *Queries
+		expectedError            error
+		hasError                 bool
 	}{
 		{
-			name: "Test Apply",
+			name:                "Error: is not initialized",
+			internalInitialized: false,
+			expectedQueries: &Queries{
+				CreateTable: []Query{},
+				DropTable:   []Query{},
+				Insert:      []Query{},
+				Update:      []Query{},
+				Delete:      []Query{},
+				Select:      []Query{},
+			},
+			expectedError: fmt.Errorf(ErrorDatabaseNotInitialized),
+			hasError:      true,
+		},
+		{
+			name:                  "Error: db Begin fails",
+			internalInitialized:   true,
+			internalDbBeginExpect: true,
+			internalDbBeginError:  errors.New("test error (ValidateDbBegin)"),
+			expectedQueries: &Queries{
+				CreateTable: []Query{},
+				DropTable:   []Query{},
+				Insert:      []Query{},
+				Update:      []Query{},
+				Delete:      []Query{},
+				Select:      []Query{},
+			},
+			expectedError: fmt.Errorf("test error (ValidateDbBegin)"),
+			hasError:      true,
 		},
 	}
 	for _, tt := range tests {
@@ -653,30 +691,45 @@ func TestApply(t *testing.T) {
 			// initialized
 			originalInitialized := initialized
 			defer func() { initialized = originalInitialized }()
-			initialized = tt.externalInitialized
+			initialized = tt.internalInitialized
 
-			mockSqlTx := NewMockSqlTx(t)
-			mockSqlTx.EXPECT().Exec(mock.Anything).Return(nil, nil)
+			if tt.internalDbBeginExpect {
 
-			databaseService.sqlTx = mockSqlTx
+				if tt.internalTxExecExpect {
+					mockSqlTx := NewMockSqlTx(t)
+					mockSqlTx.EXPECT().Exec(mock.Anything).Return(nil, tt.internalTxExecError)
 
-			/*originalTxExec := txExec
-			defer func() { txExec = originalTxExec }()
-			txExec = func(tx *sql.Tx, query string, args ...any) (sql.Result, error) {
-				return mockSqlTx.Exec(query, args...)
-			}*/
+					if tt.internalTxRollbackExpect {
+						mockSqlTx.EXPECT().Rollback().Return(tt.internalTxRollbackError)
+					}
 
-			mockSqlDb := NewMockSqlDb(t)
-			mockSqlDb.EXPECT().Begin().Return(nil, nil)
+					if tt.internalTxCommitExpect {
+						mockSqlTx.EXPECT().Commit().Return(tt.internalTxCommitError)
+					}
 
-			//db = mockSqlDb
+					databaseService.sqlTx = mockSqlTx
+				}
+
+				/*originalTxExec := txExec
+				defer func() { txExec = originalTxExec }()
+				txExec = func(tx *sql.Tx, query string, args ...any) (sql.Result, error) {
+					return mockSqlTx.Exec(query, args...)
+				}*/
+
+				mockSqlDb := NewMockSqlDb(t)
+				mockSqlDb.EXPECT().Begin().Return(nil, tt.internalDbBeginError)
+
+				db = mockSqlDb
+			}
 
 			err := databaseService.Apply()
 			if tt.hasError {
 				assert.Error(t, err)
+				assert.ErrorContains(t, err, tt.expectedError.Error())
 			} else {
 				assert.NoError(t, err)
 			}
+			assert.Equal(t, tt.expectedQueries, databaseService.queries)
 		})
 	}
 }

@@ -313,6 +313,13 @@ func (s *SDatabase) Apply() error {
 	}
 
 	// Optionally, clear the queries after applying
-	s.queries = &Queries{}
+	s.queries = &Queries{
+		CreateTable: []Query{},
+		DropTable:   []Query{},
+		Insert:      []Query{},
+		Update:      []Query{},
+		Delete:      []Query{},
+		Select:      []Query{},
+	}
 	return nil
 }
