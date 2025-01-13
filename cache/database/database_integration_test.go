@@ -1,6 +1,9 @@
 package database
 
 import (
+	"fmt"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -19,15 +22,23 @@ func Test_Integration_Initialize(t *testing.T) {
 func Test_Integration_IsInitialized(t *testing.T) {}
 
 func Test_Integration_CreateTable(t *testing.T) {
-	/*databaseService := NewDatabaseService()
+	uuidString := uuid.New()
+	path := fmt.Sprintf("/tmp/test-%s.db", uuidString)
+	databaseService := NewDatabaseService(path)
 	err := databaseService.Initialize()
 	assert.NoError(t, err)
 
-	err = databaseService.CreateTable(Table{Name: "test"})
-	assert.NoError(t, err)
+	databaseService.CreateTable()
+	err = databaseService.Apply()
+	if err != nil {
+		t.Errorf("Failed to apply database %v", err)
+	}
 
 	err = databaseService.Close()
-	assert.NoError(t, err)*/
+	assert.NoError(t, err)
+
+	// TODO: Validate the content
+	// TODO: Delete DB
 }
 
 func Test_Integration_Insert(t *testing.T) {
