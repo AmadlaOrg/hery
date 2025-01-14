@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"github.com/AmadlaOrg/hery/cache/database"
+	"github.com/AmadlaOrg/hery/entity/schema"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -11,8 +13,8 @@ func TestParseJsonSchemaToSQLiteType(t *testing.T) {
 		expected string
 	}{
 		{"string", "TEXT"},
-		{"number", "BIGINT"},
-		{"integer", "BIGINT"},
+		{"number", "NUMERIC"},
+		{"integer", "NUMERIC"},
 		{"object", "TEXT"},
 		{"array", "TEXT"},
 		{"boolean", "BOOLEAN"},
@@ -22,10 +24,8 @@ func TestParseJsonSchemaToSQLiteType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			result := parseJsonSchemaToSQLiteType(tt.input)
-			if result != tt.expected {
-				t.Errorf("parseJsonSchemaToSQLiteType(%q) = %q; want %q", tt.input, result, tt.expected)
-			}
+			result := parseJsonSchemaToSQLiteType(schema.DataType(tt.input))
+			assert.Equal(t, database.DataType(tt.expected), result)
 		})
 	}
 }
@@ -39,15 +39,14 @@ func TestParseJsonSchemaFormatToSQLiteType(t *testing.T) {
 		{"time", "TEXT"},
 		{"date", "DATE"},
 		{"duration", "TEXT"},
+		// TODO:
 		{"unknown", ""}, // Default case: returns an empty string
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			result := parseJsonSchemaFormatToSQLiteType(tt.input)
-			if result != tt.expected {
-				t.Errorf("parseJsonSchemaFormatToSQLiteType(%q) = %q; want %q", tt.input, result, tt.expected)
-			}
+			result := parseJsonSchemaFormatToSQLiteType(schema.DataFormat(tt.input))
+			assert.Equal(t, database.DataType(tt.expected), result)
 		})
 	}
 }

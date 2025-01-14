@@ -13,9 +13,9 @@ func parseJsonSchemaToSQLiteType(jsonSchemaType schema.DataType) database.DataTy
 	case schema.DataTypeString:
 		return database.DataTypeText
 	case schema.DataTypeNumber:
-		return database.DataTypeBigInteger
+		return database.DataTypeNumeric
 	case schema.DataTypeInteger:
-		return database.DataTypeBigInteger
+		return database.DataTypeNumeric
 	case schema.DataTypeObject:
 		return database.DataTypeText
 	case schema.DataTypeArray:
