@@ -1,30 +1,27 @@
 package database
 
 import (
-	"fmt"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func Test_Integration_Initialize(t *testing.T) {
-	/*databaseService := NewDatabaseService()
+func Test_Integration_IsInitialized_is_true(t *testing.T) {
+	databaseService := NewDatabaseService("/tmp/test-integration-IsInitialized-is-true.db")
 	err := databaseService.Initialize()
 	assert.NoError(t, err)
 
-	isInitialized := databaseService.IsInitialized()
-	assert.True(t, isInitialized)
+	ok := databaseService.IsInitialized()
+	assert.True(t, ok)
 
 	err = databaseService.Close()
-	assert.NoError(t, err)*/
+	assert.NoError(t, err)
+
+	err = databaseService.DeleteDb()
+	assert.NoError(t, err)
 }
 
-func Test_Integration_IsInitialized(t *testing.T) {}
-
 func Test_Integration_CreateTable(t *testing.T) {
-	uuidString := uuid.New()
-	path := fmt.Sprintf("/tmp/test-%s.db", uuidString)
-	databaseService := NewDatabaseService(path)
+	databaseService := NewDatabaseService("/tmp/test-integration-create-table.db")
 	err := databaseService.Initialize()
 	assert.NoError(t, err)
 
@@ -38,7 +35,9 @@ func Test_Integration_CreateTable(t *testing.T) {
 	assert.NoError(t, err)
 
 	// TODO: Validate the content
-	// TODO: Delete DB
+
+	err = databaseService.DeleteDb()
+	assert.NoError(t, err)
 }
 
 func Test_Integration_Insert(t *testing.T) {
@@ -56,15 +55,3 @@ func Test_Integration_Insert(t *testing.T) {
 func Test_Integration_Select(t *testing.T) {}
 
 func Test_Integration_Delete(t *testing.T) {}
-
-func Test_Integration_DropTable(t *testing.T) {
-	/*databaseService := NewDatabaseService()
-	err := databaseService.Initialize()
-	assert.NoError(t, err)
-
-	err = databaseService.DropTable(Table{Name: "test"})
-	assert.NoError(t, err)
-
-	err = databaseService.Close()
-	assert.NoError(t, err)*/
-}

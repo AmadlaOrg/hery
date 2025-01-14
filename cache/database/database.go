@@ -195,8 +195,10 @@ func (s *SDatabase) Select(table Table, clauses SelectClauses, joinClauses []Joi
 	b.WriteString(table.Name)
 
 	// Build JOIN clauses, if any
-	b.WriteString(" ")
-	b.WriteString(buildJoinClauses(joinClauses))
+	if joinClauses != nil {
+		b.WriteString(" ")
+		b.WriteString(buildJoinClauses(joinClauses))
+	}
 
 	// Build WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET
 	b.WriteString(buildWhere(clauses.Where))
@@ -204,21 +206,19 @@ func (s *SDatabase) Select(table Table, clauses SelectClauses, joinClauses []Joi
 		// For SELECT, GroupBy is just: GROUP BY col1, col2 ...
 		b.WriteString(fmt.Sprintf(" GROUP BY %s", strings.Join(clauses.GroupBy, ", ")))
 	}
-	b.WriteString(buildHaving(clauses.Having))
-	b.WriteString(buildOrderBy(clauses.OrderBy))
-	if clauses.Limit != nil {
+	if len(clauses.OrderBy) > 0 {
+		b.WriteString(buildHaving(clauses.Having))
+		b.WriteString(buildOrderBy(clauses.OrderBy))
+	}
+	if clauses.Limit != nil && *clauses.Limit > 0 {
 		b.WriteString(buildLimit(int64(*clauses.Limit)))
 	}
-	if clauses.Offset != nil {
+	if clauses.Offset != nil && *clauses.Offset > 0 {
 		b.WriteString(buildOffset(int64(*clauses.Offset)))
 	}
 	b.WriteString(";")
 
-	// Add the query to s.queries.Select
-	s.queries.Select = append(s.queries.Select, Query{
-		Query:  b.String(),
-		Values: nil, // You could also populate this if you want parameter binding
-	})
+	s.addQuery(&s.queries.Select, b.String(), nil)
 }
 
 // Delete deletes records from the table

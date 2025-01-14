@@ -78,6 +78,8 @@ CREATE TABLE IF NOT EXISTS body_data_TEXT (
     FOREIGN KEY (body_rowid) REFERENCES body(rowid)
 );
 
+CREATE INDEX IF NOT EXISTS idx_body_data_property_name ON body_data_TEXT(property_name);
+
 CREATE TABLE IF NOT EXISTS body_data_NUMERIC (
     body_rowid INTEGER,
     property_name TEXT,
@@ -137,3 +139,13 @@ CREATE TABLE IF NOT EXISTS body_data_DATETIME (
 );
 
 CREATE INDEX IF NOT EXISTS idx_body_data_DATETIME_property_value ON body_data_DATETIME(property_value);
+
+CREATE TABLE IF NOT EXISTS body_data_connection (
+    parent_body_data_TEXT_rowid INTEGER,
+    body_data_TEXT_rowid INTEGER,
+    insert_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (parent_body_data_TEXT_rowid, body_data_TEXT_rowid),
+    FOREIGN KEY (parent_body_data_TEXT_rowid) REFERENCES body_data_TEXT(rowid),
+    FOREIGN KEY (body_data_TEXT_rowid) REFERENCES body_data_TEXT(rowid)
+);

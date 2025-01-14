@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/AmadlaOrg/hery/util/pointer"
 
 	//"github.com/AmadlaOrg/hery/util/pointer"
 	"github.com/stretchr/testify/assert"
@@ -454,6 +455,253 @@ func TestUpdate(t *testing.T) {
 				{Column: "listen", Operator: "IN", Value: "[80, 443]"},
 			})
 			assert.Equal(t, tt.expected, databaseService.queries)
+		})
+	}
+}
+
+func TestSelect(t *testing.T) {
+	tests := []struct {
+		name             string
+		inputTable       Table
+		inputClauses     SelectClauses
+		inputJoinClauses []JoinClauses
+		expected         []Query
+	}{
+		{
+			name: "Test Select: one condition",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+				},
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost';",
+				},
+			},
+		},
+		{
+			name: "Test Select: two conditions",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+					{
+						Column:   "foo",
+						Operator: OperatorNotEqual,
+						Value:    "boo",
+					},
+				},
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost' AND foo != 'boo';",
+				},
+			},
+		},
+		{
+			name: "Test Select: two conditions and limit 10",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+					{
+						Column:   "foo",
+						Operator: OperatorNotEqual,
+						Value:    "boo",
+					},
+				},
+				Limit: pointer.ToPtr(10),
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost' AND foo != 'boo' LIMIT 10;",
+				},
+			},
+		},
+		{
+			name: "Test Select: two conditions and limit 10 with offset 5",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+					{
+						Column:   "foo",
+						Operator: OperatorNotEqual,
+						Value:    "boo",
+					},
+				},
+				Limit:  pointer.ToPtr(10),
+				Offset: pointer.ToPtr(5),
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost' AND foo != 'boo' LIMIT 10 OFFSET 5;",
+				},
+			},
+		},
+		{
+			name: "Test Select: two conditions, and group by and limit 10 with offset 5",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+					{
+						Column:   "foo",
+						Operator: OperatorNotEqual,
+						Value:    "boo",
+					},
+				},
+				GroupBy: []string{
+					"server_name",
+				},
+				Limit:  pointer.ToPtr(10),
+				Offset: pointer.ToPtr(5),
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost' AND foo != 'boo' GROUP BY server_name LIMIT 10 OFFSET 5;",
+				},
+			},
+		},
+		{
+			name: "Test Select: two conditions, and group by and limit 10 with offset 5",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+					{
+						Column:   "foo",
+						Operator: OperatorNotEqual,
+						Value:    "boo",
+					},
+				},
+				GroupBy: []string{
+					"server_name",
+				},
+				Limit:  pointer.ToPtr(10),
+				Offset: pointer.ToPtr(5),
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost' AND foo != 'boo' GROUP BY server_name LIMIT 10 OFFSET 5;",
+				},
+			},
+		},
+		{
+			name: "Test Select: two conditions, and group by, order by and limit 10 with offset 5",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{
+				Where: []Condition{
+					{
+						Column:   "server_name",
+						Operator: OperatorLike,
+						Value:    "%localhost",
+					},
+					{
+						Column:   "foo",
+						Operator: OperatorNotEqual,
+						Value:    "boo",
+					},
+				},
+				GroupBy: []string{
+					"server_name",
+				},
+				OrderBy: []OrderBy{
+					{
+						Column:    "server_name",
+						Direction: OrderByDesc,
+					},
+				},
+				Limit:  pointer.ToPtr(10),
+				Offset: pointer.ToPtr(5),
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name WHERE server_name LIKE '%localhost' AND foo != 'boo' GROUP BY server_name ORDER BY server_name DESC LIMIT 10 OFFSET 5;",
+				},
+			},
+		},
+		/*{
+			name: "Test Select: inner joins",
+			inputTable: Table{
+				Name: "mock_table_name",
+			},
+			inputClauses: SelectClauses{},
+			inputJoinClauses: []JoinClauses{
+				{
+					Table: "mock_second_table_name",
+					Type:  JoinTypeInner,
+					On: []JoinCondition{
+						{
+							Column1:  "server_name",
+							Operator: OperatorLike,
+							Column2:  "local%",
+						},
+					},
+				},
+			},
+			expected: []Query{
+				{
+					Query: "SELECT * FROM mock_table_name INNER JOIN mock_second_table_name ON mock_second_table_name.server_name LIKE mock_table_name.server_name;",
+				},
+			},
+		},*/
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			databaseService := SDatabase{
+				queries: &Queries{
+					CreateTable: []Query{},
+					DropTable:   []Query{},
+					Insert:      []Query{},
+					Update:      []Query{},
+					Delete:      []Query{},
+					Select:      []Query{},
+				},
+			}
+			databaseService.Select(tt.inputTable, tt.inputClauses, tt.inputJoinClauses)
+			assert.Equal(t, tt.expected, databaseService.queries.Select)
 		})
 	}
 }

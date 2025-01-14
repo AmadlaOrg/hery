@@ -192,9 +192,16 @@ type Condition struct {
 	Value    any
 }
 
+type OrderByDirection string
+
+const (
+	OrderByAsc  OrderByDirection = "ASC"
+	OrderByDesc OrderByDirection = "DESC"
+)
+
 type OrderBy struct {
 	Column    string
-	Direction string // "ASC" or "DESC"
+	Direction OrderByDirection
 }
 
 type JoinClauses struct {
