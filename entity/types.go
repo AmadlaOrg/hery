@@ -36,7 +36,8 @@ type Entity struct {
 	Have            bool           // True if the entity is downloaded and false if not (e.g.: true)
 	Hash            string         // The hash of the entity to verify if the repository on the local environment was corrupted or not (e.g.: c7e9911d38b263a69c664b8e0b5d4f27e607554d)
 	Exist           bool           // True if it was found and false if not found with Git remote (e.g.: true)
-	Schema          *schema.Schema // The entity's Schema
+	SchemaJson      string         // The JSON-Schema in string
+	Schema          *schema.Schema // The entity's Schema for caching
 	ContentJson     string         // The content in JSON format for storage in the caching
 	Content         Content        // Is the structured version of the content used by the rest the application
 }

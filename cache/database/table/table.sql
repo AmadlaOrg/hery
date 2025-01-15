@@ -11,26 +11,26 @@
 
 -- This table stores information about entities
 CREATE TABLE IF NOT EXISTS entities (
-    _entity TEXT UNIQUE,  -- Contains the entities URI (not unique)
-    Name TEXT,     -- Just the name of the entity (not unique)
-    RepoUrl TEXT,  -- The full URL to the repository containing the entity
-    Origin TEXT,   -- Contains the partial path of the entity
-    Version TEXT,  -- The entity version
-    IsLatestVersion BOOLEAN,  -- Whether the entity version is the latest
-    AbsPath TEXT UNIQUE, -- The full system path to the entity files (unique)
-    Have BOOLEAN,  -- Indicates if the entity is on the local machine
-    Hash TEXT UNIQUE,     -- The hash of the entity content for validation
-    Exist BOOLEAN, -- Indicates if the repository was found
-    Schema TEXT,   -- JSON schema of the entity
-    insert_date_time DATETIME,  -- The date when the row was added
-    update_date_time DATETIME   -- The latest date when the row was updated
+    uri TEXT UNIQUE,  -- Contains the entities URI (not unique)
+    name TEXT,     -- Just the name of the entity (not unique)
+    repo_url TEXT,  -- The full URL to the repository containing the entity
+    origin TEXT,   -- Contains the partial path of the entity
+    version TEXT,  -- The entity version
+    is_latest_version BOOLEAN,  -- Whether the entity version is the latest
+    abs_path TEXT UNIQUE, -- The full system path to the entity files (unique)
+    have BOOLEAN,  -- Indicates if the entity is on the local machine
+    hash TEXT UNIQUE,     -- The hash of the entity content for validation
+    exist BOOLEAN, -- Indicates if the repository was found
+    schema_json TEXT,   -- JSON schema of the entity
+    insert_date_time DATETIME DEFAULT CURRENT_TIMESTAMP,  -- The date when the row was added
+    update_date_time DATETIME DEFAULT CURRENT_TIMESTAMP   -- The latest date when the row was updated
 );
 
 CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(Name);
-CREATE INDEX IF NOT EXISTS idx_entities_repo_url ON entities(RepoUrl);
+CREATE INDEX IF NOT EXISTS idx_entities_repo_url ON entities(repo_url);
 CREATE INDEX IF NOT EXISTS idx_entities_version ON entities(Version);
 CREATE INDEX IF NOT EXISTS idx_entities_exist ON entities(Exist);
-CREATE INDEX IF NOT EXISTS idx_entities_is_latest_version ON entities(IsLatestVersion);
+CREATE INDEX IF NOT EXISTS idx_entities_is_latest_version ON entities(is_latest_version);
 CREATE INDEX IF NOT EXISTS idx_entities_have ON entities(Have);
 
 -- This table stores data for entities

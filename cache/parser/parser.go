@@ -23,6 +23,17 @@ var (
 
 // Entity parses the entity to SQLite 3 struct that can be used in the query builder in the database package
 func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
+	s.entitiesEntityToTable(entity)
+	s.metaToTable(entity)
+	s.bodyToTable(entity)
+	s.bodyDataTextToTable(entity)
+	s.bodyDataNumericToTable(entity)
+	s.bodyDataRealToTable(entity)
+	s.bodyDataBooleanToTable(entity)
+	s.bodyDataDateToTable(entity)
+	s.bodyDataDateTimeToTable(entity)
+	s.bodyDataConnectionToTable(entity)
+
 	// TODO: Use schema to determine the data type for the SQL
 	// string == TEXT
 	// TODO: Convert schema from the struct to the JSON-Schema string
@@ -136,6 +147,151 @@ func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
 			},
 		},
 	}, nil
+}
+
+func (s *SParser) entitiesEntityToTable(entity *entity.Entity) {
+	var entitiesTable database.Table
+	entitiesTable.Name = "entities"
+	entitiesTable.Rows = []database.Row{
+		{
+			"uri":               entity.Uri,
+			"name":              entity.Name,
+			"repo_url":          entity.RepoUrl,
+			"origin":            entity.Origin,
+			"version":           entity.Version,
+			"is_latest_version": entity.IsLatestVersion,
+			"abs_path":          entity.AbsPath,
+			"have":              entity.Have,
+			"hash":              entity.Hash,
+			"exist":             entity.Exist,
+			"schema_json":       entity.SchemaJson,
+		},
+	}
+}
+
+func (s *SParser) metaToTable(entity *entity.Entity) database.Table {
+	var metaTable database.Table
+	metaTable.Name = "meta"
+	metaTable.Rows = []database.Row{
+		{
+			"entities_rowid": "",
+			"for_body_rowid": "",
+			"body_rowid":     "",
+		},
+	}
+
+	return metaTable
+}
+
+func (s *SParser) bodyToTable(entity *entity.Entity) database.Table {
+	var bodyTable database.Table
+	bodyTable.Name = "body"
+	bodyTable.Rows = []database.Row{
+		{
+			"entities_rowid": "",
+			"_id":            entity.Id,
+			"body":           entity.ContentJson,
+		},
+	}
+
+	return bodyTable
+}
+
+func (s *SParser) bodyDataTextToTable(entity *entity.Entity) database.Table {
+	var bodyDataTextTable database.Table
+	bodyDataTextTable.Name = "body_data_TEXT"
+	bodyDataTextTable.Rows = []database.Row{
+		{
+			"body_rowid":     "",
+			"property_name":  "",
+			"property_value": "",
+		},
+	}
+
+	return bodyDataTextTable
+}
+
+func (s *SParser) bodyDataNumericToTable(entity *entity.Entity) database.Table {
+	var bodyDataNumericTable database.Table
+	bodyDataNumericTable.Name = "body_data_NUMERIC"
+	bodyDataNumericTable.Rows = []database.Row{
+		{
+			"body_rowid":     "",
+			"property_name":  "",
+			"property_value": "",
+		},
+	}
+
+	return bodyDataNumericTable
+}
+
+func (s *SParser) bodyDataRealToTable(entity *entity.Entity) database.Table {
+	var bodyDataRealTable database.Table
+	bodyDataRealTable.Name = "body_data_REAL"
+	bodyDataRealTable.Rows = []database.Row{
+		{
+			"body_rowid":     "",
+			"property_name":  "",
+			"property_value": "",
+		},
+	}
+
+	return bodyDataRealTable
+}
+
+func (s *SParser) bodyDataBooleanToTable(entity *entity.Entity) database.Table {
+	var bodyDataBooleanTable database.Table
+	bodyDataBooleanTable.Name = "body_data_BOOLEAN"
+	bodyDataBooleanTable.Rows = []database.Row{
+		{
+			"body_rowid":     "",
+			"property_name":  "",
+			"property_value": "",
+		},
+	}
+
+	return bodyDataBooleanTable
+}
+
+func (s *SParser) bodyDataDateToTable(entity *entity.Entity) database.Table {
+	var bodyDataDateTable database.Table
+	bodyDataDateTable.Name = "body_data_DATE"
+	bodyDataDateTable.Rows = []database.Row{
+		{
+			"body_rowid":     "",
+			"property_name":  "",
+			"property_value": "",
+		},
+	}
+
+	return bodyDataDateTable
+}
+
+func (s *SParser) bodyDataDateTimeToTable(entity *entity.Entity) database.Table {
+	var bodyDataDateTimeTable database.Table
+	bodyDataDateTimeTable.Name = "body_data_DATETIME"
+	bodyDataDateTimeTable.Rows = []database.Row{
+		{
+			"body_rowid":     "",
+			"property_name":  "",
+			"property_value": "",
+		},
+	}
+
+	return bodyDataDateTimeTable
+}
+
+func (s *SParser) bodyDataConnectionToTable(entity *entity.Entity) database.Table {
+	var bodyDataConnectionTable database.Table
+	bodyDataConnectionTable.Name = "body_data_connection"
+	bodyDataConnectionTable.Rows = []database.Row{
+		{
+			"parent_body_data_TEXT_rowid": "",
+			"body_data_TEXT_rowid":        "",
+		},
+	}
+
+	return bodyDataConnectionTable
 }
 
 // EntityToTableName

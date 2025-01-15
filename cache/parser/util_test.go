@@ -39,8 +39,8 @@ func TestParseJsonSchemaFormatToSQLiteType(t *testing.T) {
 		{"time", "TEXT"},
 		{"date", "DATE"},
 		{"duration", "TEXT"},
-		// TODO:
-		{"unknown", ""}, // Default case: returns an empty string
+		// TODO: Is this good idea to defautl to TEXT?
+		{"unknown", "TEXT"}, // Default case: returns an empty string
 	}
 
 	for _, tt := range tests {

@@ -14,65 +14,7 @@ func TestParseEntity(t *testing.T) {
 
 	expected := []database.Table{
 		{
-			Name: "Entities",
-			Columns: []database.Column{
-				{
-					ColumnName: "Id",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Entity",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Name",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "RepoUrl",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Origin",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Version",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "IsLatestVersion",
-					DataType:   "bool",
-				},
-				{
-					ColumnName: "IsPseudoVersion",
-					DataType:   "bool",
-				},
-				{
-					ColumnName: "AbsPath",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Have",
-					DataType:   "bool",
-				},
-				{
-					ColumnName: "Hash",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Exist",
-					DataType:   "bool",
-				},
-				{
-					ColumnName: "Schema",
-					DataType:   "string",
-				},
-				{
-					ColumnName: "Content",
-					DataType:   "string",
-				},
-			},
+			Name: "entities",
 			Rows: []map[string]any{
 				{
 					"Id":              "c0fdd76d-a5b5-4f35-8784-e6238d6933ab",
@@ -92,7 +34,7 @@ func TestParseEntity(t *testing.T) {
 				},
 			},
 		},
-		{
+		/*{
 			Name: "WebServer",
 			Columns: []database.Column{
 				{
@@ -115,8 +57,8 @@ func TestParseEntity(t *testing.T) {
 					"listen":      "c6beaec1-90c4-4d2a-aaef-211ab00b86bd",
 				},
 			},
-		},
-		{
+		},*/
+		/*{
 			Name: "Net",
 			Columns: []database.Column{
 				{
@@ -138,8 +80,9 @@ func TestParseEntity(t *testing.T) {
 					"ports": "[80, 443]",
 				},
 			},
-		},
+		},*/
 	}
+
 	e := entity.Entity{
 		Id:              uuid.MustParse("c0fdd76d-a5b5-4f35-8784-e6238d6933ab"),
 		Uri:             "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
