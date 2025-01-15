@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS entities (
     origin TEXT,   -- Contains the partial path of the entity
     version TEXT,  -- The entity version
     is_latest_version BOOLEAN,  -- Whether the entity version is the latest
+    is_pseudo_version BOOLEAN,
     abs_path TEXT UNIQUE, -- The full system path to the entity files (unique)
     have BOOLEAN,  -- Indicates if the entity is on the local machine
     hash TEXT UNIQUE,     -- The hash of the entity content for validation
@@ -31,6 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_entities_repo_url ON entities(repo_url);
 CREATE INDEX IF NOT EXISTS idx_entities_version ON entities(Version);
 CREATE INDEX IF NOT EXISTS idx_entities_exist ON entities(Exist);
 CREATE INDEX IF NOT EXISTS idx_entities_is_latest_version ON entities(is_latest_version);
+CREATE INDEX IF NOT EXISTS idx_entities_is_pseudo_version ON entities(is_pseudo_version);
 CREATE INDEX IF NOT EXISTS idx_entities_have ON entities(Have);
 
 -- This table stores data for entities

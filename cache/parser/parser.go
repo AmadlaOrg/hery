@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/AmadlaOrg/hery/cache/database"
 	"github.com/AmadlaOrg/hery/entity"
 	"regexp"
@@ -15,7 +16,9 @@ type IParser interface {
 	DatabaseRow(data []byte) (entity.Entity, error)
 }
 
-type SParser struct{}
+type SParser struct {
+	database database.IDatabase
+}
 
 var (
 	jsonMarshal = json.Marshal
@@ -23,8 +26,25 @@ var (
 
 // Entity parses the entity to SQLite 3 struct that can be used in the query builder in the database package
 func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
-	s.entitiesEntityToTable(entity)
-	s.metaToTable(entity)
+
+	// 1. Makes sure that the database connection is initialized
+	if !s.database.IsInitialized() {
+		// TODO: Maybe have a standard error for this
+		return nil, errors.New("database is not initialized")
+	}
+
+	// 2. Inserts the entity's information in the `entities` table
+	// - It needs to execute
+	entitiesTable := s.entitiesEntityToTable(entity)
+	s.database.Insert(entitiesTable)
+	err := s.database.Apply()
+	if err != nil {
+		return nil, err
+	}
+
+	/*metaTable := s.metaToTable(entity)
+	s.database.Insert(metaTable)
+
 	s.bodyToTable(entity)
 	s.bodyDataTextToTable(entity)
 	s.bodyDataNumericToTable(entity)
@@ -32,7 +52,7 @@ func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
 	s.bodyDataBooleanToTable(entity)
 	s.bodyDataDateToTable(entity)
 	s.bodyDataDateTimeToTable(entity)
-	s.bodyDataConnectionToTable(entity)
+	s.bodyDataConnectionToTable(entity)*/
 
 	// TODO: Use schema to determine the data type for the SQL
 	// string == TEXT
@@ -149,7 +169,7 @@ func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
 	}, nil
 }
 
-func (s *SParser) entitiesEntityToTable(entity *entity.Entity) {
+func (s *SParser) entitiesEntityToTable(entity *entity.Entity) database.Table {
 	var entitiesTable database.Table
 	entitiesTable.Name = "entities"
 	entitiesTable.Rows = []database.Row{
@@ -160,6 +180,7 @@ func (s *SParser) entitiesEntityToTable(entity *entity.Entity) {
 			"origin":            entity.Origin,
 			"version":           entity.Version,
 			"is_latest_version": entity.IsLatestVersion,
+			"is_pseudo_version": entity.IsPseudoVersion,
 			"abs_path":          entity.AbsPath,
 			"have":              entity.Have,
 			"hash":              entity.Hash,
@@ -167,6 +188,8 @@ func (s *SParser) entitiesEntityToTable(entity *entity.Entity) {
 			"schema_json":       entity.SchemaJson,
 		},
 	}
+
+	return entitiesTable
 }
 
 func (s *SParser) metaToTable(entity *entity.Entity) database.Table {
