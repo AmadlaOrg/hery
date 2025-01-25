@@ -31,13 +31,6 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockCacheParser"
           inpackage: True
-  github.com/AmadlaOrg/hery/client:
-    interfaces:
-      IClient:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockClient"
-          inpackage: True
   github.com/AmadlaOrg/hery/collection:
     interfaces:
       ICollection:

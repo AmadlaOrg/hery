@@ -132,7 +132,7 @@ func (s *SDatabase) query(
 }
 
 // addQuery adds the queries to the queries struct component
-func (s *SDatabase) addQuery(slice *[]Query, query string, values []string) {
+func (s *SDatabase) addQuery(slice *[]Query, query string, values []any) {
 	*slice = append(*slice, Query{
 		Query:  query,
 		Values: values,

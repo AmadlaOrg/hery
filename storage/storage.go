@@ -36,7 +36,7 @@ var (
 	osMkdirTemp  = os.MkdirTemp
 )
 
-// Paths returns the absolute paths for the different parts of storage
+// Paths return the absolute paths for the different parts of storage
 func (d *AbsPaths) Paths(collectionName string) (*AbsPaths, error) {
 	mainPath, err := d.Main()
 	if err != nil {
@@ -47,6 +47,7 @@ func (d *AbsPaths) Paths(collectionName string) (*AbsPaths, error) {
 }
 
 // Main returns the main path for `.hery` storage path
+// TODO: Maybe name it Root
 func (d *AbsPaths) Main() (string, error) {
 	//
 	// Using env var

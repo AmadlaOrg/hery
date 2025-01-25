@@ -30,8 +30,6 @@ func init() {
 	rootCmd.AddCommand(cmd.SettingsCmd)
 	rootCmd.AddCommand(cmd.CollectionCmd)
 	rootCmd.AddCommand(cmd.ComposeCmd)
-	rootCmd.AddCommand(cmd.ClientCmd)
-	rootCmd.AddCommand(cmd.ServerCmd)
 	rootCmd.AddCommand(cmd.QueryCmd)
 	rootCmd.AddCommand(cmd.EntityCmd)
 }

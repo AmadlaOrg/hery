@@ -272,6 +272,6 @@ type Queries struct {
 // Query contains what is needed when executing a query
 type Query struct {
 	Query  string
-	Values []string
+	Values []any
 	Result string
 }

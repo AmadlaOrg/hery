@@ -1,6 +1,6 @@
 package cmd
 
-import (
+/*import (
 	clientCmdPkg "github.com/AmadlaOrg/hery/client/cmd"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -36,4 +36,4 @@ func TestClientCmd_Execute(t *testing.T) {
 func executeCommand(root *cobra.Command, args ...string) (output string, err error) {
 	_, err = root.ExecuteC()
 	return
-}
+}*/

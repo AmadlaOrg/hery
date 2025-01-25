@@ -110,17 +110,17 @@ func ValidateOperator(op string) error {
 	return nil
 }
 
-func processRow(row map[string]any) ([]string, []string, []string) {
+func processRow(row map[string]any) ([]string, []string, []any) {
 	var (
 		columnNames       []string
 		valuesPlaceholder []string
-		columnValues      []string
+		columnValues      []any
 	)
 
 	for key, value := range row {
 		columnNames = append(columnNames, key)
 		valuesPlaceholder = append(valuesPlaceholder, "?")
-		columnValues = append(columnValues, fmt.Sprintf("%v", value))
+		columnValues = append(columnValues, value)
 	}
 
 	return columnNames, valuesPlaceholder, columnValues
