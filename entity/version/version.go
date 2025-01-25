@@ -72,7 +72,7 @@ func (s *SVersion) Extract(url string) (string, error) {
 
 // List returns a list of all the versions in tags with the format `v1.0.0`, `v1.0`, or `v1`.
 func (s *SVersion) List(entityUrlPath string) ([]string, error) {
-	gitRemote := remoteNewGitRemoteService(entityUrlPath, &s.GitRemoteConfig)
+	gitRemote := remoteNewGitRemoteService(entityUrlPath, s.GitRemoteConfig)
 
 	tags, err := gitRemote.Tags()
 	if err != nil {
@@ -113,7 +113,7 @@ func (s *SVersion) Latest(versions []string) (string, error) {
 
 // GeneratePseudo generates a pseudo version to be used when there is no other source to identify the version of the entity.
 func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
-	gitRemote := remoteNewGitRemoteService(entityFullRepoUrl, &s.GitRemoteConfig)
+	gitRemote := remoteNewGitRemoteService(entityFullRepoUrl, s.GitRemoteConfig)
 
 	commitHeadHash, err := gitRemote.CommitHeadHash()
 	if err != nil {
