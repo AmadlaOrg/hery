@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/storage"
-	utilObjectPkg "github.com/AmadlaOrg/hery/util/object"
+	utilMappingPkg "github.com/AmadlaOrg/LibraryUtils/mapping"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"

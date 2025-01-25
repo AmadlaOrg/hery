@@ -1,6 +1,7 @@
 package validation
 
 import (
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/AmadlaOrg/hery/entity/schema"
 	schemaValidationPkg "github.com/AmadlaOrg/hery/entity/schema/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -8,10 +9,10 @@ import (
 )
 
 // NewEntityValidationService to set up the Entity Validation service
-func NewEntityValidationService() IValidation {
+func NewEntityValidationService(gitConfig *gitConfig.Config) IValidation {
 	return &SValidation{
-		Version:           version.NewEntityVersionService(),
-		VersionValidation: validation.NewEntityVersionValidationService(),
+		Version:           version.NewEntityVersionService(gitConfig),
+		VersionValidation: validation.NewEntityVersionValidationService(gitConfig),
 		Schema:            schema.NewEntitySchemaService(),
 		SchemaValidation:  schemaValidationPkg.NewEntitySchemaValidationService(),
 	}

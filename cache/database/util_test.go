@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/AmadlaOrg/hery/util/pointer"
+	"github.com/AmadlaOrg/LibraryUtils/pointer"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"os"

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
 	entityPkg "github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/cmd/util"
@@ -38,7 +39,7 @@ var ValidateCmd = &cobra.Command{
 			}
 
 			//err := TmpEntityCheck(collectionName, args)
-			getService := get.NewGetService()
+			getService := get.NewGetService(&gitConfig.Config{})
 			paths, err := getService.GetInTmp(collectionName, args)
 			if err != nil {
 				log.Fatal(err)

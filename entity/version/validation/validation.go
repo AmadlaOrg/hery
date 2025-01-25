@@ -1,8 +1,8 @@
 package validation
 
 import (
+	"github.com/AmadlaOrg/LibraryUtils/str"
 	versionPkg "github.com/AmadlaOrg/hery/entity/version"
-	"github.com/AmadlaOrg/hery/util/str"
 	"regexp"
 )
 

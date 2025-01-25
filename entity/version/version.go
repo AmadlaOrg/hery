@@ -3,7 +3,8 @@ package version
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/util/git/remote"
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
+	"github.com/AmadlaOrg/LibraryUtils/git/remote"
 	"regexp"
 	"sort"
 	"strconv"
@@ -21,8 +22,12 @@ type IVersion interface {
 
 // SVersion struct implements the Manager interface.
 type SVersion struct {
-	GitRemote remote.IRemote
+	GitRemoteConfig *gitConfig.Config
 }
+
+var (
+	remoteNewGitRemoteService = remote.NewGitRemoteService
+)
 
 // Extract extracts the version from a go get URI.
 //
@@ -67,7 +72,9 @@ func (s *SVersion) Extract(url string) (string, error) {
 
 // List returns a list of all the versions in tags with the format `v1.0.0`, `v1.0`, or `v1`.
 func (s *SVersion) List(entityUrlPath string) ([]string, error) {
-	tags, err := s.GitRemote.Tags(entityUrlPath)
+	gitRemote := remoteNewGitRemoteService(entityUrlPath, &s.GitRemoteConfig)
+
+	tags, err := gitRemote.Tags()
 	if err != nil {
 		return nil, errors.Join(ErrorListGitRemoteTags, err)
 	}
@@ -106,12 +113,16 @@ func (s *SVersion) Latest(versions []string) (string, error) {
 
 // GeneratePseudo generates a pseudo version to be used when there is no other source to identify the version of the entity.
 func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
-	commitHeadHash, err := s.GitRemote.CommitHeadHash(entityFullRepoUrl)
+	gitRemote := remoteNewGitRemoteService(entityFullRepoUrl, &s.GitRemoteConfig)
+
+	commitHeadHash, err := gitRemote.CommitHeadHash()
 	if err != nil {
 		return "", err
 	}
+
 	timestamp := time.Now().Format("20060102150405")
 	pseudoVersion := fmt.Sprintf("v0.0.0-%s-%s", timestamp, commitHeadHash[:12])
+
 	return pseudoVersion, nil
 }
 

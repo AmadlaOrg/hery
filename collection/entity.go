@@ -3,12 +3,12 @@ package collection
 import (
 	"errors"
 	"fmt"
+	"github.com/AmadlaOrg/LibraryUtils/url"
 	entityPkg "github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/message"
-	"github.com/AmadlaOrg/hery/util/url"
 	"strings"
 )
 

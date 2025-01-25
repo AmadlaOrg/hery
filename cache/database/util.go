@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/util/file"
+	"github.com/AmadlaOrg/LibraryUtils/file"
 	"strings"
 )
 

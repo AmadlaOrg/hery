@@ -8,13 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/AmadlaOrg/LibraryUtils/url"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
-	"github.com/AmadlaOrg/hery/util/git"
-	"github.com/AmadlaOrg/hery/util/url"
 )
 
 // IBuild to help with mocking and to gather metadata from remote and local sources.
@@ -28,7 +27,6 @@ type IBuild interface {
 
 // SBuild struct implements the MetaBuilder interface.
 type SBuild struct {
-	Git                     git.IGit
 	Entity                  entity.IEntity
 	EntityValidation        validation.IValidation
 	EntityVersion           version.IVersion

@@ -2,7 +2,10 @@ module github.com/AmadlaOrg/hery
 
 go 1.23.5
 
+replace github.com/AmadlaOrg/LibraryUtils => ../LibraryUtils
+
 require (
+	github.com/AmadlaOrg/LibraryUtils v0.0.0
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/google/uuid v1.6.0
@@ -33,7 +36,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20250121033306-997b0b79cac0 // indirect
+	github.com/google/pprof v0.0.0-20250125003558-7fdb3d7e6fa0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.6 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect

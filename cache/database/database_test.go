@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/util/pointer"
+	"github.com/AmadlaOrg/LibraryUtils/pointer"
 
 	//"github.com/AmadlaOrg/hery/util/pointer"
 	"github.com/stretchr/testify/assert"

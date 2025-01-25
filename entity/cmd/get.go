@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/AmadlaOrg/hery/entity/cmd/util"
 	"github.com/AmadlaOrg/hery/entity/cmd/validation"
 	"github.com/AmadlaOrg/hery/entity/get"
@@ -19,7 +20,7 @@ var GetCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			getService := get.NewGetService()
+			getService := get.NewGetService(&gitConfig.Config{})
 			err := getService.Get(collectionName, paths, args)
 			if err != nil {
 				log.Fatalf("Error getting entity: %s", err)

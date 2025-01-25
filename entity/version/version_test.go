@@ -3,7 +3,8 @@ package version
 import (
 	"errors"
 	"fmt"
-	"github.com/AmadlaOrg/hery/util/git/remote"
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
+	"github.com/AmadlaOrg/LibraryUtils/git/remote"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -61,11 +62,17 @@ func TestList(t *testing.T) {
 	// Scenario 1: Successful retrieval of tags
 	t.Run("Successful retrieval of tags", func(t *testing.T) {
 		// Create a new instance of the mocked GitRemote
-		mockGitRemote := new(remote.MockUtilGitRemote)
+		mockGitRemote := remote.NewMockUtilGitRemote(t)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
-			GitRemote: mockGitRemote,
+			GitRemoteConfig: &gitConfig.Config{},
+		}
+
+		originalRemoteNewGitRemoteService := remoteNewGitRemoteService
+		defer func() { remoteNewGitRemoteService = originalRemoteNewGitRemoteService }()
+		remoteNewGitRemoteService = func(url string, cnf *gitConfig.Config) remote.IRemote {
+			return mockGitRemote
 		}
 
 		// Define the URL path to be used in the test
@@ -94,11 +101,17 @@ func TestList(t *testing.T) {
 	// Scenario 2: Error scenario
 	t.Run("Tags method returns an error", func(t *testing.T) {
 		// Reinitialize the mock to clear the previous expectations
-		mockGitRemote := new(remote.MockUtilGitRemote)
+		mockGitRemote := remote.NewMockUtilGitRemote(t)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
-			GitRemote: mockGitRemote,
+			GitRemoteConfig: &gitConfig.Config{},
+		}
+
+		originalRemoteNewGitRemoteService := remoteNewGitRemoteService
+		defer func() { remoteNewGitRemoteService = originalRemoteNewGitRemoteService }()
+		remoteNewGitRemoteService = func(url string, cnf *gitConfig.Config) remote.IRemote {
+			return mockGitRemote
 		}
 
 		// Define the URL path to be used in the test
@@ -123,11 +136,17 @@ func TestList(t *testing.T) {
 	// Scenario 3: No tags found
 	t.Run("No tags found", func(t *testing.T) {
 		// Reinitialize the mock to clear the previous expectations
-		mockGitRemote := new(remote.MockUtilGitRemote)
+		mockGitRemote := remote.NewMockUtilGitRemote(t)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
-			GitRemote: mockGitRemote,
+			GitRemoteConfig: &gitConfig.Config{},
+		}
+
+		originalRemoteNewGitRemoteService := remoteNewGitRemoteService
+		defer func() { remoteNewGitRemoteService = originalRemoteNewGitRemoteService }()
+		remoteNewGitRemoteService = func(url string, cnf *gitConfig.Config) remote.IRemote {
+			return mockGitRemote
 		}
 
 		// Define the URL path to be used in the test
@@ -305,11 +324,17 @@ func TestGeneratePseudo(t *testing.T) {
 	// Scenario 1: Successful generation of pseudo-version
 	t.Run("Successful generation of pseudo-version", func(t *testing.T) {
 		// Create a new instance of the mocked GitRemote
-		mockGitRemote := new(remote.MockUtilGitRemote)
+		mockGitRemote := remote.NewMockUtilGitRemote(t)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
-			GitRemote: mockGitRemote,
+			GitRemoteConfig: &gitConfig.Config{},
+		}
+
+		originalRemoteNewGitRemoteService := remoteNewGitRemoteService
+		defer func() { remoteNewGitRemoteService = originalRemoteNewGitRemoteService }()
+		remoteNewGitRemoteService = func(url string, cnf *gitConfig.Config) remote.IRemote {
+			return mockGitRemote
 		}
 
 		// Define the URL path to be used in the test
@@ -339,11 +364,17 @@ func TestGeneratePseudo(t *testing.T) {
 	// Scenario 2: Error case when retrieving commit hash
 	t.Run("Error case when retrieving commit hash", func(t *testing.T) {
 		// Reinitialize the mock to clear the previous expectations
-		mockGitRemote := new(remote.MockUtilGitRemote)
+		mockGitRemote := remote.NewMockUtilGitRemote(t)
 
 		// Create the service with the mocked GitRemote
 		entityVersionService := &SVersion{
-			GitRemote: mockGitRemote,
+			GitRemoteConfig: &gitConfig.Config{},
+		}
+
+		originalRemoteNewGitRemoteService := remoteNewGitRemoteService
+		defer func() { remoteNewGitRemoteService = originalRemoteNewGitRemoteService }()
+		remoteNewGitRemoteService = func(url string, cnf *gitConfig.Config) remote.IRemote {
+			return mockGitRemote
 		}
 
 		// Define the URL path to be used in the test

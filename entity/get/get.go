@@ -2,6 +2,8 @@ package get
 
 import (
 	"fmt"
+	"github.com/AmadlaOrg/LibraryUtils/git"
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/build"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
@@ -9,7 +11,6 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version"
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
-	"github.com/AmadlaOrg/hery/util/git"
 	"os"
 	"sync"
 )
@@ -25,20 +26,23 @@ type IGet interface {
 
 // SGet struct implements the EntityGetter interface.
 type SGet struct {
-	Git                     git.IGit
 	Entity                  entity.IEntity
 	EntityValidation        validation.IValidation
 	EntityVersion           version.IVersion
 	EntityVersionValidation versionValidationPkg.IValidation
 	Build                   build.IBuild
 	Schema                  schemaPkg.ISchema
+
+	// Config
+	GitConfig *gitConfig.Config
 }
 
 const perm os.FileMode = os.ModePerm
 
 // For easier mocking
 var (
-	osMkdirAll = os.MkdirAll
+	osMkdirAll       = os.MkdirAll
+	gitNewGitService = git.NewGitService
 )
 
 // GetInTmp retrieves entities based on the provided collection name and entities
@@ -192,14 +196,16 @@ func (s *SGet) addRepo(entityMeta entity.Entity) error {
 		return err
 	}
 
+	gitService := gitNewGitService(entityMeta.RepoUrl, entityMeta.AbsPath, s.GitConfig)
+
 	// 2. Download the Entity with `git clone`
-	if err = s.Git.FetchRepo(entityMeta.RepoUrl, entityMeta.AbsPath); err != nil {
+	if err = gitService.Clone(); err != nil {
 		return fmt.Errorf("error fetching repo: %v", err)
 	}
 
 	// 3. Changes the repository to the tag (version) that was pass
 	if !entityMeta.IsPseudoVersion {
-		if err = s.Git.CheckoutTag(entityMeta.AbsPath, entityMeta.Version); err != nil {
+		if err = gitService.CheckoutTag(entityMeta.Version); err != nil {
 			return fmt.Errorf("error checking out version: %v", err)
 		}
 	}

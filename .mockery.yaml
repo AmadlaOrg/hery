@@ -106,33 +106,12 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityVersionValidation"
           inpackage: True
-  github.com/AmadlaOrg/hery/util/git:
-    interfaces:
-      IGit:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockUtilGit"
-          inpackage: True
-  github.com/AmadlaOrg/hery/util/git/remote:
-    interfaces:
-      IRemote:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockUtilGitRemote"
-          inpackage: True
   github.com/AmadlaOrg/hery/storage:
     interfaces:
       IStorage:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockStorage"
-          inpackage: True
-  github.com/AmadlaOrg/hery/util/file:
-    interfaces:
-      IFile:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: MockFile
           inpackage: True
   sync:
     interfaces:
@@ -142,11 +121,3 @@ packages:
           mockName: MockSyncLocker
           inpackage: False
           outpkg: database
-  io/fs:
-    interfaces:
-      FileInfo:
-        config:
-          dir: util/file
-          mockName: MockFileInfo
-          inpackage: False
-          outpkg: file
