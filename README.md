@@ -1,6 +1,6 @@
 <img src=".assets/bear.jpg" alt="Electronics photo" style="width: 400px;" align="right">
 
-# hery 🐻
+# `hery` 🐻
 🐻 Hierarchical Entity Relational YAML (HERY) 🐻
 
 HERY is an extension to [YAML](https://yaml.org/), leveraging the concept of entities—[YAML](https://yaml.org/)

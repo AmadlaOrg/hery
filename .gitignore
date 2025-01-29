@@ -23,7 +23,7 @@ vendor/
 go.work
 go.work.sum
 
-# Editor
+# Editors
 .idea/
 
 tests.sh
