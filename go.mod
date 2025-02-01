@@ -4,7 +4,10 @@ go 1.23.5
 
 replace github.com/AmadlaOrg/LibraryUtils => ../LibraryUtils
 
+replace github.com/AmadlaOrg/LibraryFramework => ../LibraryFramework
+
 require (
+	github.com/AmadlaOrg/LibraryFramework v0.0.0
 	github.com/AmadlaOrg/LibraryUtils v0.0.0
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/google/uuid v1.6.0
@@ -47,8 +50,8 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/skeema/knownhosts v1.3.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/skeema/knownhosts v1.3.1 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
