@@ -3,7 +3,6 @@ module github.com/AmadlaOrg/hery
 go 1.23.5
 
 replace github.com/AmadlaOrg/LibraryUtils => ../LibraryUtils
-
 replace github.com/AmadlaOrg/LibraryFramework => ../LibraryFramework
 
 require (
