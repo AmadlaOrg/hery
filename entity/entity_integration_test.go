@@ -1,6 +1,7 @@
 package entity
 
 import (
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
@@ -13,7 +14,7 @@ func TestRead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	heryExtService := NewEntityService()
+	heryExtService := NewEntityService(&gitConfig.Config{})
 	tests := []struct {
 		name                string
 		inputPath           string

@@ -25,11 +25,11 @@ var ListCmd = &cobra.Command{
 		}
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Collections"})
+		table.Header("Collections")
 
 		for _, dir := range directories {
 			if dir.IsDir() {
-				table.Append([]string{dir.Name()})
+				table.Append(dir.Name())
 			}
 		}
 

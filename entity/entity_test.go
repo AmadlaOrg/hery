@@ -3,6 +3,7 @@ package entity
 import (
 	"testing"
 
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -464,7 +465,7 @@ tests := []struct {
 }*/
 
 func TestGeneratePseudoVersionPattern(t *testing.T) {
-	entityService := NewEntityService()
+	entityService := NewEntityService(&gitConfig.Config{})
 
 	tests := []struct {
 		name         string

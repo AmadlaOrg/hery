@@ -1,11 +1,12 @@
 package validation
 
 import (
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"testing"
 )
 
 func TestEntityUri(t *testing.T) {
-	entityValidationService := NewEntityValidationService()
+	entityValidationService := NewEntityValidationService(&gitConfig.Config{})
 	tests := []struct {
 		path     string
 		expected bool

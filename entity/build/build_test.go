@@ -103,8 +103,7 @@ func TestMeta(t *testing.T) {
 				Hash:            "",
 				Exist:           true,
 				Schema:          nil,
-				Config:          nil,
-			},
+				},
 			hasError: false,
 		},
 		//
@@ -460,8 +459,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				Hash:            "",
 				Exist:           false,
 				Schema:          nil,
-				Config:          nil,
-			},
+				},
 			hasError: false,
 		},
 		{
@@ -487,8 +485,7 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				Hash:            "",
 				Exist:           false,
 				Schema:          nil,
-				Config:          nil,
-			},
+				},
 			hasError: false,
 		},
 		// FIXME:

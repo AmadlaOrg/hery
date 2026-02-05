@@ -2,6 +2,10 @@ package collection
 
 import (
 	"fmt"
+	entityPkg "github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/validation"
+	"github.com/AmadlaOrg/hery/entity/version"
+	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"os"
 	"path/filepath"
@@ -16,7 +20,10 @@ type ICollection interface {
 }
 
 type SCollection struct {
-	Storage storage.IStorage
+	Storage                 storage.IStorage
+	EntityVersion           version.IVersion
+	EntityVersionValidation versionValidationPkg.IValidation
+	EntityValidation        validation.IValidation
 
 	// Data
 	Collections *[]*Collection
@@ -32,10 +39,13 @@ var (
 func (s *SCollection) Select(collectionName string) IEntityCollection {
 	// TODO: Verify if the collection exist
 	return &SEntityCollection{
+		EntityVersion:           s.EntityVersion,
+		EntityVersionValidation: s.EntityVersionValidation,
+		EntityValidation:        s.EntityValidation,
 		Collection: &Collection{
 			Name:              collectionName,
 			Paths:             nil,
-			TransientEntities: nil,
+			TransientEntities: &[]*entityPkg.Entity{},
 		},
 	}
 }

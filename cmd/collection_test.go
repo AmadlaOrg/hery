@@ -7,6 +7,13 @@ import (
 	"testing"
 )
 
+// executeCommand is a utility function to execute a command for testing
+func executeCommand(root *cobra.Command, args ...string) (output string, err error) {
+	root.SetArgs(args)
+	_, err = root.ExecuteC()
+	return
+}
+
 func TestCollectionCmd(t *testing.T) {
 	// Check that the root command is properly set up
 	assert.Equal(t, "collection", CollectionCmd.Use)

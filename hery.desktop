@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Amadla
+Comment=Infrastructure as Code Manager
+Exec=/home/user/.local/bin/amadla
+Icon=amadla
+Terminal=true
+Type=Application
+Categories=Development;Utility;
+MimeType=application/x-hery;

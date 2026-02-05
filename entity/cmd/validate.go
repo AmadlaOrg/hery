@@ -50,7 +50,7 @@ var ValidateCmd = &cobra.Command{
 		} else if isValidateAll {
 			entityCmdUtilService := util.NewEntityCmdUtilService()
 			err := entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-				entityService := entityPkg.NewEntityService()
+				entityService := entityPkg.NewEntityService(&gitConfig.Config{})
 				entityList, err := entityService.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
 					log.Fatal(err)

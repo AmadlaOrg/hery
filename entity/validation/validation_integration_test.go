@@ -1,6 +1,7 @@
 package validation
 
 import (
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -13,7 +14,7 @@ func TestEntity(t *testing.T) {
 		t.Fatal(err)
 	}*/
 
-	entityValidationService := NewEntityValidationService()
+	entityValidationService := NewEntityValidationService(&gitConfig.Config{})
 
 	tests := []struct {
 		name                string

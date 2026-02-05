@@ -7,7 +7,7 @@ import (
 
 func TestNewCacheService(t *testing.T) {
 	t.Run("should return a new instance of Cache", func(t *testing.T) {
-		service := NewCacheService()
+		service := NewCacheService(t.TempDir())
 		assert.NotNil(t, service)
 		assert.IsType(t, &SCache{}, service)
 	})

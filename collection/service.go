@@ -9,9 +9,12 @@ import (
 )
 
 // NewCollectionService to set up the collection service
-func NewCollectionService() ICollection {
+func NewCollectionService(gitConfig *gitConfig.Config) ICollection {
 	return &SCollection{
-		Storage: storage.NewStorageService(),
+		Storage:                 storage.NewStorageService(),
+		EntityVersion:           version.NewEntityVersionService(gitConfig),
+		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(gitConfig),
+		EntityValidation:        validation.NewEntityValidationService(gitConfig),
 	}
 }
 

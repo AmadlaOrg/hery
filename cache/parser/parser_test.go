@@ -6,11 +6,16 @@ import (
 	"github.com/AmadlaOrg/hery/entity/schema"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"testing"
 )
 
 func TestParseEntity(t *testing.T) {
-	parserService := NewParserService()
+	mockDb := &database.MockCacheDatabase{}
+	mockDb.EXPECT().IsInitialized().Return(true)
+	mockDb.EXPECT().Insert(mock.Anything).Return()
+	mockDb.EXPECT().Apply().Return(nil)
+	parserService := NewParserService(mockDb)
 
 	expected := []database.Table{
 		{
@@ -135,7 +140,7 @@ func TestParseEntity(t *testing.T) {
 }
 
 func TestEntityToTableName(t *testing.T) {
-	parserService := NewParserService()
+	parserService := NewParserService(nil)
 	tableName := parserService.EntityToTableName("github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0")
 	assert.Equal(t, "github_com_AmadlaOrg_EntityApplication_WebServer_v1_0_0", tableName)
 }

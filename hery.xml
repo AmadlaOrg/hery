@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+    <!-- text/yaml+hery ?? -->
+    <mime-type type="application/x-yaml+hery">
+        <comment>Hery configuration file</comment>
+        <comment xml:lang="fr">Fichier de configuration Hery</comment>
+        <glob pattern="*.hery"/>
+    </mime-type>
+</mime-info>

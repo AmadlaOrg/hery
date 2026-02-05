@@ -6,7 +6,7 @@ import (
 )
 
 func TestAddEntity(t *testing.T) {
-	cacheService := NewCacheService()
+	cacheService := NewCacheService(t.TempDir())
 	err := cacheService.Open()
 	assert.NoError(t, err)
 

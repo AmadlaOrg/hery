@@ -44,7 +44,9 @@ func (s *SEntityCollection) SelectByUri(entityUri string) (entityPkg.Entity, err
 		err error
 	)
 
-	s.Collection.TransientEntities = &[]*entityPkg.Entity{}
+	if s.Collection.TransientEntities == nil {
+		s.Collection.TransientEntities = &[]*entityPkg.Entity{}
+	}
 
 	if !s.EntityValidation.EntityUri(entityUri) {
 		return entityVals, errors.New("invalid entity url")
@@ -116,7 +118,7 @@ func (s *SEntityCollection) SelectByUri(entityUri string) (entityPkg.Entity, err
 			return entityVals, errors.Join(
 				message.ErrorNotFound,
 				fmt.Errorf("no entity found with repo url %s and version %s", entityVals.RepoUrl, entityVals.Version))
-		} else if matchCount >= 1 {
+		} else if matchCount > 1 {
 			return entityVals, errors.Join(
 				message.ErrorMultipleFound,
 				fmt.Errorf("multiple matching entities found with repo url: %s", entityVals.RepoUrl))
