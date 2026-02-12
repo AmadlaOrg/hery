@@ -5,13 +5,14 @@ An entity is:
 - A YAML block that is named by a URI that contains a version number and points to related resources
 
 In an entity directory there is a basic file and a directory. The file is at the root of the directory or repository of
-the entity and is named after the collection with a `.yml` or `.yaml` file extension.
+the entity and is named after the collection with a `.hery` file extension.
 
-For the directory it is dot and the name of the collection (e.g.: `.amadla/`). This directory contains the `schema.json`
-[JSON Schema](https://json-schema.org/) file. It is always named: `schema.json`. It is possible to have multiple
-[JSON Schemas](https://json-schema.org/), but they won't be connected automatically to the entity definition. That will
-have to be done manually following the [JSON Schema](https://json-schema.org/) documentation by adding a full URL to
-the schema file in the schema file of choosing. The directory can contain other files that are connected to the entity.
+For the directory it is dot and the name of the collection (e.g.: `.amadla/`). This directory contains the
+`schema.hery.json` [JSON Schema](https://json-schema.org/) file. It is always named: `schema.hery.json`. It is possible
+to have multiple [JSON Schemas](https://json-schema.org/), but they won't be connected automatically to the entity
+definition. That will have to be done manually following the [JSON Schema](https://json-schema.org/) documentation by
+adding a full URL to the schema file in the schema file of choosing. The directory can contain other files that are
+connected to the entity.
 
 The only important detail to retain is to not conflict with these three basic files and directory:
 - `.<collection name>`
@@ -28,8 +29,12 @@ The only important detail to retain is to not conflict with these three basic fi
 Useful to identify an entity and point to where to get the entity.
 
 ### `_body`
+Contains the entity data. At the root level of an entity file, `_body` must be explicit (the outer schema uses
+`additionalProperties: false`). Inside sub-entities, `_body` wraps the nested entity content.
 
 ### `_id`
+A string identifier for a specific entity content instance. Must match the pattern `^[a-zA-Z0-9_\-:/]+$`. If omitted,
+a UUID v4 is auto-generated as the default value.
 
 ### `_meta`
 Useful for querying entities.
@@ -58,7 +63,8 @@ _body:
 In this example the entity is: github.com/AmadlaOrg/Entity@latest.
 ```hery
 ---
-name: Random Name
+_body:
+  name: Random Name
 ```
 
 3. Multi-layered entity
@@ -100,9 +106,9 @@ _body:
     - `mkdir -p .<collection name>`
 3. Make `.hery` configuration file with the collection name at the root of the repository
     - `touch <collection name>.hery`
-4. Make a `schema.json` configuration file in the `.<collection name>` directory
-    - `touch ./.<collection name>/schema.json`
-5. Add the content in `.hery` configuration file and the `schema.json` [JSON-Schema](https://json-schema.org/)
+4. Make a `schema.hery.json` configuration file in the `.<collection name>` directory
+    - `touch ./.<collection name>/schema.hery.json`
+5. Add the content in `.hery` configuration file and the `schema.hery.json` [JSON-Schema](https://json-schema.org/)
 6. Add it in git:
     - `git add .`
     - `git commit -m "Batman"`

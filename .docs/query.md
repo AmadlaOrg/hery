@@ -158,6 +158,7 @@ Table:
 +--------------------------------------+-----------------------------------------------+---------+
 ```
 
+Planned (not yet implemented):
 ```eql
 entities.and(contains("_id", "17"), contains("_entity", "Entity@v1.0.0"))
 ```
@@ -187,7 +188,17 @@ JSON:
 ```
 
 
-### Function
+### Implemented Functions
+
+| Function                                                    | Description                                                                                                                           |
+|-------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| contains(&lt;property name&gt;, &lt;filter with&gt;)        | Filter rows where a column's value contains the given substring                                                                       |
+| property(&lt;property name&gt; [, ...])                     | Select specific properties from entities                                                                                              |
+| jq()                                                        | Used to query JSON content with [jq](https://jqlang.github.io/jq/)                                                                    |
+
+### Planned Functions
+
+The following functions are not yet implemented. See [roadmap.md](roadmap.md) for details.
 
 | Function                                                    | Description                                                                                                                           |
 |-------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
@@ -203,4 +214,3 @@ JSON:
 | offset(&lt;number&gt;)                                      | Offset specifies the number of rows to skip before starting to return results in a query                                              |
 | order_by(&lt;property name&gt; [, &lt;ASC\|DESC&gt;])       | Using a property to order the output and optionally choose `DESC` or `ASC`                                                            |
 | group_by(&lt;property name&gt; [, &lt;property name&gt...]) | Group a property or multiple-properties                                                                                               |
-| jq()                                                        | Used to query JSON content with [jq](https://jqlang.github.io/jq/)                                                                    |

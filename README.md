@@ -126,10 +126,12 @@ _body:
   name: Random Name
 ```
 
-There are different structures that are valid. For example `_meta` is an optional reserved property. And at the root of
-the entity content `_entity` is not allowed since it takes the value from the repository itself.
+There are different structures that are valid. For example `_meta` is an optional reserved property. At the root of
+the entity content, `_entity` is auto-populated from the repository URI (users omit it, and the tool injects it before
+validation). The `_id` is a string identifier matching the pattern `^[a-zA-Z0-9_\-:/]+$`; if omitted, a UUID v4 is
+auto-generated.
 
-When validation happens it takes for account the entity URI and validates what is in the `_body` whilst everything else
+When validation happens it takes into account the entity URI and validates what is in the `_body` whilst everything else
 is ignored.
 
 ### 🚛 Caching

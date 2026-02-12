@@ -11,7 +11,7 @@ different standards and projects.
 With the cli it is possible to list and add a collection.
 
 ## Where?
-`~/.henry/` or `{project root}/.henry/`.
+`~/.hery/` or `{project root}/.hery/`.
 
 ## How to set?
 With the environment variable: `HERY_COLLECTION=amadla`

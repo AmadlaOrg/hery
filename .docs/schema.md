@@ -1,7 +1,7 @@
 # Schema | Docs | HERY
-The `.hery` files are YAML files with reserved properties: `_entity`, `_id`, `_self`. So not to complicated. That said,
+The `.hery` files are YAML files with reserved properties: `_entity`, `_id`, `_body`, `_meta`. So not too complicated. That said,
 every entity has its own standard set of properties and data format. And those are standardized in a [JSON Schema](https://json-schema.org/)
-file named: `schema.entity.json`. This schema file is found in the `.<collection name>/schema.entity.json` directory.
+file named: `schema.hery.json`. This schema file is found in the `.<collection name>/schema.hery.json` directory.
 
 Inside this [JSON Schema](https://json-schema.org/) file there are standards that need to be followed.
 

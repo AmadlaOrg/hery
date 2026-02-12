@@ -1,13 +1,8 @@
 # Cache | Docs | HERY
 To be able to have an efficient querying system caching is essentials.
 
-The command compose puts the different entities together to then generate a lock file. Using this lock file and the
-multiple [JSON Schemas](https://json-schema.org/) it generates an [SQLite](https://www.sqlite.org/) DB that is saved
-to the root of the collection's storage directory (e.g.: `amadla.cache`).
-
-> [!NOTE]
-> When `hery`-cli is run in server mode it will load the DB in memory for quicker reads. Also, to note server mode is
-> not for writing. Creation and updating of the cache is done outside the server mode.
+Entity data is cached in an [SQLite](https://www.sqlite.org/) DB that is saved to the root of the collection's
+storage directory (e.g.: `amadla.cache`).
 
 Here is an example what it looks like inside the cache DB:
 
@@ -56,8 +51,11 @@ SELECT * FROM body_merged;
 > from [YAML](https://yaml.org/) to [JSON](https://www.json.org/).
 
 ### `_id`
-Is chief when it comes to an entity data. `entities` is just for defining the entity and `_id` table is for the data
-for that entity. There can be multiple `_id` for an entity. In other words there can be multiple data set for an entity.
+Is chief when it comes to entity data. `entities` is just for defining the entity and the `_id` table is for the data
+for that entity. There can be multiple `_id` for an entity. In other words there can be multiple data sets for an entity.
+
+`_id` is a string that must match the pattern `^[a-zA-Z0-9_\-:/]+$`. If omitted, a UUID v4 is auto-generated as the
+default value. Custom IDs are allowed as long as they match the pattern.
 
 | Column Name         | Column Type                     | Description                                                                                                                                                                                                                                   | Example                                             |
 |---------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
