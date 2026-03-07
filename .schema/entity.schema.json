@@ -1,59 +1,49 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/AmadlaOrg/hery/master/.schema/entity.schema.json",
-  "title": "HERY Basic Configuration Properties",
-  "description": "Defines the foundational HERY entity properties. This schema sets the foundational structure for entities in the HERY system, including reserved properties that are crucial for entity identification and referencing within the system.",
+  "$id": "urn:hery:amadla.org:entity:hery:v1.0.0",
+  "title": "HERY Base Entity Schema",
+  "description": "Defines the five reserved properties for all HERY entities.",
   "type": "object",
   "properties": {
+    "_type": {
+      "$ref": "#/$defs/_type"
+    },
+    "_self": {
+      "$ref": "#/$defs/_self"
+    },
+    "_parent": {
+      "$ref": "#/$defs/_parent"
+    },
     "_meta": {
       "$ref": "#/$defs/_meta"
-    },
-    "_entity": {
-      "$ref": "#/$defs/_entity"
-    },
-    "_id": {
-      "$ref": "#/$defs/_id"
     },
     "_body": {
       "$ref": "#/$defs/_body"
     }
   },
   "required": [
-    "_meta",
-    "_body"
+    "_type"
   ],
   "$defs": {
+    "_type": {
+      "type": "string",
+      "description": "Entity type URI with version (e.g., amadla.org/entity/application@v1.0.0). Determines which JSON Schema validates this document."
+    },
+    "_self": {
+      "type": "string",
+      "description": "Resolvable URI address of this entity instance. Functions as the merge discriminator."
+    },
+    "_parent": {
+      "type": "string",
+      "description": "URI to another entity instance of the same type. Enables deep merge inheritance."
+    },
     "_meta": {
       "type": "object",
-      "description": "",
-      "properties": {
-        "_meta": {
-          "$ref": "#/$defs/_meta"
-        },
-        "_entity": {
-          "$ref": "#/$defs/_entity"
-        },
-        "_id": {
-          "$ref": "#/$defs/_id"
-        },
-        "_body": {
-          "$ref": "#/$defs/_body"
-        }
-      }
-    },
-    "_entity": {
-      "type": "string",
-      "format": "uri-reference",
-      "description": "The URI that uniquely identifies the entity within the HERY system."
-    },
-    "_id": {
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_\\-:/]+$",
-      "description": "A unique identifier for an entity dataset. Allowed characters include letters, numbers, underscores, hyphens, colons, and slashes."
+      "description": "Metadata for filtering and search. Structure defined by the entity's schema."
     },
     "_body": {
       "type": "object",
-      "description": "Used to reference the current entity inside another entity."
+      "description": "Entity content data. Validated against the entity's JSON Schema."
     }
   }
 }

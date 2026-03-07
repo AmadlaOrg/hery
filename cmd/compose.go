@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"log"
+
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
+	"github.com/AmadlaOrg/hery/entity/compose"
 	"github.com/spf13/cobra"
 )
 
@@ -9,14 +14,17 @@ var ComposeCmd = &cobra.Command{
 	Short: "Compose the specified entity",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// FIXME:
-		/*entityArg := args[0]
+		entityArg := args[0]
 		printToScreen, _ := cmd.Flags().GetBool("print")
-		composeService := compose.NewComposeService()
+		composeService := compose.NewComposeService(&gitConfig.Config{})
 		err := composeService.ComposeEntity(entityArg, printToScreen)
 		if err != nil {
 			fmt.Println("Error:", err)
-			os.Exit(1)
-		}*/
+			log.Fatal(err)
+		}
 	},
+}
+
+func init() {
+	ComposeCmd.Flags().BoolP("print", "p", true, "Print composed entity to screen")
 }

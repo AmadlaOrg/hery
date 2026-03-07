@@ -1,7 +1,7 @@
 <img src=".assets/bear.jpg" alt="Electronics photo" style="width: 400px;" align="right">
 
-# `hery` 🐻
-🐻 Hierarchical Entity Relational YAML (HERY) 🐻
+# `hery`
+Hierarchical Entity Relational YAML (HERY)
 
 HERY is an extension to [YAML](https://yaml.org/), leveraging the concept of entities—[YAML](https://yaml.org/)
 groupings that can be interconnected similarly to an RDBMS. This CLI utility facilitates the use of HERY, enabling
@@ -10,195 +10,167 @@ efficient data organization and interaction.
 Additionally, the term "hery" in British English, pronounced /ˈhɛrɪ/, is an obsolete verb meaning "to glorify; praise."
 This name reflects the utility's aim to elevate and celebrate structured data management.
 
-## 👐 Apropos
+## Apropos
 
-HERY differs with [YAML](https://yaml.org/) only by the four "reserved" properties: `_meta`, `_entity`, `_id` and `_body`. In other
-words any `.hery` can be read by any [YAML](https://yaml.org/) library or editor. HERY's reserved properties are there to organize
-the content in a [YAML](https://yaml.org/) file into entities. The property `_meta` contains one or more entities that attach metadata
-information to an entity to make it easier to query and organize them. Similar to HTML `<meta>` element. The `_entity`
-is the URI of the entity being used. It also contains the version of the entity. The `_id` is to link a property to
-another entity similar to relationship in a RDBMS database. The `_body` contains the entity data, similar to HTML
-`<body>` element.
+HERY differs from [YAML](https://yaml.org/) only by five "reserved" properties: `_type`, `_self`, `_parent`, `_meta`
+and `_body`. In other words any `.hery` file can be read by any [YAML](https://yaml.org/) library or editor.
 
-Entities also require a [JSON-Schema](https://json-schema.org/) to define the standard for an entity. Everytime an
-entity is added it validates it against its own schema or any other entity schemas. In the context of HTML it would the
-[DTD](https://en.wikipedia.org/wiki/Document_type_definition).
+HERY's reserved properties organize content in a [YAML](https://yaml.org/) file into entities:
+- `_type` is the URI of the entity type being used, including the version
+- `_self` is an optional resolvable identifier for a specific entity content instance (merge discriminator)
+- `_parent` is an optional URI to a parent entity instance, enabling deep merge inheritance
+- `_meta` contains metadata for the entity, making it easier to query and organize (similar to HTML `<meta>`)
+- `_body` contains the entity data (similar to HTML `<body>`)
 
-HERY is also similar to a package manager whereby the entity's that are required can be added via the CLI or inside the
-`.hery` file configuration using the reserved property `_entity` that contains the entity URI
-(e.g.: `github.com/AmadlaOrg/Entity@latest`).
+Entities require a [JSON-Schema](https://json-schema.org/) (`schema.hery.json`) to define the standard for an entity.
+When an entity is added, it is validated against its schema.
 
-Once that the entities are added to the filesystem, it is also added to a cache system that is an
-[SQLite3](https://www.sqlite.org/) database. From this cache system HERY can query the different entities. HERY comes with
-its own query language. Everything that is output will be in [JSON](https://www.json.org/) format that can then be used
-with [jq](https://jqlang.github.io/jq/) or any other tools that support [JSON](https://www.json.org/).
+HERY is also similar to a package manager whereby entities can be added via the CLI or inside the
+`.hery` file using `_type` with an entity URI (e.g.: `github.com/AmadlaOrg/Entity@latest`).
 
-An entity can overwrite another entity of the same type. Entities can be thought as a table and the data set in the `_body`
-as row in a RDBMS database. To overwrite a specific entity content ("row"), the `_id` property needs to be used.
+Once entities are added to the filesystem, they are cached in an [SQLite3](https://www.sqlite.org/) database.
+HERY uses a two-stage query model: selection via CLI flags hitting SQLite indexes, then optional transformation
+via [jq](https://jqlang.github.io/jq/) expressions (compiled in via gojq). Output is always [JSON](https://www.json.org/).
 
-Entities are grouped by collections. A collection can be thought as a database.
+Entities support deep merge inheritance via `_parent`: child values override parent values — objects merge recursively,
+arrays replace entirely, scalars are overridden by the child.
 
-✅ A simple definition parallel:
+A simple definition parallel:
 
-| Component               | Parallel                               |
-|-------------------------|----------------------------------------|
-| 🛒 **Collection**       | Database                               |
-| 📦 **Entity**           | Table                                  |
-| 🎁 **Entity content**   | Row                                    |
-| 🔖 **Meta**             | HTML `<meta>`                          |
-| 🪪 **Id**               | An `id` for a row in a RDBMS database  |
+| Component             | Parallel                               |
+|-----------------------|----------------------------------------|
+| **Entity**            | Table                                  |
+| **Entity content**    | Row                                    |
+| **Meta**              | HTML `<meta>`                          |
+| **Self**              | Row identifier / merge discriminator   |
 
-To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a file
-that is named after the collection and with the extension `.hery`. This means that it is possible to have multiple
-collections in the same repository using `.hery` files. Inside is the definition of the entity.
+To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a
+`schema.hery.json` file and one or more `.hery` content files.
 
-The other component required is the collection directory. It is named after the collection with a dot at the beginning.
-For example: `.amadla/`. Inside is the `schema.hery.json` file that is a [JSON-Schema](https://json-schema.org/) definition.
-The directory can also contain any files that an entity might need.
-
-## 🐰 Amadla ❤️ HERY 🐻
+## Amadla + HERY
 Amadla ecosystem follows as best as possible the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). So any storage sources that can `stdout` will
 work. HERY is an optional storage source that is chiefly recommended for the Amadla ecosystem.
 
 It is also possible to use HERY as a library in a custom [Golang](https://go.dev/) project. Or the [JSON](https://www.json.org/) output by HERY can be
 piped.
 
-## :suspect: Why Not Just Use SQLite 🐘?
+## Why Not Just Use SQLite?
 - Entities concept with [YAML](https://yaml.org/) is simpler to use
 - Lower learning curve
 - It manages the download of separate entities automatically
 - Easier to read
-- Takes advantages of CVS like Git
-- It easy to attach metadata to entity ("table")
+- Takes advantages of VCS like Git
+- Easy to attach metadata to entities
 - Easier validation
 
 It can be thought as an abstraction of a RDBMS and a Package Manager.
 
-## 🏎 How Fast Is It?
+## How Fast Is It?
 For the downloading of entities it will depend on how heavy the repository is. But generally an entity is just text so
 should be quick.
 
 For the query of data via HERY, it should be pretty quick since it uses [SQLite3](https://www.sqlite.org/) in the
 backend.
 
-## 📥 Install
-### 🐹 With Go
+## Install
+### With Go
 ```bash
 go install github.com/AmadlaOrg/hery
 ```
-### 🔨 Build
+### Build
 ```bash
 go build -o hery
 ```
 
-## 🚀 Quickstart
-HERY does not require a lot of learning to get started. All you need to know is the four reserved properties, the
-`.hery` file format that the reserved properties are found, that there is a SQLite caching system, a few of the
-commands and understand some of the basics of the query language.
+## Quickstart
+HERY does not require a lot of learning to get started. All you need to know is the five reserved properties, the
+`.hery` file format, that there is a SQLite caching system, a few of the commands, and the two-stage query model.
 
-### 📑 `.hery` File Format
+### `.hery` File Format
 The `.hery` file format is the same as a `.yml`/`.yaml` file format. The reason the extension is different is so that
-`hery` CLI is able to find it and so that IDEs can have better support.
+the `hery` CLI can find it and so that IDEs can have better support.
 
-HERY format comes with four different reserved properties:
+HERY format has five reserved properties:
 
-| Property   | Description                                                |
-|------------|------------------------------------------------------------|
-| `_meta`    | For metadata for the relative entity                       |
-| `_entity`  | Contains the entity URI with the version                   |
-| `_id`      | To be able to make reference to a specific entity content  |
-| `_body`    | Contains the content of the entity                         |
+| Property   | Description                                                   |
+|------------|---------------------------------------------------------------|
+| `_type`    | Entity type URI with version (required)                       |
+| `_self`    | Resolvable identifier for entity content (optional)           |
+| `_parent`  | URI to parent entity for deep merge inheritance (optional)    |
+| `_meta`    | Metadata for the entity (optional)                            |
+| `_body`    | Contains the content of the entity (optional)                 |
 
 Here is an example:
 ```yaml
 ---
+_type: github.com/AmadlaOrg/EntityQA/RandomName@latest
 _meta:
-  _entity: github.com/AmadlaOrg/Entity@latest
-  _body:
-    name: RandomName
-    description: Entity Pseudo Version definitions.
-    category: QA
-    tags:
-      - QA
-      - fixture
-      - test
+  name: RandomName
+  description: Entity Pseudo Version definitions.
+  category: QA
+  tags:
+    - QA
+    - fixture
+    - test
 _body:
   name: Random Name
 ```
 
-There are different structures that are valid. For example `_meta` is an optional reserved property. At the root of
-the entity content, `_entity` is auto-populated from the repository URI (users omit it, and the tool injects it before
-validation). The `_id` is a string identifier matching the pattern `^[a-zA-Z0-9_\-:/]+$`; if omitted, a UUID v4 is
-auto-generated.
+When validation happens it validates what is in the `_body` against the entity's JSON Schema.
 
-When validation happens it takes into account the entity URI and validates what is in the `_body` whilst everything else
-is ignored.
+### Caching
+Since querying [YAML](https://yaml.org/) files directly would be slow, [SQLite3](https://www.sqlite.org/)
+is used to cache all the entities at: `~/.cache/hery/entity/`.
 
-### 🚛 Caching
-Since the querying on [YAML](https://yaml.org/) files would be a bit slow and resource demanding, [SQLite3](https://www.sqlite.org/)
-is used to store all the entities.
-
-Each entity has its own table, and it is found: `~/.hery/collection/<collection name>/<collection name>.cache`.
-
-### 🖥️ Basic Commands
+### Basic Commands
 To verify that it was installed properly:
 ```bash
 hery --version
 ```
 
-### 🔩 Create a collection
+### Download an entity
 ```bash
-hery collection init collection_name
-```
-
-### 📃 List collections
-```bash
-hery collection list
-```
-
-### 📥 Download an entity
-```bash
-# Without version it will get the latest version or if no version found then it will generate a pseudo version number using the commit hash
+# Without version it will get the latest version or generate a pseudo version
 # To add a version: @v{version}
-hery entity --collection amadla get github.com/Repository/EntityName
+hery entity get github.com/Repository/EntityName
 ```
 
-### 🔍 Query
+### Query
 ```bash
-hery entity --collection {collection name} query 'entities'
+# Two-stage query: selection flags + optional jq transformation
+hery query --type "github.com/AmadlaOrg/Entity@latest"
+hery query --type "github.com/AmadlaOrg/Entity@latest" --jq '.[] | .name'
 ```
 
-### ➕ More...
+### More...
 To get more details on the functioning and commands: [.docs](.docs).
 
-## ⌨ Dev
-### 🔥 Developer Benefits
+## Dev
+### Developer Benefits
 A developer should find the code of this project to be well organized. It also comes with generated mocks that can make
-it very easy to write unit tests without needing to make mocks. It also comes with interfaces for each packages making
-it easy to overwrite. The only functions that are not in the interface are generally just simple utility functions.
-
-There are also a lot of text and code editor plugins that make it a breeze for the `.hery` files to be used.
+it very easy to write unit tests without needing to make mocks. It also comes with interfaces for each package making
+it easy to overwrite.
 
 > PRs are always welcome!
 
-### 📝 IDE Plugins
-       ![Vim icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vim.png) [Vim](.editor/.vimrc)
+### IDE Plugins
+       ![Vim icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vim.png) [Vim](.editor/.vimrc)
 
-       ![Code icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vscode.png) [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
+       ![Code icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vscode.png) [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
 
-       ![IntelliJ icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/IntelliJ_IDEA.png) [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
+       ![IntelliJ icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/IntelliJ_IDEA.png) [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
 
-       ![Sublime Text icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/sublime.png) [Sublime Text](.editor/sublime.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-sublime-editor-plugin))
+       ![Sublime Text icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/sublime.png) [Sublime Text](.editor/sublime.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-sublime-editor-plugin))
 
-       ![GNU Emacs icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/Emacs.png) [GNU Emacs](.editor/emacs.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-emacs-editor-plugin))
+       ![GNU Emacs icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/Emacs.png) [GNU Emacs](.editor/emacs.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-emacs-editor-plugin))
 
-## ©️ Copyright
+## Copyright
 - "[The Bear and Honey.](https://www.flickr.com/photos/97123293@N07/29003630251)" by [Swallowtail Garden Seeds](https://www.flickr.com/photos/97123293@N07) is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/?ref=openverse).
 
-## :scroll: License
+## License
 
 The license for the code and documentation can be found in the [LICENSE](./LICENSE) file.
 
 ---
 
-Made in Québec 🏴󠁣󠁡󠁱󠁣󠁿, Canada 🇨🇦!
+Made in Québec, Canada!

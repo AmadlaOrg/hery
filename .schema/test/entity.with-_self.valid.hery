@@ -1,5 +1,6 @@
 ---
-_id: "self:id:1231243"
+_type: amadla.org/entity/test@v1.0.0
+_self: github.com/example/project/component
 _body:
   property: Some Value!
   array_property: ["Hello", "World!"]
@@ -8,7 +9,3 @@ _body:
     sub_property_array: ["Another", "Hello", "World!"]
     sub_property_object:
       sub_sub_property_string: String string string...
-      sub_sub_property_object:
-        _entity: "example.com/entity/43593457"
-        _id: "self:subsubsub:id:1231243"
-        name: "Bob"

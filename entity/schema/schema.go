@@ -14,9 +14,8 @@ import (
 // ISchema used by mockery
 type ISchema interface {
 	Load(schemaPath string) (*Schema, error)
-	GenerateSchemaPath(collectionName, entityPath string) string
-	GenerateURNPrefix(collectionName string) string
-	GenerateURN(urnPrefix, entityUri string) string
+	GenerateSchemaPath(entityPath string) string
+	GenerateURN(entityUri string) string
 
 	// Local functions
 	loadSchemaFile(schemaPath string) (map[string]any, error)
@@ -59,13 +58,11 @@ func (s *SSchema) Load(schemaPath string) (*Schema, error) {
 	}
 
 	var schemaId string
-	if schemaData["$id"] == nil {
-		schemaId = ""
-	} else {
-		if schemaId = schemaData["$id"].(string); schemaId != "" {
-			// TODO: Better handling of warnings
-			log.Printf("Warning! Schema $id from %s to %s is empty", schemaName, schemaId)
-		}
+	if idVal, ok := schemaData["$id"].(string); ok {
+		schemaId = idVal
+	}
+	if schemaId == "" {
+		log.Printf("Warning: Schema %s has no $id field", schemaName)
 	}
 
 	// 5. Return the Schema struct
@@ -78,21 +75,18 @@ func (s *SSchema) Load(schemaPath string) (*Schema, error) {
 	}, nil
 }
 
-// GenerateSchemaPath returns the absolute path for the entity's schema
-func (s *SSchema) GenerateSchemaPath(collectionName, entityPath string) string {
-	return filepath.Join(entityPath, fmt.Sprintf(".%s", collectionName), EntityJsonSchemaFileName)
+// GenerateSchemaPath returns the absolute path for the entity's schema.
+// In Draft 3.2, schema.hery.json is at the root of the entity type directory.
+func (s *SSchema) GenerateSchemaPath(entityPath string) string {
+	return filepath.Join(entityPath, EntityJsonSchemaFileName)
 }
 
-// GenerateURNPrefix returns the URN prefix for JSON-Schema `id`
-func (s *SSchema) GenerateURNPrefix(collectionName string) string {
-	return fmt.Sprintf("urn:hery:%s:", collectionName)
-}
-
-// GenerateURN returns the full URN for JSON-Schema `id`
-func (s *SSchema) GenerateURN(urnPrefix, entityUri string) string {
-	urlToUrn := strings.Replace(entityUri, "/", ":", 255)
-	heryUrnSuffix := strings.Replace(urlToUrn, "@", ":", 1)
-	return fmt.Sprintf("%s%s", urnPrefix, heryUrnSuffix)
+// GenerateURN returns the full URN for a HERY entity type.
+// Format: urn:hery:<type-uri-with-/-and-@-replaced-by-:>
+func (s *SSchema) GenerateURN(entityUri string) string {
+	urlToUrn := strings.Replace(entityUri, "/", ":", -1)
+	urn := strings.Replace(urlToUrn, "@", ":", 1)
+	return fmt.Sprintf("urn:hery:%s", urn)
 }
 
 //

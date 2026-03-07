@@ -55,6 +55,7 @@ func Test_Integration_Insert(t *testing.T) {
 		Name: "entities",
 		Rows: []Row{
 			{
+				"entity_type":       "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 				"uri":               "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 				"name":              "WebServer",
 				"repo_url":          "https://github.com/AmadlaOrg/EntityApplication",
@@ -62,7 +63,7 @@ func Test_Integration_Insert(t *testing.T) {
 				"version":           "v1.0.0",
 				"is_latest_version": true,
 				"is_pseudo_version": false,
-				"abs_path":          "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
+				"abs_path":          "/home/user/.cache/hery/entity/github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
 				"have":              true,
 				"hash":              "",
 				"exist":             true,
@@ -80,10 +81,8 @@ func Test_Integration_Insert(t *testing.T) {
 	err = databaseService.Close()
 	assert.NoError(t, err)
 
-	// TODO: Validate the content
-
-	//err = databaseService.DeleteDb()
-	//assert.NoError(t, err)
+	err = databaseService.DeleteDb()
+	assert.NoError(t, err)
 }
 
 func Test_Integration_Select(t *testing.T) {}

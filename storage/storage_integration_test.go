@@ -9,7 +9,7 @@ import (
 
 func Test_Integration_Main(t *testing.T) {
 	storageService := NewStorageService()
-	paths, err := storageService.Paths("test")
+	paths, err := storageService.Paths()
 	if err != nil {
 		t.Fatal("Failed to get paths")
 	}
@@ -18,39 +18,29 @@ func Test_Integration_Main(t *testing.T) {
 	var mainDir string
 	switch runtime.GOOS {
 	case "windows":
-		appDataDir := os.Getenv("APPDATA")
-		mainDir = filepath.Join(appDataDir, "Hery")
-	default: // "linux" and "darwin" (macOS)
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			t.Fatal("Failed to get user home dir")
+		appDataDir := os.Getenv("LOCALAPPDATA")
+		if appDataDir == "" {
+			appDataDir = os.Getenv("APPDATA")
 		}
-		mainDir = filepath.Join(homeDir, ".hery")
+		mainDir = filepath.Join(appDataDir, "hery")
+	default:
+		cacheDir, err := os.UserCacheDir()
+		if err != nil {
+			homeDir, _ := os.UserHomeDir()
+			cacheDir = filepath.Join(homeDir, ".cache")
+		}
+		mainDir = filepath.Join(cacheDir, "hery")
 	}
 
-	// Define expected paths based on the main directory
 	expectedPaths := AbsPaths{
-		Storage:    mainDir,
-		Catalog:    filepath.Join(mainDir, "collection"),
-		Collection: filepath.Join(mainDir, "collection", "test"),
-		Entities:   filepath.Join(mainDir, "collection", "test", "entity"),
-		Cache:      filepath.Join(mainDir, "collection", "test", "test.cache"),
+		Storage:  mainDir,
+		Entities: filepath.Join(mainDir, "entity"),
 	}
 
-	// Check if the actual paths match the expected paths
 	if paths.Storage != expectedPaths.Storage {
 		t.Errorf("Storage path mismatch. Got: %s, Want: %s", paths.Storage, expectedPaths.Storage)
 	}
-	if paths.Catalog != expectedPaths.Catalog {
-		t.Errorf("Catalog path mismatch. Got: %s, Want: %s", paths.Catalog, expectedPaths.Catalog)
-	}
-	if paths.Collection != expectedPaths.Collection {
-		t.Errorf("Collection path mismatch. Got: %s, Want: %s", paths.Collection, expectedPaths.Collection)
-	}
 	if paths.Entities != expectedPaths.Entities {
 		t.Errorf("Entities path mismatch. Got: %s, Want: %s", paths.Entities, expectedPaths.Entities)
-	}
-	if paths.Cache != expectedPaths.Cache {
-		t.Errorf("Cache path mismatch. Got: %s, Want: %s", paths.Cache, expectedPaths.Cache)
 	}
 }

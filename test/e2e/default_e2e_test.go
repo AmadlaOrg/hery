@@ -32,14 +32,11 @@ Usage:
   hery [command]
 
 Available Commands:
-  client      HERY client
-  collection  Collections
   completion  Generate the autocompletion script for the specified shell
   compose     Compose the specified entity
   entity      Entity commands
   help        Help about any command
   query       Query entities
-  server      HERY Server
   settings    List the paths and other environment variables for HERY
   version     Print the version number of hery
 

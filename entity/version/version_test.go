@@ -80,7 +80,7 @@ func TestList(t *testing.T) {
 
 		// Define the expected tags and the result we want from the mock
 		expectedTags := []string{"v1.0.0", "v2.0.0", "not-a-version", "v1"}
-		mockGitRemote.On("Tags", entityUrlPath).Return(expectedTags, nil)
+		mockGitRemote.On("Tags").Return(expectedTags, nil)
 
 		// Call the List method
 		result, err := entityVersionService.List(entityUrlPath)
@@ -118,7 +118,7 @@ func TestList(t *testing.T) {
 		entityUrlPath := "https://example.com/repo.git"
 
 		// Now let's test the case where the Tags method returns an error
-		mockGitRemote.On("Tags", entityUrlPath).Return(nil, errors.New("git error"))
+		mockGitRemote.On("Tags").Return(nil, errors.New("git error"))
 
 		// Call the List method again
 		result, err := entityVersionService.List(entityUrlPath)
@@ -153,7 +153,7 @@ func TestList(t *testing.T) {
 		entityUrlPath := "https://example.com/repo.git"
 
 		// Mock the scenario where the Tags method returns an empty list
-		mockGitRemote.On("Tags", entityUrlPath).Return([]string{}, nil)
+		mockGitRemote.On("Tags").Return([]string{}, nil)
 
 		// Call the List method again
 		result, err := entityVersionService.List(entityUrlPath)
@@ -342,7 +342,7 @@ func TestGeneratePseudo(t *testing.T) {
 
 		// Mock the CommitHeadHash method to return a specific hash
 		expectedCommitHash := "abcd1234efgh5678ijkl"
-		mockGitRemote.On("CommitHeadHash", entityFullRepoUrl).Return(expectedCommitHash, nil)
+		mockGitRemote.On("CommitHeadHash").Return(expectedCommitHash, nil)
 
 		// Call the GeneratePseudo method
 		pseudoVersion, err := entityVersionService.GeneratePseudo(entityFullRepoUrl)
@@ -381,7 +381,7 @@ func TestGeneratePseudo(t *testing.T) {
 		entityFullRepoUrl := "https://example.com/repo.git"
 
 		// Mock the CommitHeadHash method to return an error
-		mockGitRemote.On("CommitHeadHash", entityFullRepoUrl).Return("", errors.New("commit hash error"))
+		mockGitRemote.On("CommitHeadHash").Return("", errors.New("commit hash error"))
 
 		// Call the GeneratePseudo method
 		pseudoVersion, err := entityVersionService.GeneratePseudo(entityFullRepoUrl)

@@ -1,17 +1,16 @@
 package compose
 
-// FIXME:
-/*
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestNewEntityValidationService(t *testing.T) {
+func TestNewComposeService(t *testing.T) {
 	t.Run("should return a new instance of Composer", func(t *testing.T) {
-		service := NewComposeService()
+		service := NewComposeService(&gitConfig.Config{})
 		assert.NotNil(t, service)
 		assert.IsType(t, &SComposer{}, service)
 	})
 }
-*/

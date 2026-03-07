@@ -9,7 +9,7 @@ import (
 
 // IValidation
 type IValidation interface {
-	Id(id, collectionName, entityUri string) error
+	Id(id, entityUri string) error
 }
 
 // SValidation
@@ -18,8 +18,7 @@ type SValidation struct {
 }
 
 // Id validation of JSON-Schema for an entity
-// Multiple layers of validation helps the developer debug with more specific errors
-func (s *SValidation) Id(id, collectionName, entityUri string) error {
+func (s *SValidation) Id(id, entityUri string) error {
 
 	// 1. Validates that the `id` is not empty
 	if id == "" {
@@ -32,18 +31,18 @@ func (s *SValidation) Id(id, collectionName, entityUri string) error {
 		return fmt.Errorf("schema validation failed: invalid `id` format")
 	}
 
-	// 3. Validates that the prefix of the HERY URN is standard
-	prefix := s.Schema.GenerateURNPrefix(collectionName)
-	if !strings.HasPrefix(id, prefix) {
-		return fmt.Errorf("schema validation failed: invalid `urn` prefix (`urn:hery:<collection name>:`)")
+	// 3. Validates that the prefix is standard (urn:hery:)
+	if !strings.HasPrefix(id, "urn:hery:") {
+		return fmt.Errorf("schema validation failed: invalid `urn` prefix (expected `urn:hery:`)")
 	}
 
-	// 4. Validates that the entire URN is valid
-	if s.Schema.GenerateURN(prefix, entityUri) != id {
+	// 4. Validates that the entire URN matches the entity URI
+	expectedURN := s.Schema.GenerateURN(entityUri)
+	if expectedURN != id {
 		return fmt.Errorf(
-			"schema validation failed: invalid `urn` since the other values are not the same as the `_entity` URI: collection: %s and entity URI: %s",
-			collectionName,
-			entityUri)
+			"schema validation failed: invalid `urn` — expected %s, got %s",
+			expectedURN,
+			id)
 	}
 
 	return nil

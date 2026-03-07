@@ -4,80 +4,83 @@ An entity is:
 - A YAML that comes with a [JSON Schema](https://json-schema.org/)
 - A YAML block that is named by a URI that contains a version number and points to related resources
 
-In an entity directory there is a basic file and a directory. The file is at the root of the directory or repository of
-the entity and is named after the collection with a `.hery` file extension.
+In an entity directory there is a basic file and directory structure. The file at the root of the entity repository
+is named with a `.hery` file extension.
 
-For the directory it is dot and the name of the collection (e.g.: `.amadla/`). This directory contains the
-`schema.hery.json` [JSON Schema](https://json-schema.org/) file. It is always named: `schema.hery.json`. It is possible
+The schema file `schema.hery.json` is located at the root of the entity type directory. It is possible
 to have multiple [JSON Schemas](https://json-schema.org/), but they won't be connected automatically to the entity
 definition. That will have to be done manually following the [JSON Schema](https://json-schema.org/) documentation by
-adding a full URL to the schema file in the schema file of choosing. The directory can contain other files that are
-connected to the entity.
+adding a full URL to the schema file in the schema file of choosing.
 
-The only important detail to retain is to not conflict with these three basic files and directory:
-- `.<collection name>`
-- `.<collection name>/schema.hery.json`
-- `<collection name>.hery`
+The key files for an entity:
+- `schema.hery.json` — entity JSON Schema at the entity type directory root
+- `*.hery` — entity content files
 
 ## Properties
-- `_entity` - Contains the URI (without the protocol) to the entity repository with the version (e.g.: `github.com/AmadlaOrg/Entity@latest`)
-- `_body` - Contains the entity content
-- `_id` - Used as reference to a specific entity content
-- `_meta` - Contains metadata for a related entity
+- `_type` — Contains the URI (without the protocol) to the entity repository with the version (e.g.: `github.com/AmadlaOrg/Entity@latest`)
+- `_self` — Optional self-referencing identifier for a specific entity content instance
+- `_parent` — Optional URI to parent entity instance for deep merge inheritance
+- `_meta` — Contains metadata for the entity
+- `_body` — Contains the entity content
 
-### `_entity`
-Useful to identify an entity and point to where to get the entity.
+### `_type`
+Identifies the entity type and points to where to get the entity definition and schema. Required in every `.hery` file.
 
-### `_body`
-Contains the entity data. At the root level of an entity file, `_body` must be explicit (the outer schema uses
-`additionalProperties: false`). Inside sub-entities, `_body` wraps the nested entity content.
+### `_self`
+A resolvable URI identifier for a specific entity content instance. Acts as the merge discriminator: when entities
+of the same type are merged across layers, same `_self` means override (child wins), different `_self` means
+accumulate (new entry). If omitted, a UUID v4 is auto-generated.
 
-### `_id`
-A string identifier for a specific entity content instance. Must match the pattern `^[a-zA-Z0-9_\-:/]+$`. If omitted,
-a UUID v4 is auto-generated as the default value.
+### `_parent`
+Points to a parent entity instance of the same `_type`. Enables deep merge inheritance where the child's values
+override the parent's: objects merge recursively, arrays replace entirely, scalars are overridden by the child.
 
 ### `_meta`
-Useful for querying entities.
+Optional metadata for the entity. Useful for querying and organizing entities.
+
+### `_body`
+Contains the entity data. Optional — when omitted, the entity inherits all default values from the parent entity
+definition. When present, its content is validated against the entity's JSON Schema.
 
 ## Entity Examples:
 
-1. With metadata for the entity
-A basic example.
+1. Basic entity with metadata
 ```hery
+# yaml-language-server: $schema=amadla.org/schemas/hery@v1.0.0
 ---
+_type: github.com/AmadlaOrg/EntityQA/RandomName@latest
 _meta:
-  _entity: github.com/AmadlaOrg/Entity@latest
-  _body:
-    name: RandomName
-    description: Entity Pseudo Version definitions.
-    category: QA
-    tags:
-      - QA
-      - fixture
-      - test
+  name: RandomName
+  description: Entity Pseudo Version definitions.
+  category: QA
+  tags:
+    - QA
+    - fixture
+    - test
 _body:
   name: Random Name
 ```
 
-2. Without metadata entity
-In this example the entity is: github.com/AmadlaOrg/Entity@latest.
+2. Minimal entity without metadata
 ```hery
+# yaml-language-server: $schema=amadla.org/schemas/hery@v1.0.0
 ---
+_type: github.com/AmadlaOrg/Entity@latest
 _body:
   name: Random Name
 ```
 
-3. Multi-layered entity
-This example is to show a multi-layered entity.
+3. Entity with parent inheritance
 ```hery
+# yaml-language-server: $schema=amadla.org/schemas/hery@v1.0.0
 ---
+_type: github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0
+_self: "my-webserver"
+_parent: "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0#base"
 _meta:
-  _entity: github.com/AmadlaOrg/Entity@latest
-  _body:
-    name: RandomName
-    description: Some description.
-    category: QA
-_id: "random:ID:1234"
+  name: MyWebServer
+  description: Custom web server configuration.
+  category: Application
 _body:
   subject: Some random subject.
   listing:
@@ -85,30 +88,17 @@ _body:
     - Orange
     - Grape
   external:
-    _entity: github.com/AmadlaOrg/QAFixturesSubEntityWithMultiSubEntities@latest
+    _type: github.com/AmadlaOrg/EntitySystem/Net@v1.0.0
     _body:
-      message: Some message...
-  external-list:
-    - _entity: github.com/AmadlaOrg/QAFixturesSubEntityWithMultiSubEntities@latest
-      _body:
-        message: Another random message.
-    - _entity: github.com/AmadlaOrg/QAFixturesSubEntityWithMultiSubEntities@latest
-      _body:
-        message: Again, another random message.
-    - _entity: github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest
-      _body:
-        title: Hello World!
+      ports:
+        - 80
+        - 443
 ```
 
 ### Create Entity
 1. Create repository
-2. Make a dot directory with the collection name at the root of the repository:
-    - `mkdir -p .<collection name>`
-3. Make `.hery` configuration file with the collection name at the root of the repository
-    - `touch <collection name>.hery`
-4. Make a `schema.hery.json` configuration file in the `.<collection name>` directory
-    - `touch ./.<collection name>/schema.hery.json`
-5. Add the content in `.hery` configuration file and the `schema.hery.json` [JSON-Schema](https://json-schema.org/)
-6. Add it in git:
+2. Create a `schema.hery.json` [JSON-Schema](https://json-schema.org/) at the repository root
+3. Create one or more `.hery` content files
+4. Add it in git:
     - `git add .`
-    - `git commit -m "Batman"`
+    - `git commit -m "Initial entity"`

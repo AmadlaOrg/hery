@@ -1,4 +1,3 @@
 ---
 _type: amadla.org/entity/test@v1.0.0
-_hello:
-  hello: string
+_self: "invalid self\!"

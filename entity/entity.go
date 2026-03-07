@@ -14,7 +14,7 @@ import (
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 	"github.com/AmadlaOrg/hery/message"
 	"github.com/AmadlaOrg/hery/storage"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 var (
@@ -30,9 +30,9 @@ var (
 type IEntity interface {
 	FindDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicate(entities []Entity, entityMeta Entity) error
-	GeneratePseudoVersionPattern(name, version string) string // TODO: Move it to the version package
+	GeneratePseudoVersionPattern(name, version string) string
 	CrawlDirectoriesParallel(root string) (map[string]Entity, error)
-	Read(path, collectionName string) (map[string]any, error)
+	ReadAll(path string) ([]map[string]any, error)
 }
 
 // SEntity used for mock
@@ -42,75 +42,33 @@ type SEntity struct {
 	EntityValidation        validation.IValidation
 }
 
-// SetSchema for appending an entity schema into the specific struct entity
-// TODO: What to do if the `id` is empty
-/*func (s *SEntity) setSchema(entity Entity, schema *jsonschema.Schema) error {
-	var wg sync.WaitGroup
-	wg.Add(len(s.Entities))
-
-	errCh := make(chan error, 1)
-
-	for i := range s.Entities {
-		go func(i int) {
-			defer wg.Done()
-			if s.Entities[i].Id == "" {
-				// TODO: Throw error
-			}
-			if s.Entities[i].Id == entity.Id {
-				s.Entities[i].Schema = schema
-			}
-		}(i)
-	}
-
-	wg.Wait()
-	close(errCh)
-
-	return fmt.Errorf("%v", errCh) // TODO: Better error handling?
-}*/
-
-// SetContent
+// setContent extracts the five reserved HERY properties from raw YAML content.
 func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
-	// 1. Extract `_entity`
-	entitySection := heryContent["_entity"].(string)
+	// 1. Extract `_type` (required)
+	typeSection, _ := heryContent["_type"].(string)
 	if entity.Uri != "" {
-		entitySection = entity.Uri
-	} else if entitySection == "" {
-		return Content{}, errors.New("no entity section found")
+		typeSection = entity.Uri
+	}
+	if typeSection == "" {
+		return Content{}, errors.New("_type is required")
 	}
 
-	// 2. Extract `_id`
-	// TODO: Needs to be adapted for `uuid`
-	idSection := ""
-	/*idSection := heryContent["_id"].(uuid)
-	if entity.Id != "" {
-		idSection = entity.Id
-	} else if idSection == "" {
-		idSection = uuid.New().String()
-	}*/
+	// 2. Extract `_self` (optional)
+	selfSection, _ := heryContent["_self"].(string)
 
-	// 3. Extract `_meta`
-	metaSection := heryContent["_meta"].(map[string]any)
-	if metaSection == nil {
-		return Content{
-			Entity: entitySection,
-			Id:     idSection,
-		}, errors.New("_meta section is empty")
-	}
+	// 3. Extract `_parent` (optional)
+	parentSection, _ := heryContent["_parent"].(string)
 
-	// 4. Extract `_body`
-	bodySection := heryContent["_body"].(map[string]any)
-	if bodySection == nil {
-		return Content{
-			Entity: entitySection,
-			Id:     idSection,
-			Meta:   metaSection,
-		}, errors.New("_body section is empty")
-	}
+	// 4. Extract `_meta` (optional)
+	metaSection, _ := heryContent["_meta"].(map[string]any)
 
-	// 5. Returns all the components of an entity content
+	// 5. Extract `_body` (optional)
+	bodySection, _ := heryContent["_body"].(map[string]any)
+
 	return Content{
-		Entity: entitySection,
-		Id:     idSection,
+		Type:   typeSection,
+		Self:   selfSection,
+		Parent: parentSection,
 		Meta:   metaSection,
 		Body:   bodySection,
 	}, nil
@@ -181,14 +139,12 @@ func (s *SEntity) CheckDuplicate(entities []Entity, entityMeta Entity) error {
 	return nil
 }
 
-// GeneratePseudoVersionPattern generates a pattern string for pseudo-versioned entities based on their name and version
-// TODO: Move it?
-func (s *SEntity) GeneratePseudoVersionPattern(name, version string) string {
-	return fmt.Sprintf("%s@%s-*-%s", name, version[:6], version[22:])
+// GeneratePseudoVersionPattern delegates to version.GeneratePseudoPattern.
+func (s *SEntity) GeneratePseudoVersionPattern(name, ver string) string {
+	return s.EntityVersion.GeneratePseudoPattern(name, ver)
 }
 
-// CrawlDirectoriesParallel crawls the directories in parallel and returns a map of entities
-// TODO: Move it?
+// CrawlDirectoriesParallel crawls the directories in parallel and returns a map of entities.
 func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 	entities := make(map[string]Entity)
 	var mu sync.Mutex
@@ -254,26 +210,37 @@ func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, erro
 	return entities, nil
 }
 
-// Read makes it easy to read any yaml file with any of the two extensions: yml or yaml
-// TODO: Maybe just pass collection (it might cause a cycle problem)
-func (s *SEntity) Read(path, collectionName string) (map[string]any, error) {
-	heryFileName := fmt.Sprintf("%s.hery", collectionName)
-	heryPath := filepath.Join(path, heryFileName)
+// ReadAll reads all .hery files in a directory and returns each YAML document as a map.
+// Supports multi-document YAML files (separated by ---).
+func (s *SEntity) ReadAll(dir string) ([]map[string]any, error) {
+	var documents []map[string]any
 
-	if !fileExists(heryPath) {
-		return nil, fmt.Errorf("%s does not exist", heryPath)
-	}
+	err := filepathWalk(dir, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if info.IsDir() || filepath.Ext(path) != ".hery" {
+			return nil
+		}
 
-	content, err := osReadFile(heryPath)
+		content, readErr := osReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+
+		var doc map[string]any
+		if unmarshalErr := yamlUnmarshal(content, &doc); unmarshalErr != nil {
+			return unmarshalErr
+		}
+		if doc != nil {
+			documents = append(documents, doc)
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var current map[string]interface{}
-	err = yamlUnmarshal(content, &current)
-	if err != nil {
-		return nil, err
-	}
-
-	return current, nil
+	return documents, nil
 }

@@ -91,10 +91,6 @@ clean: ## Clean bin and coverage files
 	@rm -f coverage.out
 	@rm -f .reports/*
 
-build: ## Build code
-	@echo "---> Build"
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -buildvcs=true -o bin/ ./
-
 .PHONY: help
 help: ## Help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sed 's/Makefile://' | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

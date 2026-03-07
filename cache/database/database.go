@@ -22,6 +22,7 @@ type IDatabase interface {
 	Delete(table Table, clauses SelectClauses)
 	DeleteDb() error
 	Apply() error
+	QueryRows(query string, args ...any) ([]map[string]any, error)
 }
 
 // SDatabase implements IDatabase
@@ -65,12 +66,12 @@ func (s *SDatabase) Initialize() error {
 	// Doc: https://stackoverflow.com/questions/57118674/go-sqlite3-with-journal-mode-wal-gives-database-is-locked-error
 	_, err = db.Exec("PRAGMA journal_mode = WAL;")
 	if err != nil {
-		err := db.Close()
-		if err != nil {
-			return err
+		pragmaErr := err
+		if closeErr := db.Close(); closeErr != nil {
+			return fmt.Errorf("error setting journal mode: %v (also failed to close: %v)", pragmaErr, closeErr)
 		}
 		db = nil
-		return fmt.Errorf("error setting journal mode: %v", err)
+		return fmt.Errorf("error setting journal mode: %v", pragmaErr)
 	}
 
 	// Configure the database connection pool
@@ -261,25 +262,13 @@ func (s *SDatabase) Apply() error {
 	}
 
 	// Merge all queries in the desired order.
-	var allQueries []string
-	for _, q := range s.queries.CreateTable {
-		allQueries = append(allQueries, q.Query)
-	}
-	for _, q := range s.queries.DropTable {
-		allQueries = append(allQueries, q.Query)
-	}
-	for _, q := range s.queries.Insert {
-		allQueries = append(allQueries, q.Query)
-	}
-	for _, q := range s.queries.Update {
-		allQueries = append(allQueries, q.Query)
-	}
-	for _, q := range s.queries.Delete {
-		allQueries = append(allQueries, q.Query)
-	}
-	for _, q := range s.queries.Select {
-		allQueries = append(allQueries, q.Query)
-	}
+	var allQueries []Query
+	allQueries = append(allQueries, s.queries.CreateTable...)
+	allQueries = append(allQueries, s.queries.DropTable...)
+	allQueries = append(allQueries, s.queries.Insert...)
+	allQueries = append(allQueries, s.queries.Update...)
+	allQueries = append(allQueries, s.queries.Delete...)
+	allQueries = append(allQueries, s.queries.Select...)
 
 	if len(allQueries) == 0 {
 		return fmt.Errorf("error no queries")
@@ -293,28 +282,72 @@ func (s *SDatabase) Apply() error {
 	return nil
 }
 
+// QueryRows executes a SELECT query and returns results as a slice of maps.
+func (s *SDatabase) QueryRows(query string, args ...any) ([]map[string]any, error) {
+	if !s.IsInitialized() {
+		return nil, fmt.Errorf(ErrorDatabaseNotInitialized)
+	}
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, fmt.Errorf("error getting columns: %w", err)
+	}
+
+	var results []map[string]any
+	for rows.Next() {
+		values := make([]any, len(columns))
+		valuePtrs := make([]any, len(columns))
+		for i := range values {
+			valuePtrs[i] = &values[i]
+		}
+
+		if scanErr := rows.Scan(valuePtrs...); scanErr != nil {
+			return nil, fmt.Errorf("error scanning row: %w", scanErr)
+		}
+
+		row := make(map[string]any, len(columns))
+		for i, col := range columns {
+			val := values[i]
+			// Convert []byte to string for readability
+			if b, ok := val.([]byte); ok {
+				row[col] = string(b)
+			} else {
+				row[col] = val
+			}
+		}
+		results = append(results, row)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return results, nil
+}
+
 // exec loops through all the queries and executes them
-func (s *SDatabase) exec(sqlTx ISqlTx, allQueries []string) error {
-	// Execute each query individually within the transaction.
-	// This approach is more flexible if you want to handle parameter binding or errors per query.
-	for _, queryString := range allQueries {
-		_, execErr := sqlTx.Exec(queryString)
+func (s *SDatabase) exec(sqlTx ISqlTx, allQueries []Query) error {
+	for _, q := range allQueries {
+		_, execErr := sqlTx.Exec(q.Query, q.Values...)
 		if execErr != nil {
-			// Roll back the entire transaction on error
 			rbErr := sqlTx.Rollback()
 			if rbErr != nil {
 				return fmt.Errorf("error rolling back transaction: %w (original error: %v)", rbErr, execErr)
 			}
-			return fmt.Errorf("error applying query (%s): %w", queryString, execErr)
+			return fmt.Errorf("error applying query (%s): %w", q.Query, execErr)
 		}
 	}
 
-	// If all queries succeeded, commit the transaction
 	if err := sqlTx.Commit(); err != nil {
 		return fmt.Errorf("error committing transaction: %w", err)
 	}
 
-	// Optionally, clear the queries after applying
 	s.queries = &Queries{
 		CreateTable: []Query{},
 		DropTable:   []Query{},

@@ -392,7 +392,10 @@ func TestMetaFromRemoteWithoutVersion(t *testing.T) {
 				assert.Error(t, err)
 			}
 
-			if !reflect.DeepEqual(entityMeta, tt.expectEntity) {
+			// Compare all fields except Id (which is randomly generated)
+			gotCopy := entityMeta
+			gotCopy.Id = tt.expectEntity.Id
+			if !reflect.DeepEqual(gotCopy, tt.expectEntity) {
 				t.Errorf("got %v, want %v", entityMeta, tt.expectEntity)
 			}
 		})
@@ -446,7 +449,6 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			internalEntityVersionLatest:            "",
 			internalEntityVersionLatestErr:         nil,
 			expectEntity: entity.Entity{
-				Id:              uuid.MustParse("4c2b0c61-0850-4784-af36-11fda869f747"),
 				Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20240823005443-9b4947da3948",
 				Name:            "Entity",
 				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
@@ -683,7 +685,10 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			if !reflect.DeepEqual(entityMeta, tt.expectEntity) {
+			// Compare all fields except Id (which is randomly generated)
+			gotCopy := entityMeta
+			gotCopy.Id = tt.expectEntity.Id
+			if !reflect.DeepEqual(gotCopy, tt.expectEntity) {
 				t.Errorf("got %v, want %v", entityMeta, tt.expectEntity)
 			}
 		})

@@ -1,225 +1,106 @@
 package get
 
-// FIXME:
-/*func TestDownload(t *testing.T) {
-	tests := []struct {
-		name                string
-		inputCollectionName string
-		inputStoragePaths   *storage.AbsPaths
-		inputEntitiesMeta   []entity.Entity
-		expectedIds         []string
-		hasError            bool
-	}{
-		{
-			name:                "Valid",
-			inputCollectionName: "amadla",
-			inputStoragePaths: &storage.AbsPaths{
-				Storage:    "/home/user/.hery/",
-				Catalog:    "/home/user/.hery/collection/",
-				Collection: "/home/user/.hery/collection/amadla/",
-				Entities:   "/home/user/.hery/collection/amadla/entity/",
-				Cache:      "/home/user/.hery/collection/amadla/amadla.cache",
-			},
-			inputEntitiesMeta: []entity.Entity{
-				{
-					Id:              "97d4b783-f448-483c-8111-380d6082ae1c",
-					Entity:          "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "latest",
-					IsLatestVersion:   true,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20240924093300-abcd1234efgh",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          nil,
-					Config:          nil,
-				},
-				{
-					Id:              "12c4b793-d458-756f-8151-740d6082ae1f",
-					Entity:          "github.com/AmadlaOrg/Entity@v0.0.0-20230924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "latest",
-					IsLatestVersion:   false,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20230924093300-abcd1234efgh",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          nil,
-					Config:          nil,
-				},
-				{
-					Id:              "98d4b682-c758-943c-8911-560d9022ae3c",
-					Entity:          "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.1.0",
-					Name:            "QAFixturesEntityMultipleTagVersion",
-					RepoUrl:         "https://github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion",
-					Origin:          "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion",
-					Version:         "v2.1.0",
-					IsLatestVersion:   true,
-					IsPseudoVersion: false,
-					AbsPath:         "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.1.0",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          nil,
-					Config:          nil,
-				},
-			},
-			expectedIds: []string{},
-			hasError:    false,
-		},
+import (
+	"fmt"
+	"testing"
+
+	"github.com/AmadlaOrg/hery/entity"
+	"github.com/AmadlaOrg/hery/entity/build"
+	"github.com/AmadlaOrg/hery/storage"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+)
+
+func TestGet_Success(t *testing.T) {
+	mockEntity := &entity.MockEntity{}
+	mockBuild := &build.MockEntityBuild{}
+
+	paths := &storage.AbsPaths{
+		Storage:  "/tmp/hery",
+		Entities: "/tmp/hery/entity",
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			getService := NewGetService()
-			err := getService.download(tt.inputCollectionName, tt.inputStoragePaths, tt.inputEntitiesMeta)
-
-			if tt.hasError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			assert.Equal(t, tt.expectedIds, tt.inputCollectionName)
-		})
-	}
-}*/
-
-// FIXME:
-/*func TestDownload(t *testing.T) {
-	tests := []struct {
-		name                string
-		inputCollectionName string
-		inputStoragePaths   *storage.AbsPaths
-		inputEntitiesMeta   []entity.Entity
-		expectedIds         []string
-		hasError            bool
-	}{
-		{
-			name:                "Valid",
-			inputCollectionName: "amadla",
-			inputStoragePaths: &storage.AbsPaths{
-				Storage:    "/home/user/.hery/",
-				Catalog:    "/home/user/.hery/collection/",
-				Collection: "/home/user/.hery/collection/amadla/",
-				Entities:   "/home/user/.hery/collection/amadla/entity/",
-				Cache:      "/home/user/.hery/collection/amadla/amadla.cache",
-			},
-			inputEntitiesMeta: []entity.Entity{
-				{
-					Id:              "97d4b783-f448-483c-8111-380d6082ae1c",
-					Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "latest",
-					IsLatestVersion: true,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20240924093300-abcd1234efgh",
-					Have:            false,
-					Hash:            "",
-					Exist:           true,
-					Schema:          nil,
-					Config:          nil,
-				},
-				{
-					Id:              "12c4b793-d458-756f-8151-740d6082ae1f",
-					Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20230924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "latest",
-					IsLatestVersion: false,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20230924093300-abcd1234efgh",
-					Have:            false,
-					Hash:            "",
-					Exist:           true,
-					Schema:          nil,
-					Config:          nil,
-				},
-				{
-					Id:              "98d4b682-c758-943c-8911-560d9022ae3c",
-					Uri:             "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.1.0",
-					Name:            "QAFixturesEntityMultipleTagVersion",
-					RepoUrl:         "https://github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion",
-					Origin:          "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion",
-					Version:         "v2.1.0",
-					IsLatestVersion: true,
-					IsPseudoVersion: false,
-					AbsPath:         "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.1.0",
-					Have:            false,
-					Hash:            "",
-					Exist:           true,
-					Schema:          nil,
-					Config:          nil,
-				},
-			},
-			expectedIds: []string{},
-			hasError:    false,
-		},
+	entityMeta := entity.Entity{
+		Uri:     "github.com/AmadlaOrg/TestEntity@v1.0.0",
+		Name:    "TestEntity",
+		RepoUrl: "https://github.com/AmadlaOrg/TestEntity",
+		Origin:  "github.com/AmadlaOrg/TestEntity",
+		Version: "v1.0.0",
+		AbsPath: "/tmp/hery/entity/github.com/AmadlaOrg/TestEntity@v1.0.0",
+		Have:    true,
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			originalOsMkdirAll := osMkdirAll
-			defer func() { osMkdirAll = originalOsMkdirAll }()
+	mockBuild.EXPECT().Meta(*paths, "github.com/AmadlaOrg/TestEntity@v1.0.0").Return(entityMeta, nil)
+	mockEntity.EXPECT().CheckDuplicate(mock.Anything, entityMeta).Return(nil)
 
-			osMkdirAll = func(path string, perm os.FileMode) error {
-				return nil
-			}
-
-			mockUtilGit := git.NewMockUtilGit(t)
-			mockUtilGit.EXPECT().FetchRepo(mock.Anything, mock.Anything).Return(nil)
-			mockUtilGit.EXPECT().CheckoutTag(mock.Anything, mock.Anything).Return(nil)
-
-			mockHeryContent := map[string]any{
-				"_body": map[string]any{
-					"name":        "Entity",
-					"description": "The meta Entity definition.",
-					"category":    "General",
-					"tags":        []any{"main", "master"},
-				},
-			}
-
-			mockEntity := entity.NewMockEntity(t)
-			mockEntity.EXPECT().Read(mock.Anything, mock.Anything).Return(mockHeryContent, nil)
-
-			mockHeryContentBody := mockHeryContent["_body"].(map[string]any)
-
-			mockEntitySchema := schema.NewMockEntitySchema(t)
-			mockEntitySchema.EXPECT().ExtractBody(mock.Anything).Return(mockHeryContentBody)
-			mockEntitySchema.EXPECT().GenerateSchemaPath(mock.Anything, mock.Anything).Return()
-			mockEntitySchema.EXPECT().Load(mock.Anything).Return()
-
-			mockEntityValidation := validation.NewMockEntityValidation(t)
-			mockEntityValidation.EXPECT().Entity(mock.Anything, mock.Anything, mock.Anything).Return()
-
-			// TODO: After testing all the code and their results then mock all of them. This is not an integration test.
-			getService := SGet{
-				Git:                     mockUtilGit,
-				Entity:                  entity.NewEntityService(),
-				EntityValidation:        validation.NewEntityValidationService(),
-				EntityVersion:           version.NewEntityVersionService(),
-				EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(),
-				Build:                   build.NewEntityBuildService(),
-			}
-
-			err := getService.download(tt.inputCollectionName, tt.inputStoragePaths, tt.inputEntitiesMeta)
-
-			if tt.hasError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			assert.Equal(t, tt.expectedIds, tt.inputCollectionName)
-		})
+	getService := &SGet{
+		Entity: mockEntity,
+		Build:  mockBuild,
 	}
-}*/
+
+	// Entity has Have=true, so download is skipped (no clone needed)
+	err := getService.Get(paths, []string{"github.com/AmadlaOrg/TestEntity@v1.0.0"})
+	assert.NoError(t, err)
+}
+
+func TestGet_DuplicateError(t *testing.T) {
+	mockEntity := &entity.MockEntity{}
+	mockBuild := &build.MockEntityBuild{}
+
+	paths := &storage.AbsPaths{
+		Storage:  "/tmp/hery",
+		Entities: "/tmp/hery/entity",
+	}
+
+	entityMeta := entity.Entity{
+		Uri:  "github.com/AmadlaOrg/TestEntity@v1.0.0",
+		Name: "TestEntity",
+	}
+
+	mockBuild.EXPECT().Meta(*paths, "github.com/AmadlaOrg/TestEntity@v1.0.0").Return(entityMeta, nil)
+	mockEntity.EXPECT().CheckDuplicate(mock.Anything, entityMeta).Return(fmt.Errorf("duplicate entity found"))
+
+	getService := &SGet{
+		Entity: mockEntity,
+		Build:  mockBuild,
+	}
+
+	err := getService.Get(paths, []string{"github.com/AmadlaOrg/TestEntity@v1.0.0"})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "duplicate")
+}
+
+func TestGet_BuildMetaError(t *testing.T) {
+	mockBuild := &build.MockEntityBuild{}
+
+	paths := &storage.AbsPaths{
+		Storage:  "/tmp/hery",
+		Entities: "/tmp/hery/entity",
+	}
+
+	mockBuild.EXPECT().Meta(*paths, "invalid-entity").Return(entity.Entity{}, fmt.Errorf("invalid entity URI"))
+
+	getService := &SGet{
+		Build: mockBuild,
+	}
+
+	err := getService.Get(paths, []string{"invalid-entity"})
+	assert.Error(t, err)
+}
+
+func TestDownload_AllHave(t *testing.T) {
+	getService := &SGet{}
+
+	entities := []entity.Entity{
+		{Have: true, Name: "Entity1"},
+		{Have: true, Name: "Entity2"},
+	}
+
+	paths := &storage.AbsPaths{
+		Storage:  "/tmp/hery",
+		Entities: "/tmp/hery/entity",
+	}
+
+	err := getService.download(paths, entities)
+	assert.NoError(t, err)
+}

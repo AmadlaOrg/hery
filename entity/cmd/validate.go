@@ -1,21 +1,22 @@
 package cmd
 
 import (
+	"fmt"
+	"log"
+
 	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
-	collectionPkgCmd "github.com/AmadlaOrg/hery/collection/cmd"
 	entityPkg "github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/cmd/util"
 	"github.com/AmadlaOrg/hery/entity/cmd/validation"
 	"github.com/AmadlaOrg/hery/entity/get"
+	entityValidation "github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/storage"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 var (
-	isValidateAll     bool
-	isRm              bool
-	getCollectionFlag = collectionPkgCmd.GetCollectionFlag
+	isValidateAll bool
+	isRm          bool
 )
 
 var ValidateCmd = &cobra.Command{
@@ -33,14 +34,8 @@ var ValidateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			collectionName, err := getCollectionFlag()
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			//err := TmpEntityCheck(collectionName, args)
 			getService := get.NewGetService(&gitConfig.Config{})
-			paths, err := getService.GetInTmp(collectionName, args)
+			paths, err := getService.GetInTmp(args)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -48,48 +43,37 @@ var ValidateCmd = &cobra.Command{
 			println(paths.Entities)
 			return
 		} else if isValidateAll {
+			gitCfg := &gitConfig.Config{}
 			entityCmdUtilService := util.NewEntityCmdUtilService()
-			err := entityCmdUtilService.Concoct(cmd, args, func(collectionName string, paths *storage.AbsPaths, args []string) {
-				entityService := entityPkg.NewEntityService(&gitConfig.Config{})
+			err := entityCmdUtilService.Concoct(cmd, args, func(paths *storage.AbsPaths, args []string) {
+				entityService := entityPkg.NewEntityService(gitCfg)
 				entityList, err := entityService.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
 					log.Fatal(err)
 				}
 
 				if len(entityList) == 0 {
-					println("No entity")
+					fmt.Println("No entities found")
+					return
 				}
 
-				//println(entityList)
-				//println(paths.Entities)
-
-				// FIXME:
-				/*entityValidation := entityValidation.NewEntityValidationService()
-
-				for _, entity := range entityList {
-					err := entityValidation.Entity(collectionName, entity.AbsPath, entity.Entity, map[string]any{})
-					if err != nil {
-						log.Fatal(err)
-						return
+				validationService := entityValidation.NewEntityValidationService(gitCfg)
+				for name, e := range entityList {
+					docs, readErr := entityService.ReadAll(e.AbsPath)
+					if readErr != nil {
+						fmt.Printf("Error reading entity %s: %v\n", name, readErr)
+						continue
 					}
-					println(entity.AbsPath)
-					println(entity.Name)
-				}*/
-
-				// Add your validation logic here
-				// entityDir, err := storage.Path()
-				// if err != nil {
-				//     fmt.Println("could not get the root storage directory:", err)
-				//     return
-				// }
-				// err = entity.Validate(entityDir)
-				// if err != nil {
-				//     fmt.Println("Error validating entities:", err)
-				//     return
-				// }
+					for _, doc := range docs {
+						if valErr := validationService.Entity(nil, doc); valErr != nil {
+							fmt.Printf("Validation failed for %s: %v\n", name, valErr)
+						} else {
+							fmt.Printf("Entity %s: valid\n", name)
+						}
+					}
+				}
 			})
 			if err != nil {
-				// TODO: Handle error
 				return
 			}
 		}

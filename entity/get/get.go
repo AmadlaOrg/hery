@@ -6,6 +6,7 @@ import (
 	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/build"
+	"github.com/AmadlaOrg/hery/entity/merge"
 	schemaPkg "github.com/AmadlaOrg/hery/entity/schema"
 	"github.com/AmadlaOrg/hery/entity/validation"
 	"github.com/AmadlaOrg/hery/entity/version"
@@ -15,13 +16,11 @@ import (
 	"sync"
 )
 
-// TODO: Change name to Retrieve. Get is to generic and can cause confusion (e.g.: used in certain patterns)
-
 // IGet is an interface for getting entities.
 type IGet interface {
-	GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error)
-	Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error
-	download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
+	GetInTmp(entities []string) (storage.AbsPaths, error)
+	Get(storagePaths *storage.AbsPaths, entities []string) error
+	download(storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
 }
 
 // SGet struct implements the EntityGetter interface.
@@ -45,12 +44,11 @@ var (
 	gitNewGitService = git.NewGitService
 )
 
-// GetInTmp retrieves entities based on the provided collection name and entities
-func (s *SGet) GetInTmp(collectionName string, entities []string) (storage.AbsPaths, error) {
+// GetInTmp retrieves entities into a temporary directory
+func (s *SGet) GetInTmp(entities []string) (storage.AbsPaths, error) {
 	storageService := storage.NewStorageService()
 
-	// Replace paths with temporary directory before .<collectionName>
-	storagePaths, err := storageService.TmpPaths(collectionName)
+	storagePaths, err := storageService.TmpPaths()
 	if err != nil {
 		return storage.AbsPaths{}, err
 	}
@@ -60,7 +58,7 @@ func (s *SGet) GetInTmp(collectionName string, entities []string) (storage.AbsPa
 		return *storagePaths, err
 	}
 
-	err = s.Get(collectionName, storagePaths, entities)
+	err = s.Get(storagePaths, entities)
 	if err != nil {
 		return *storagePaths, err
 	}
@@ -68,8 +66,8 @@ func (s *SGet) GetInTmp(collectionName string, entities []string) (storage.AbsPa
 	return *storagePaths, nil
 }
 
-// Get retrieves entities based on the provided collection name and entities
-func (s *SGet) Get(collectionName string, storagePaths *storage.AbsPaths, entities []string) error {
+// Get retrieves entities based on the provided entity URIs
+func (s *SGet) Get(storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
 		entityMeta, err := s.Build.Meta(*storagePaths, e)
@@ -84,93 +82,86 @@ func (s *SGet) Get(collectionName string, storagePaths *storage.AbsPaths, entiti
 		entityBuilds[i] = entityMeta
 	}
 
-	return s.download(collectionName, storagePaths, entityBuilds)
+	return s.download(storagePaths, entityBuilds)
 }
 
-// download retrieves entities in parallel using concurrency and calls on the functions to set up, validate and
-// collect sub entities
-func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
+// download retrieves entities in parallel
+func (s *SGet) download(storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
 
-	// Channel to collect errors
 	errCh := make(chan error, 1)
 
-	// TODO: Is Exist param ever used? Have is if it is in local and exist is for when it is found remotely
-
 	for _, entityMeta := range entitiesMeta {
-		// Skips if it is already there
 		if entityMeta.Have {
+			wg.Done()
 			continue
 		}
 
 		go func(entityMeta entity.Entity) {
 			defer wg.Done()
 
-			// 1. Add repository in the collection directory
+			// 1. Clone the repository
 			err := s.addRepo(entityMeta)
 			if err != nil {
 				errCh <- err
 				return
 			}
 
-			// 2. Gather the `<collection name>.hery` configuration file content
-			heryContent, err := s.Entity.Read(entityMeta.AbsPath, collectionName)
+			// 2. Read all .hery files in the entity directory
+			documents, err := s.Entity.ReadAll(entityMeta.AbsPath)
 			if err != nil {
-				errCh <- fmt.Errorf("error reading yaml: %v", err)
+				errCh <- fmt.Errorf("error reading hery files: %v", err)
 				return
 			}
 
-			// 3. Entity validation
-			// 3.1: Extract the basic hery structure
-			/*content, err := s.Entity.SetContent(entityMeta, heryContent)
-			if err != nil {
-				errCh <- fmt.Errorf("error setting entity content: %v", err)
-				return
-			}*/
-
-			/*selfEntitySchemaPath := s.Schema.GenerateSchemaPath(collectionName, entityMeta.AbsPath)
-			selfEntitySchema, err := s.Schema.Load(selfEntitySchemaPath)
-			if err != nil {
-				errCh <- fmt.Errorf("error loading schema: %v", err)
-				return
-			}*/
-
-			/*err = s.EntityValidation.Entity(collectionName, selfEntitySchema, content.Body)
-			if err != nil {
-				errCh <- fmt.Errorf("error validating entity: %v", err)
-				return
-			}*/
-
-			// 3.2: Extracted _body entity section to validate
-
-			// 3. Validate the content of hery file content to make sure it does not cause is issue later in the code
-			//
-			// -- This follows the Fail Fast principal --
-			//
-			// TODO:
-			/*err = s.EntityValidation.Entity(entityMeta.AbsPath, collectionName, entityMeta.Entity, heryContent)
-			if err != nil {
-				errCh <- fmt.Errorf("error validating entity: %v", err)
-				return
-			}*/
-
-			// 4. The reference to the other entities are found in the hery file content
-			//
-			// This function gathers the `_entity` properties that have the entity URIs that are used to pull the entity
-			// repositories.
-			//
-			// TODO: Add limit on how many times this can be called since we don't want infinite loop (maybe add a counter)
-			err = s.collectSubEntities(collectionName, storagePaths, heryContent)
-			if err != nil {
-				errCh <- fmt.Errorf("error collecting sub entities: %v", err)
-				return
+			// 2b. Resolve _parent chains via deep merge
+			parentLookup := func(selfURI string) (map[string]any, error) {
+				parentMeta, lookupErr := s.Build.Meta(*storagePaths, selfURI)
+				if lookupErr != nil {
+					return nil, lookupErr
+				}
+				if !parentMeta.Have {
+					if dlErr := s.download(storagePaths, []entity.Entity{parentMeta}); dlErr != nil {
+						return nil, dlErr
+					}
+				}
+				parentDocs, readErr := s.Entity.ReadAll(parentMeta.AbsPath)
+				if readErr != nil || len(parentDocs) == 0 {
+					return nil, fmt.Errorf("could not read parent entity %s", selfURI)
+				}
+				return parentDocs[0], nil
 			}
 
+			for i, doc := range documents {
+				resolved, resolveErr := merge.ResolveParentChain(doc, parentLookup)
+				if resolveErr != nil {
+					errCh <- fmt.Errorf("error resolving _parent chain: %v", resolveErr)
+					return
+				}
+				documents[i] = resolved
+			}
+
+			// 3. Collect sub-entities referenced via _type in _body (via schema $ref)
+			for _, doc := range documents {
+				if typeVal, ok := doc["_type"].(string); ok {
+					subEntityMeta, err := s.Build.Meta(*storagePaths, typeVal)
+					if err != nil {
+						errCh <- fmt.Errorf("error fetching sub entity meta: %v", err)
+						return
+					}
+					if !subEntityMeta.Have {
+						if err := s.download(storagePaths, []entity.Entity{subEntityMeta}); err != nil {
+							errCh <- fmt.Errorf("error downloading sub entities: %v", err)
+							return
+						}
+					}
+				}
+			}
 		}(entityMeta)
 	}
 
-	wg.Wait() // TODO: Just hangs here
+	wg.Wait()
 	close(errCh)
 
 	var combinedErr error
@@ -185,12 +176,8 @@ func (s *SGet) download(collectionName string, storagePaths *storage.AbsPaths, e
 	return combinedErr
 }
 
-// addRepo does all the tasks required to setup a new entity (or entity with a different version)
-// TODO: Add a timer limit (maybe go-git has something for that) so that it does not get
-// TODO: Make sure we have clear error. Because it seems it just hangs without clear error.
-// TODO: Might want to add hashing of the entity once it was downloaded to have verification that nothing was corrupted for Fail Fast principal
+// addRepo clones the entity repository and checks out the correct version
 func (s *SGet) addRepo(entityMeta entity.Entity) error {
-	// 1. Create the directory if it does not exist
 	err := osMkdirAll(entityMeta.AbsPath, perm)
 	if err != nil {
 		return err
@@ -198,76 +185,13 @@ func (s *SGet) addRepo(entityMeta entity.Entity) error {
 
 	gitService := gitNewGitService(entityMeta.RepoUrl, entityMeta.AbsPath, s.GitConfig)
 
-	// 2. Download the Entity with `git clone`
 	if err = gitService.Clone(); err != nil {
 		return fmt.Errorf("error fetching repo: %v", err)
 	}
 
-	// 3. Changes the repository to the tag (version) that was pass
 	if !entityMeta.IsPseudoVersion {
 		if err = gitService.CheckoutTag(entityMeta.Version); err != nil {
 			return fmt.Errorf("error checking out version: %v", err)
-		}
-	}
-
-	return nil
-}
-
-// collectSubEntities Calls on download function with the entity URIs that were found in the `_entity`
-//
-// For the `_body` contains the initial configuration of the setup of the entity `.hery` configuration. It might contain
-// `_entity` and this function also pulls those sub entities.
-//
-// download function is call because inside any entities there might be again sub entities.
-// TODO: Needs to be reviewed based on the new structure
-func (s *SGet) collectSubEntities(
-	collectionName string,
-	storagePaths *storage.AbsPaths,
-	henryContent map[string]interface{}) error {
-
-	// 1. Loops through the properties found in the `.hery` configuration file
-	// found in the `_entity` or the `_entity` in `_body`
-	var subEntitiesMeta []entity.Entity
-	for key, value := range henryContent {
-		// TODO: There is multiple keys that are at the same level that can be present: _entity, _meta, _id, and _body
-		if key == "_entity" {
-			entityPath, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("error converting yaml entity to string: %v", value)
-			}
-			subEntityMeta, err := s.Build.Meta(*storagePaths, entityPath)
-			if err != nil {
-				return fmt.Errorf("error fetching sub entity meta: %v", err)
-			}
-			subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
-		} else if key == "_body" {
-			selfMap, ok := value.(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("error converting yaml entity to string: %v", value)
-			}
-			for selfKey, selfValue := range selfMap {
-				if selfKey == "_entity" {
-					entityPath, ok := selfValue.(string)
-					if !ok {
-						return fmt.Errorf("error converting yaml entity to string: %v", selfValue)
-					}
-					subEntityMeta, err := s.Build.Meta(*storagePaths, entityPath)
-					if err != nil {
-						return fmt.Errorf("error fetching sub entity meta: %v", err)
-					}
-					subEntitiesMeta = append(subEntitiesMeta, subEntityMeta)
-				}
-			}
-		}
-	}
-
-	// 2. If sub entities found then send it to download function
-	// TODO: Add check that this entity does not already in `Have == true`
-	// TODO: Or maybe add that logic at a higher level so that it is not added to the `subEntitiesMeta` list
-	if len(subEntitiesMeta) > 0 {
-		err := s.download(collectionName, storagePaths, subEntitiesMeta)
-		if err != nil {
-			return fmt.Errorf("error downloading sub entities: %v", err)
 		}
 	}
 

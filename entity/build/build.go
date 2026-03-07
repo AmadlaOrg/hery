@@ -1,6 +1,7 @@
 package build
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"github.com/AmadlaOrg/hery/message"
@@ -115,8 +116,7 @@ func (s *SBuild) metaFromLocalWithVersion(entityUri, entityVersion string) (enti
 		return entityVals, fmt.Errorf("error extracting repo url: %v", err)
 	}
 
-	// TODO: Get hash
-	// entityVals.Hash
+	entityVals.Hash = fmt.Sprintf("%x", sha256.Sum256([]byte(entityUri)))
 
 	entityVals.Have = true
 	entityVals.Exist = true

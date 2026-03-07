@@ -21,7 +21,6 @@ func (m *MockFile) Exists(path string) bool {
 
 // Setup test suite
 func setup() {
-	// Mock os and filepath functions as needed
 	osGetwd = func() (string, error) {
 		return "/mock/path", nil
 	}
@@ -40,49 +39,20 @@ func setup() {
 	}
 }
 
-// FIXME:
-/*func TestPaths(t *testing.T) {
-	setup()
-	d := &AbsPaths{}
-	paths, err := d.Paths("testCollection")
-	assert.NoError(t, err)
-	assert.Equal(t, "/mock/path/testCollection", paths.Storage)
-}*/
-
-// FIXME:
-/*func TestEntityPath(t *testing.T) {
-	setup()
-	d := &AbsPaths{}
-	entityPath := d.EntityPath("/mock/path/entities", "entity1.json")
-	assert.Equal(t, "/mock/path/entities/entity1.json", entityPath)
-}*/
-
-// FIXME:
-/*func TestTmpPaths(t *testing.T) {
-	setup()
-	d := &AbsPaths{}
-	paths, err := d.TmpPaths("testCollection")
-	assert.NoError(t, err)
-	assert.Equal(t, "/tmp/mock/hery/testCollection", paths.Storage)
-}*/
-
 func TestTmpMain(t *testing.T) {
 	setup()
 	d := &AbsPaths{}
 	mainPath, err := d.TmpMain()
 	assert.NoError(t, err)
-	assert.Equal(t, "/tmp/mock/hery/.hery", mainPath)
+	assert.Equal(t, "/tmp/mock/hery", mainPath)
 }
 
 func TestMakePaths(t *testing.T) {
 	setup()
 	d := &AbsPaths{}
 	paths := AbsPaths{
-		Storage:    "/mock/path/storage",
-		Catalog:    "/mock/path/catalog",
-		Collection: "/mock/path/collection",
-		Entities:   "/mock/path/entities",
-		Cache:      "/mock/path/cache",
+		Storage:  "/mock/path/storage",
+		Entities: "/mock/path/entities",
 	}
 	err := d.MakePaths(paths)
 	assert.NoError(t, err)
@@ -104,18 +74,15 @@ func TestMakePaths_MkdirAllError(t *testing.T) {
 	}
 	d := &AbsPaths{}
 	paths := AbsPaths{
-		Storage:    "/mock/path/storage",
-		Catalog:    "/mock/path/catalog",
-		Collection: "/mock/path/collection",
-		Entities:   "/mock/path/entities",
-		Cache:      "/mock/path/cache",
+		Storage:  "/mock/path/storage",
+		Entities: "/mock/path/entities",
 	}
 	err := d.MakePaths(paths)
 	assert.Error(t, err)
 	assert.Equal(t, "mock error", err.Error())
 }
 
-// TestMainPathUsingEnvVar tests the Main function using an environment variable for the storage path
+// TestMainPathUsingEnvVar tests the Main function using an environment variable
 func TestMainPathUsingEnvVar(t *testing.T) {
 	mockStorage := NewMockStorage(t)
 
@@ -132,34 +99,17 @@ func TestMainPathUsingEnvVar(t *testing.T) {
 	mockStorage.AssertExpectations(t)
 }
 
-// TestMainPathUsingCurrentLocation tests the Main function using the current working directory
-func TestMainPathUsingCurrentLocation(t *testing.T) {
-	mockStorage := NewMockStorage(t)
-
-	cwd, _ := os.Getwd()
-	expectedPath := filepath.Join(cwd, ".hery")
-
-	mockStorage.On("Main").Return(expectedPath, nil)
-
-	actualPath, err := mockStorage.Main()
-
-	assert.NoError(t, err)
-	assert.Equal(t, expectedPath, actualPath)
-
-	mockStorage.AssertExpectations(t)
-}
-
-// TestMainPathUsingDefault tests the Main function using the default path based on the operating system
+// TestMainPathUsingDefault tests the Main function using the default path
 func TestMainPathUsingDefault(t *testing.T) {
 	mockStorage := NewMockStorage(t)
 
 	var expectedPath string
 	switch runtime.GOOS {
 	case "windows":
-		expectedPath = filepath.Join(os.Getenv("APPDATA"), "Hery")
-	default: // "linux" and "darwin"
+		expectedPath = filepath.Join(os.Getenv("APPDATA"), "hery")
+	default:
 		homeDir, _ := os.UserHomeDir()
-		expectedPath = filepath.Join(homeDir, ".hery")
+		expectedPath = filepath.Join(homeDir, ".cache", "hery")
 	}
 
 	mockStorage.On("Main").Return(expectedPath, nil)
@@ -172,40 +122,11 @@ func TestMainPathUsingDefault(t *testing.T) {
 	mockStorage.AssertExpectations(t)
 }
 
-// TestPaths tests the Paths function to ensure correct paths are returned
-// FIXME:
-/*func TestPaths(t *testing.T) {
-	mockStorage := NewMockStorage(t)
-
-	mainPath := "/mock/storage"
-	collectionName := "mockCollection"
-	collectionPath := filepath.Join(mainPath, collectionName)
-	entityPath := filepath.Join(collectionPath, "entity")
-	cachePath := filepath.Join(collectionPath, "mockCollection.cache")
-
-	expectedPaths := &AbsPaths{
-		Storage:    mainPath,
-		Collection: collectionPath,
-		Entities:   entityPath,
-		Cache:      cachePath,
-	}
-
-	mockStorage.On("Main").Return(mainPath, nil)
-	mockStorage.On("Paths", collectionName).Return(expectedPaths, nil)
-
-	actualPaths, err := mockStorage.Paths(collectionName)
-
-	assert.NoError(t, err)
-	assert.Equal(t, expectedPaths, actualPaths)
-
-	mockStorage.AssertExpectations(t)
-}*/
-
-// TestEntityPath tests the EntityPath function to ensure the correct path is returned
+// TestEntityPath tests the EntityPath function
 func TestEntityPath(t *testing.T) {
 	mockStorage := NewMockStorage(t)
 
-	entitiesPath := "/mock/storage/mockCollection/entity"
+	entitiesPath := "/mock/storage/entity"
 	entityRelativePath := "some/entity.yaml"
 	expectedPath := filepath.Join(entitiesPath, entityRelativePath)
 
@@ -218,7 +139,7 @@ func TestEntityPath(t *testing.T) {
 	mockStorage.AssertExpectations(t)
 }
 
-// TestMainError tests the case when an error occurs in the Main function
+// TestMainError tests error case
 func TestMainError(t *testing.T) {
 	mockStorage := NewMockStorage(t)
 

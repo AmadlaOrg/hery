@@ -3,10 +3,12 @@ package parser
 import (
 	"encoding/json"
 	"errors"
-	"github.com/AmadlaOrg/hery/cache/database"
-	"github.com/AmadlaOrg/hery/entity"
+	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/AmadlaOrg/hery/cache/database"
+	"github.com/AmadlaOrg/hery/entity"
 )
 
 type IParser interface {
@@ -24,351 +26,148 @@ var (
 	jsonMarshal = json.Marshal
 )
 
-// Entity parses the entity to SQLite 3 struct that can be used in the query builder in the database package
-func (s *SParser) Entity(entity *entity.Entity) ([]database.Table, error) {
-
-	// 1. Makes sure that the database connection is initialized
+// Entity parses the entity and inserts it into the entities table.
+func (s *SParser) Entity(e *entity.Entity) ([]database.Table, error) {
 	if !s.database.IsInitialized() {
-		// TODO: Maybe have a standard error for this
 		return nil, errors.New("database is not initialized")
 	}
 
-	// 2. Inserts the entity's information in the `entities` table
-	// - It needs to execute
-	entitiesTable := s.entitiesEntityToTable(entity)
+	entitiesTable := s.entitiesEntityToTable(e)
 	s.database.Insert(entitiesTable)
 	err := s.database.Apply()
 	if err != nil {
 		return nil, err
 	}
 
-	/*metaTable := s.metaToTable(entity)
-	s.database.Insert(metaTable)
-
-	s.bodyToTable(entity)
-	s.bodyDataTextToTable(entity)
-	s.bodyDataNumericToTable(entity)
-	s.bodyDataRealToTable(entity)
-	s.bodyDataBooleanToTable(entity)
-	s.bodyDataDateToTable(entity)
-	s.bodyDataDateTimeToTable(entity)
-	s.bodyDataConnectionToTable(entity)*/
-
-	// TODO: Use schema to determine the data type for the SQL
-	// string == TEXT
-	// TODO: Convert schema from the struct to the JSON-Schema string
-	// TODO: For `Id` always: `Id TEXT PRIMARY KEY,`
-	// TODO: Maybe always have `NOT NULL` as a constrain. E.g.: name TEXT NOT NULL
-
-	// TODO: Handle different structures of _meta data
-	// TODO: Single entity:
-	/*
-		_meta:
-		  _entity: github.com/AmadlaOrg/Entity@latest
-		  _body:
-		    name: RandomName
-		    description: Some description.
-		    category: QA
-	*/
-	// TODO: Or list:
-	/*
-	  external-list:
-	    - _entity: github.com/AmadlaOrg/QAFixturesSubEntityWithMultiSubEntities@latest
-	      _body:
-	        message: Another random message.
-	    - _entity: github.com/AmadlaOrg/QAFixturesSubEntityWithMultiSubEntities@latest
-	      _body:
-	        message: Again, another random message.
-	    - _entity: github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest
-	      _body:
-	        title: Hello World!
-	    - _entity: github.com/AmadlaOrg/QAFixturesEntityPseudoVersion@latest
-	      _body:
-	        name: John Doe
-	*/
-
-	// TODO: For UUID support
-	/*
-		CREATE TABLE example (
-		    id TEXT PRIMARY KEY NOT NULL DEFAULT
-		);
-	*/
-
-	//entitySchema := entity.Schema.Schema
-
-	// TODO:
-	//entity.Schema.CompiledSchema.Types
-
-	/*var (
-		dynamicColumns       []database.Column
-		dynamicRelationships []database.Relationships
-	)
-	for key, value := range entitySchema {
-		// Ensure "properties" is being processed
-		if key == "properties" {
-			properties, ok := value.(map[string]any)
-			if !ok {
-				continue // Skip if "properties" is not the expected type
-			}
-
-			for schemaPropertyName, schemaPropertyValue := range properties {
-				// Assert schemaPropertyValue is a map
-				propertyDetails, ok := schemaPropertyValue.(map[string]any)
-				if !ok {
-					continue // Skip if schemaPropertyValue is not a map
-				}
-
-				var dataType database.DataType
-
-				// Change the data type if the "format" property is present
-				if formatValue, ok := propertyDetails["format"].(string); ok {
-					if dataFormat, valid := schema.StringToDataFormat(formatValue); valid {
-						dataType = parseJsonSchemaFormatToSQLiteType(dataFormat)
-					}
-				} else if typeValue, ok := propertyDetails["type"].(string); ok {
-					if dataTypeValue, valid := schema.StringToDataType(typeValue); valid {
-						dataType = parseJsonSchemaToSQLiteType(dataTypeValue)
-					}
-				}
-
-				// Append the column definition
-				dynamicColumns = append(dynamicColumns, database.Column{
-					ColumnName: schemaPropertyName,
-					DataType:   dataType,
-					Constraint: "", // TODO: Use constraints from JSON Schema (e.g., unique, required)
-				})
-			}
-		}
-	}
-
-	entityBody := entity.Content.Body*/
-
-	// TODO: It needs data type and constrain
-	//var dynamicColumns []database.Column
-	/*for key, value := range entityBody {
-		//dataType := determineDataType(value)
-		// TODO: Lookup the JsonSchema for the datatype
-
-	}*/
-
-	// TODO:
-	/*var dynamicRelationships []database.Relationships
-	for key, value := range entityBody {
-		dynamicRelationships = append(dynamicRelationships, database.Relationships{})
-	}*/
-
 	return []database.Table{
-		{},
-		{},
-		{
-			Name: s.EntityToTableName(entity.Uri),
-			Columns: []database.Column{
-				{},
-			},
-		},
+		entitiesTable,
 	}, nil
 }
 
-func (s *SParser) entitiesEntityToTable(entity *entity.Entity) database.Table {
+func (s *SParser) entitiesEntityToTable(e *entity.Entity) database.Table {
+	metaJson, _ := jsonMarshal(e.Content.Meta)
+	bodyJson, _ := jsonMarshal(e.Content.Body)
+
+	// Build the full merged document for merged_json
+	merged := map[string]any{
+		"_type": e.Content.Type,
+	}
+	if e.Content.Self != "" {
+		merged["_self"] = e.Content.Self
+	}
+	if e.Content.Parent != "" {
+		merged["_parent"] = e.Content.Parent
+	}
+	if e.Content.Meta != nil {
+		merged["_meta"] = e.Content.Meta
+	}
+	if e.Content.Body != nil {
+		merged["_body"] = e.Content.Body
+	}
+	mergedJson, _ := jsonMarshal(merged)
+
 	var entitiesTable database.Table
 	entitiesTable.Name = "entities"
 	entitiesTable.Rows = []database.Row{
 		{
-			"uri":               entity.Uri,
-			"name":              entity.Name,
-			"repo_url":          entity.RepoUrl,
-			"origin":            entity.Origin,
-			"version":           entity.Version,
-			"is_latest_version": entity.IsLatestVersion,
-			"is_pseudo_version": entity.IsPseudoVersion,
-			"abs_path":          entity.AbsPath,
-			"have":              entity.Have,
-			"hash":              entity.Hash,
-			"exist":             entity.Exist,
-			"schema_json":       entity.SchemaJson,
+			"entity_type":       e.Content.Type,
+			"entity_self":       e.Content.Self,
+			"entity_parent":     e.Content.Parent,
+			"uri":               e.Uri,
+			"name":              e.Name,
+			"repo_url":          e.RepoUrl,
+			"origin":            e.Origin,
+			"version":           e.Version,
+			"is_latest_version": e.IsLatestVersion,
+			"is_pseudo_version": e.IsPseudoVersion,
+			"abs_path":          e.AbsPath,
+			"have":              e.Have,
+			"hash":              e.Hash,
+			"exist":             e.Exist,
+			"schema_json":       e.SchemaJson,
+			"meta_json":         string(metaJson),
+			"body_json":         string(bodyJson),
+			"merged_json":       string(mergedJson),
 		},
 	}
 
 	return entitiesTable
 }
 
-func (s *SParser) metaToTable(entity *entity.Entity) database.Table {
-	var metaTable database.Table
-	metaTable.Name = "meta"
-	metaTable.Rows = []database.Row{
-		{
-			"entities_rowid": "",
-			"for_body_rowid": "",
-			"body_rowid":     "",
-		},
-	}
-
-	return metaTable
-}
-
-func (s *SParser) bodyToTable(entity *entity.Entity) database.Table {
-	var bodyTable database.Table
-	bodyTable.Name = "body"
-	bodyTable.Rows = []database.Row{
-		{
-			"entities_rowid": "",
-			"_id":            entity.Id,
-			"body":           entity.ContentJson,
-		},
-	}
-
-	return bodyTable
-}
-
-func (s *SParser) bodyDataTextToTable(entity *entity.Entity) database.Table {
-	var bodyDataTextTable database.Table
-	bodyDataTextTable.Name = "body_data_TEXT"
-	bodyDataTextTable.Rows = []database.Row{
-		{
-			"body_rowid":     "",
-			"property_name":  "",
-			"property_value": "",
-		},
-	}
-
-	return bodyDataTextTable
-}
-
-func (s *SParser) bodyDataNumericToTable(entity *entity.Entity) database.Table {
-	var bodyDataNumericTable database.Table
-	bodyDataNumericTable.Name = "body_data_NUMERIC"
-	bodyDataNumericTable.Rows = []database.Row{
-		{
-			"body_rowid":     "",
-			"property_name":  "",
-			"property_value": "",
-		},
-	}
-
-	return bodyDataNumericTable
-}
-
-func (s *SParser) bodyDataRealToTable(entity *entity.Entity) database.Table {
-	var bodyDataRealTable database.Table
-	bodyDataRealTable.Name = "body_data_REAL"
-	bodyDataRealTable.Rows = []database.Row{
-		{
-			"body_rowid":     "",
-			"property_name":  "",
-			"property_value": "",
-		},
-	}
-
-	return bodyDataRealTable
-}
-
-func (s *SParser) bodyDataBooleanToTable(entity *entity.Entity) database.Table {
-	var bodyDataBooleanTable database.Table
-	bodyDataBooleanTable.Name = "body_data_BOOLEAN"
-	bodyDataBooleanTable.Rows = []database.Row{
-		{
-			"body_rowid":     "",
-			"property_name":  "",
-			"property_value": "",
-		},
-	}
-
-	return bodyDataBooleanTable
-}
-
-func (s *SParser) bodyDataDateToTable(entity *entity.Entity) database.Table {
-	var bodyDataDateTable database.Table
-	bodyDataDateTable.Name = "body_data_DATE"
-	bodyDataDateTable.Rows = []database.Row{
-		{
-			"body_rowid":     "",
-			"property_name":  "",
-			"property_value": "",
-		},
-	}
-
-	return bodyDataDateTable
-}
-
-func (s *SParser) bodyDataDateTimeToTable(entity *entity.Entity) database.Table {
-	var bodyDataDateTimeTable database.Table
-	bodyDataDateTimeTable.Name = "body_data_DATETIME"
-	bodyDataDateTimeTable.Rows = []database.Row{
-		{
-			"body_rowid":     "",
-			"property_name":  "",
-			"property_value": "",
-		},
-	}
-
-	return bodyDataDateTimeTable
-}
-
-func (s *SParser) bodyDataConnectionToTable(entity *entity.Entity) database.Table {
-	var bodyDataConnectionTable database.Table
-	bodyDataConnectionTable.Name = "body_data_connection"
-	bodyDataConnectionTable.Rows = []database.Row{
-		{
-			"parent_body_data_TEXT_rowid": "",
-			"body_data_TEXT_rowid":        "",
-		},
-	}
-
-	return bodyDataConnectionTable
-}
-
-// EntityToTableName
+// EntityToTableName converts an entity URI to a valid SQL table name.
 func (s *SParser) EntityToTableName(entity string) string {
 	re := regexp.MustCompile(`[^a-zA-Z0-9]+`)
 	tableName := re.ReplaceAllString(entity, "_")
 	return strings.Trim(tableName, "_")
 }
 
-// ParseTable
+// DatabaseTable parses a JSON-encoded table row into an Entity.
 func (s *SParser) DatabaseTable(data []byte) (entity.Entity, error) {
-	return entity.Entity{}, nil
-}
-
-// ParseRow
-func (s *SParser) DatabaseRow(data []byte) (entity.Entity, error) {
-	return entity.Entity{}, nil
-}
-
-//
-// Private methods
-//
-
-func (s *SParser) databaseInsertTableEntities(entity entity.Entity) (*[]database.Table, error) {
-	schema := entity.Schema.Schema
-	// Convert schema map[string]any into a JSON string for cache storage
-	schemaJsonBytes, err := jsonMarshal(schema)
-	if err != nil {
-		return nil, err
+	var row map[string]any
+	if err := json.Unmarshal(data, &row); err != nil {
+		return entity.Entity{}, fmt.Errorf("failed to unmarshal table data: %w", err)
 	}
-	schemaJsonString := string(schemaJsonBytes)
+	return s.rowToEntity(row), nil
+}
 
-	return &[]database.Table{
-		{
-			Name: "Entities",
-			Rows: []map[string]any{
-				{
-					"Id":              entity.Id.String(),
-					"CustomId":        entity.CustomId,
-					"Uri":             entity.Uri,
-					"Name":            entity.Name,
-					"RepoUrl":         entity.RepoUrl,
-					"Origin":          entity.Origin,
-					"Version":         entity.Version,
-					"IsLatestVersion": entity.IsLatestVersion,
-					"IsPseudoVersion": entity.IsPseudoVersion,
-					"AbsPath":         entity.AbsPath,
-					"Have":            entity.Have,
-					"Hash":            entity.Hash,
-					"Exist":           entity.Exist,
-					"Schema":          schemaJsonString,
-					"Content":         entity.ContentJson,
-				},
-			},
+// DatabaseRow parses a JSON-encoded database row into an Entity.
+func (s *SParser) DatabaseRow(data []byte) (entity.Entity, error) {
+	var row map[string]any
+	if err := json.Unmarshal(data, &row); err != nil {
+		return entity.Entity{}, fmt.Errorf("failed to unmarshal row data: %w", err)
+	}
+	return s.rowToEntity(row), nil
+}
+
+func (s *SParser) rowToEntity(row map[string]any) entity.Entity {
+	str := func(key string) string {
+		if v, ok := row[key].(string); ok {
+			return v
+		}
+		return ""
+	}
+	boolVal := func(key string) bool {
+		switch v := row[key].(type) {
+		case bool:
+			return v
+		case float64:
+			return v != 0
+		}
+		return false
+	}
+
+	e := entity.Entity{
+		Uri:             str("uri"),
+		Name:            str("name"),
+		RepoUrl:         str("repo_url"),
+		Origin:          str("origin"),
+		Version:         str("version"),
+		IsLatestVersion: boolVal("is_latest_version"),
+		IsPseudoVersion: boolVal("is_pseudo_version"),
+		AbsPath:         str("abs_path"),
+		Have:            boolVal("have"),
+		Hash:            str("hash"),
+		Exist:           boolVal("exist"),
+		SchemaJson:      str("schema_json"),
+		Content: entity.Content{
+			Type:   str("entity_type"),
+			Self:   str("entity_self"),
+			Parent: str("entity_parent"),
 		},
-	}, nil
+	}
+
+	if metaStr := str("meta_json"); metaStr != "" {
+		var meta map[string]any
+		if err := json.Unmarshal([]byte(metaStr), &meta); err == nil {
+			e.Content.Meta = meta
+		}
+	}
+	if bodyStr := str("body_json"); bodyStr != "" {
+		var body map[string]any
+		if err := json.Unmarshal([]byte(bodyStr), &body); err == nil {
+			e.Content.Body = body
+		}
+	}
+
+	return e
 }

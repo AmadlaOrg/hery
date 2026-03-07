@@ -31,18 +31,6 @@ packages:
           dir: "{{.InterfaceDir}}"
           mockName: "MockCacheParser"
           inpackage: True
-  github.com/AmadlaOrg/hery/collection:
-    interfaces:
-      ICollection:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockCollection"
-          inpackage: True
-      ICollectionEntity:
-        config:
-          dir: "{{.InterfaceDir}}"
-          mockName: "MockCollectionEntity"
-          inpackage: True
   github.com/AmadlaOrg/hery/entity:
     interfaces:
       IEntity:
@@ -59,7 +47,7 @@ packages:
           inpackage: True
   github.com/AmadlaOrg/hery/entity/cmd/util:
     interfaces:
-      IBuild:
+      IUtil:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityCmdUtil"

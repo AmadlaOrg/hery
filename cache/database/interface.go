@@ -10,6 +10,7 @@ import (
 type ISqlDb interface {
 	Begin() (*sql.Tx, error)
 	Exec(query string, args ...any) (sql.Result, error)
+	Query(query string, args ...any) (*sql.Rows, error)
 	Close() error
 	SetMaxOpenConns(n int)
 	SetMaxIdleConns(n int)

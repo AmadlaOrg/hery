@@ -13,17 +13,8 @@ func AllExist(absPaths storage.AbsPaths) error {
 	if !fileExists(absPaths.Storage) {
 		return fmt.Errorf("storage %s does not exist", absPaths.Storage)
 	}
-	if !fileExists(absPaths.Catalog) {
-		return fmt.Errorf("catalog %s does not exist", absPaths.Catalog)
-	}
-	if !fileExists(absPaths.Collection) {
-		return fmt.Errorf("collection %s does not exist", absPaths.Storage)
-	}
 	if !fileExists(absPaths.Entities) {
-		return fmt.Errorf("entities %s does not exist", absPaths.Storage)
-	}
-	if !fileExists(absPaths.Cache) {
-		return fmt.Errorf("cache %s does not exist", absPaths.Storage)
+		return fmt.Errorf("entities %s does not exist", absPaths.Entities)
 	}
 	return nil
 }

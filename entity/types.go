@@ -6,16 +6,7 @@ import (
 )
 
 const (
-	// EntityNameMatch The entity name format
-	// TODO: It also does not seemed to be used
-	//EntityNameMatch = `^[a-zA-Z0-9]+$`
-
-	// EntityNameAndVersionMatch The entity name and version format
-	// @deprecated: the version is wrong since it changed
-	// TODO: It also does not seemed to be used
-	//EntityNameAndVersionMatch = `^([a-zA-Z0-9]+)(@v\d+\.\d+\.\d+)$`
-
-	// FormatEntityPathAndNameVersion Used to identify the entities that are stored in a collection
+	// FormatEntityPathAndNameVersion matches entity paths with name@version format
 	FormatEntityPathAndNameVersion = `^(.+[/\/]\.[A-z0-9-_]+[/\/]entity[/\/])(.+)([/\/].+@).+$`
 )
 
@@ -26,7 +17,7 @@ type Entity struct {
 	Id              uuid.UUID      // Id is in uuid format (e.g.: 97d4b783-f448-483c-8111-380d6082ae1c)
 	CustomId        string         // CustomId is only fill
 	Uri             string         // Reserved (e.g.: github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0)
-	Name            string         // The simple name of an entity (e.g.: WebServer) // TODO: Remove it and replace it with RepoUrl
+	Name            string         // The simple name of an entity (e.g.: WebServer)
 	RepoUrl         string         // The full repository URL (e.g.: https://github.com/AmadlaOrg/EntityApplication)
 	Origin          string         // The entity URL path (it can also be used as a relative path) (e.g.: github.com/AmadlaOrg/EntityApplication)
 	Version         string         // The entity version (what is after `@`) (e.g.: v1.0.0)
@@ -44,10 +35,11 @@ type Entity struct {
 
 // Content of an entity
 type Content struct {
-	Entity string             `json:"_entity,omitempty"`
-	Id     string             `json:"_id,omitempty"`
-	Meta   NotFormatedContent `json:"_meta"`
-	Body   NotFormatedContent `json:"_body"`
+	Type   string             `json:"_type"`
+	Self   string             `json:"_self,omitempty"`
+	Parent string             `json:"_parent,omitempty"`
+	Meta   NotFormatedContent `json:"_meta,omitempty"`
+	Body   NotFormatedContent `json:"_body,omitempty"`
 }
 
 // NotFormatedContent when the content of entity as not been structured

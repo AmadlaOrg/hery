@@ -17,7 +17,6 @@ func main() {
 		"1.0.0",
 		func(rootCmd *cobra.Command) {
 			rootCmd.AddCommand(cmd.SettingsCmd)
-			rootCmd.AddCommand(cmd.CollectionCmd)
 			rootCmd.AddCommand(cmd.ComposeCmd)
 			rootCmd.AddCommand(cmd.QueryCmd)
 			rootCmd.AddCommand(cmd.EntityCmd)

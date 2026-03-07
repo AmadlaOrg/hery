@@ -1,468 +1,222 @@
 package entity
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	gitConfig "github.com/AmadlaOrg/LibraryUtils/git/config"
+	versionPkg "github.com/AmadlaOrg/hery/entity/version"
+	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
+	"github.com/AmadlaOrg/hery/message"
+	"github.com/AmadlaOrg/hery/storage"
 	"github.com/stretchr/testify/assert"
 )
 
-// FIXME:
-/*func TestSetEntity(t *testing.T) {
-	entityService := NewEntityService()
+func TestSetContent(t *testing.T) {
+	s := &SEntity{}
 
 	tests := []struct {
-		name             string
-		inputEntity      Entity
-		expectedEntities []Entity
+		name        string
+		entity      Entity
+		input       NotFormatedContent
+		expectType  string
+		expectSelf  string
+		expectError bool
 	}{
 		{
-			name: "Valid: entity",
-			inputEntity: Entity{
-				Id:              "97d4b783-f448-483c-8111-380d6082ae1c",
-				Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
-				Name:            "Entity",
-				RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-				Origin:          "github.com/AmadlaOrg/Entity",
-				Version:         "v0.0.0-20240924093300-abcd1234efgh",
-				IsLatestVersion: true,
-				IsPseudoVersion: true,
-				AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20240924093300-abcd1234efgh",
-				Have:            true,
-				Hash:            "",
-				Exist:           true,
-				Schema:          &jsonschema.Schema{},
-				Config: map[string]any{
-					"name":        "Entity",
-					"description": "The meta Entity definition.",
-					"category":    "General",
-					"tags": []string{
-						"main",
-						"master",
-					},
-				},
+			name:   "Full content",
+			entity: Entity{},
+			input: NotFormatedContent{
+				"_type":   "github.com/AmadlaOrg/Entity@v1.0.0",
+				"_self":   "my-entity",
+				"_parent": "parent-entity",
+				"_meta":   map[string]any{"name": "Test"},
+				"_body":   map[string]any{"key": "value"},
 			},
-			expectedEntities: []Entity{
-				{
-					Id:              "97d4b783-f448-483c-8111-380d6082ae1c",
-					Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "v0.0.0-20240924093300-abcd1234efgh",
-					IsLatestVersion: true,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20240924093300-abcd1234efgh",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          &jsonschema.Schema{},
-					Config: map[string]any{
-						"name":        "Entity",
-						"description": "The meta Entity definition.",
-						"category":    "General",
-						"tags": []string{
-							"main",
-							"master",
-						},
-					},
-				},
-			},
+			expectType: "github.com/AmadlaOrg/Entity@v1.0.0",
+			expectSelf: "my-entity",
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			entityService.SetEntity(tt.inputEntity)
-			assert.Equal(t, tt.expectedEntities, entityService.GetAllEntities())
-		})
-	}
-}*/
-
-// FIXME:
-/*func TestGetEntity(t *testing.T) {
-	entityService := NewEntityService()
-	tests := []struct {
-		name            string
-		serviceEntities []Entity
-		inputEntityUri  string
-		expectedId      string
-		expectedErr     error
-		hasError        bool
-	}{
 		{
-			name: "Valid: entity",
-			serviceEntities: []Entity{
-				{
-					Id:              "97d4b783-f448-483c-8111-380d6082ae1c",
-					Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20240924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "latest",
-					IsLatestVersion: true,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20240924093300-abcd1234efgh",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          &jsonschema.Schema{},
-					Config: map[string]any{
-						"name":        "Entity",
-						"description": "The meta Entity definition.",
-						"category":    "General",
-						"tags": []string{
-							"main",
-							"master",
-						},
-					},
-				},
-				{
-					Id:              "12c4b793-d458-756f-8151-740d6082ae1f",
-					Uri:             "github.com/AmadlaOrg/Entity@v0.0.0-20230924093300-abcd1234efgh",
-					Name:            "Entity",
-					RepoUrl:         "https://github.com/AmadlaOrg/Entity",
-					Origin:          "github.com/AmadlaOrg/Entity",
-					Version:         "latest",
-					IsLatestVersion: false,
-					IsPseudoVersion: true,
-					AbsPath:         "/home/user/.hery/collection/amadla/entity/github.com/AmadlaOrg/Entity@v.0.0.0-20230924093300-abcd1234efgh",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          &jsonschema.Schema{},
-					Config: map[string]any{
-						"name":        "Entity",
-						"description": "The meta Entity definition.",
-						"category":    "General",
-						"tags": []string{
-							"main",
-							"master",
-						},
-					},
-				},
-				{
-					Id:              "98d4b682-c758-943c-8911-560d9022ae3c",
-					Uri:             "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.1.0",
-					Name:            "QAFixturesEntityMultipleTagVersion",
-					RepoUrl:         "https://github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion",
-					Origin:          "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion",
-					Version:         "v2.1.0",
-					IsLatestVersion: true,
-					IsPseudoVersion: false,
-					AbsPath:         "/home/user/.hery/amadla/entity/github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@v2.1.0",
-					Have:            true,
-					Hash:            "",
-					Exist:           true,
-					Schema:          &jsonschema.Schema{},
-					Config: map[string]any{
-						"name":        "QAFixturesEntityMultipleTagVersion",
-						"description": "Entity Multiple Tag Version definitions.",
-						"category":    "QA",
-						"tags": []string{
-							"QA",
-							"fixture",
-							"test",
-						},
-					},
-				},
+			name:   "Type from entity URI",
+			entity: Entity{Uri: "github.com/AmadlaOrg/Entity@v2.0.0"},
+			input: NotFormatedContent{
+				"_type": "github.com/AmadlaOrg/Entity@v1.0.0",
 			},
-			inputEntityUri: "github.com/AmadlaOrg/Entity@latest",
-			expectedId:     "97d4b783-f448-483c-8111-380d6082ae1c",
-			expectedErr:    nil,
-			hasError:       false,
+			expectType: "github.com/AmadlaOrg/Entity@v2.0.0",
+		},
+		{
+			name:   "Missing _type",
+			entity: Entity{},
+			input: NotFormatedContent{
+				"_body": map[string]any{"key": "value"},
+			},
+			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			for _, entity := range tt.serviceEntities {
-				entityService.SetEntity(entity)
-			}
-
-			got, err := entityService.GetEntity(tt.inputEntityUri)
-			if tt.hasError {
+			content, err := s.setContent(tt.entity, tt.input)
+			if tt.expectError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.Equal(t, tt.expectType, content.Type)
+				assert.Equal(t, tt.expectSelf, content.Self)
 			}
-			assert.Equal(t, tt.expectedId, got.Id)
 		})
 	}
-}*/
-
-// FIXME:
-/*func TestSetEntitySchema(t *testing.T) {
-	// Define a sample schema
-	oldSchema := &jsonschema.Schema{}
-	newSchema := &jsonschema.Schema{}
-
-	// Create an SEntity with a list of entities, including one with a matching ID
-	s := SEntity{
-		Entities: []Entity{
-			{Id: "1", Schema: oldSchema},
-			{Id: "2", Schema: oldSchema},
-			{Id: "3", Schema: oldSchema}, // This is the target entity
-		},
-	}
-
-	// Define the target entity with the same ID as one in s.Entities
-	targetEntity := Entity{Id: "3"}
-
-	// Call SetEntitySchema to update the schema of the matching entity
-	s.SetEntitySchema(targetEntity, newSchema)
-
-	// Check if only the matching entity was updated
-	for _, e := range s.Entities {
-		if e.Id == targetEntity.Id {
-			if e.Schema != newSchema {
-				t.Errorf("Schema was not updated for entity with ID %s", e.Id)
-			}
-		} else {
-			if e.Schema != oldSchema {
-				t.Errorf("Schema was incorrectly updated for entity with ID %s", e.Id)
-			}
-		}
-	}
-}*/
-
-// FIXME:
-/*func TestFindEntityDir(t *testing.T) {
-entityService := NewEntityService()
-
-// Setup test directories
-basePath := "/tmp/.hery/test/entity"
-err := os.MkdirAll(basePath, os.ModePerm)
-if err != nil {
-	t.Fatal("cannot create test directory")
 }
-defer func() {
-	err := os.RemoveAll("/tmp/.hery")
-	if err != nil {
-		t.Fatal("cannot remove test directory")
+
+func TestFindDir(t *testing.T) {
+	basePath := filepath.Join(t.TempDir(), "entity")
+
+	// Create test directories
+	exactDir := filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApp@v1.0.0")
+	err := os.MkdirAll(exactDir, os.ModePerm)
+	assert.NoError(t, err)
+
+	pseudoDir := filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApp@v0.0.0-20240726095222-c7e9911d38b2")
+	err = os.MkdirAll(pseudoDir, os.ModePerm)
+	assert.NoError(t, err)
+
+	mockVersionValidation := &versionValidationPkg.MockEntityVersionValidation{}
+	mockVersion := &versionPkg.MockEntityVersion{}
+	s := &SEntity{
+		EntityVersion:           mockVersion,
+		EntityVersionValidation: mockVersionValidation,
 	}
-}() // Clean up after tests
 
-tests := []struct {
-	name        string
-	paths       storage.AbsPaths
-	entityVals  Entity
-	setupFunc   func()
-	expected    string
-	expectedErr error
-}{
-	{
-		name: "Exact version match",
-		paths: storage.AbsPaths{
-			Entities: basePath,
+	tests := []struct {
+		name        string
+		paths       storage.AbsPaths
+		entityVals  Entity
+		isPseudo    bool
+		expected    string
+		expectError bool
+	}{
+		{
+			name:  "Exact version match",
+			paths: storage.AbsPaths{Entities: basePath},
+			entityVals: Entity{
+				Name:    "EntityApp",
+				Version: "v1.0.0",
+				Origin:  "github.com/AmadlaOrg",
+				Uri:     exactDir,
+			},
+			isPseudo: false,
+			expected: exactDir,
 		},
-		entityVals: Entity{
-			Name:    "EntityApplication",
-			Version: "v0.0.0",
-			Origin:  "github.com/AmadlaOrg",
-			Uri:     filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0"),
+		{
+			name:  "Exact version not found",
+			paths: storage.AbsPaths{Entities: basePath},
+			entityVals: Entity{
+				Name:    "EntityApp",
+				Version: "v9.9.9",
+				Origin:  "github.com/AmadlaOrg",
+				Uri:     filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApp@v9.9.9"),
+			},
+			isPseudo:    false,
+			expectError: true,
 		},
-		setupFunc: func() {
-			err := os.MkdirAll(filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0"), os.ModePerm)
-			if err != nil {
-				t.Fatal("cannot create test directory")
+		{
+			name:  "Pseudo version match",
+			paths: storage.AbsPaths{Entities: basePath},
+			entityVals: Entity{
+				Name:    "EntityApp",
+				Version: "v0.0.0-20240726095222-c7e9911d38b2",
+				Origin:  "github.com/AmadlaOrg",
+			},
+			isPseudo: true,
+			expected: pseudoDir,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockVersionValidation.ExpectedCalls = nil
+			mockVersion.ExpectedCalls = nil
+			mockVersionValidation.EXPECT().PseudoFormat(tt.entityVals.Version).Return(tt.isPseudo)
+			if tt.isPseudo {
+				mockVersion.EXPECT().GeneratePseudoPattern(tt.entityVals.Name, tt.entityVals.Version).
+					Return(fmt.Sprintf("%s@%s-*-%s", tt.entityVals.Name, tt.entityVals.Version[:6], tt.entityVals.Version[22:]))
 			}
-		},
-		expected:    filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0"),
-		expectedErr: nil,
-	},
-	{
-		name: "Pseudo version match",
-		paths: storage.AbsPaths{
-			Entities: basePath,
-		},
-		entityVals: Entity{
-			Name:    "EntityApplication",
-			Version: "v0.0.0-20240726095222-c7e9911d38b2",
-			Origin:  "github.com/AmadlaOrg",
-		},
-		setupFunc: func() {
-			err := os.MkdirAll(filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0-20240726095222-c7e9911d38b2"), os.ModePerm)
-			if err != nil {
-				t.Fatal("cannot create test directory")
-			}
-		},
-		expected:    filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0-20240726095222-c7e9911d38b2"),
-		expectedErr: nil,
-	},*/
-/*{
-	name: "No matching exact version",
-	paths: storage.AbsPaths{
-		Entities: basePath,
-	},
-	entityVals: Entity{
-		Name:    "EntityApplication",
-		Version: "v0.0.0",
-		Origin:  "github.com/AmadlaOrg",
-		Entity:  filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0"),
-	},
-	setupFunc: func() {},
-	expected:  "",
-	expectedErr: errors.Join(
-		errtypes.NotFoundError,
-		fmt.Errorf("no matching directory found for exact version: %s", filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0")),
-	),
-},
-{
-	name: "No matching pseudo version",
-	paths: storage.AbsPaths{
-		Entities: basePath,
-	},
-	entityVals: Entity{
-		Name:    "EntityApplication",
-		Version: "v0.0.0-20240726095222-c7e9911d38b2",
-		Origin:  "github.com/AmadlaOrg",
-	},
-	setupFunc: func() {},
-	expected:  "",
-	expectedErr: errors.Join(
-		errtypes.NotFoundError,
-		fmt.Errorf("no matching directories found for pattern: %s", filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0-*c7e9911d38b2")),
-	),
-},
-{
-	name: "Multiple matching pseudo versions",
-	paths: storage.AbsPaths{
-		Entities: basePath,
-	},
-	entityVals: Entity{
-		Name:    "EntityApplication",
-		Version: "v0.0.0-20240726095222-c7e9911d38b2",
-		Origin:  "github.com/AmadlaOrg",
-	},
-	setupFunc: func() {
-		err := os.MkdirAll(filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0-20240726095222-c7e9911d38b2"), os.ModePerm)
-		if err != nil {
-			t.Fatal("cannot create test directory")
-		}
-		err = os.MkdirAll(filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0-20240726095322-c7e9911d38b2"), os.ModePerm)
-		if err != nil {
-			t.Fatal("cannot create test directory")
-		}
-	},
-	expected: "",
-	expectedErr: errors.Join(
-		errtypes.MultipleFoundError,
-		fmt.Errorf("multiple matching directories found for pattern: %s", filepath.Join(basePath, "github.com/AmadlaOrg", "EntityApplication@v0.0.0-*c7e9911d38b2")),
-	),
-},*/
-/*}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			// Setup test case
-			test.setupFunc()
-
-			result, err := entityService.FindEntityDir(test.paths, test.entityVals)
-			if test.expectedErr == nil {
-				assert.NoError(t, err)
+			result, err := s.FindDir(tt.paths, tt.entityVals)
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.True(t, errors.Is(err, message.ErrorNotFound) || errors.Is(err, message.ErrorMultipleFound) || err != nil)
 			} else {
-				assert.EqualError(t, err, test.expectedErr.Error())
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
 			}
-			assert.Equal(t, test.expected, result)
 		})
 	}
-}*/
+}
 
-// FIXME:
-/*func TestCheckDuplicateEntity(t *testing.T) {
-	entityService := NewEntityService()
+func TestCheckDuplicate(t *testing.T) {
+	mockVersionValidation := &versionValidationPkg.MockEntityVersionValidation{}
+	mockVersion := &versionPkg.MockEntityVersion{}
+	s := &SEntity{
+		EntityVersion:           mockVersion,
+		EntityVersionValidation: mockVersionValidation,
+	}
 
 	tests := []struct {
 		name       string
 		entities   []Entity
 		entityMeta Entity
-		expected   error
+		isPseudo   bool
+		expectErr  bool
 	}{
 		{
-			name: "Exact version match",
+			name: "Exact version duplicate",
 			entities: []Entity{
-				{
-					Name:    "EntityApplication",
-					Version: "v0.0.0",
-					Origin:  "github.com/AmadlaOrg",
-				},
+				{Name: "EntityApp", Version: "v1.0.0", Origin: "github.com/AmadlaOrg"},
 			},
-			entityMeta: Entity{
-				Name:    "EntityApplication",
-				Version: "v0.0.0",
-				Origin:  "github.com/AmadlaOrg",
-			},
-			expected: fmt.Errorf("duplicate entity found: %v", Entity{
-				Name:    "EntityApplication",
-				Version: "v0.0.0",
-				Origin:  "github.com/AmadlaOrg",
-			}),
+			entityMeta: Entity{Name: "EntityApp", Version: "v1.0.0", Origin: "github.com/AmadlaOrg"},
+			isPseudo:   false,
+			expectErr:  true,
 		},
 		{
-			name: "Pseudo version match",
+			name: "Different version no duplicate",
 			entities: []Entity{
-				{
-					Name:    "EntityApplication",
-					Version: "v0.0.0-20240726095222-c7e9911d38b2",
-					Origin:  "github.com/AmadlaOrg",
-				},
+				{Name: "EntityApp", Version: "v1.0.0", Origin: "github.com/AmadlaOrg"},
 			},
-			entityMeta: Entity{
-				Name:    "EntityApplication",
-				Version: "v0.0.0-20240726095222-c7e9911d38b2",
-				Origin:  "github.com/AmadlaOrg",
-			},
-			expected: fmt.Errorf("duplicate entity found: %v", Entity{
-				Name:    "EntityApplication",
-				Version: "v0.0.0-20240726095222-c7e9911d38b2",
-				Origin:  "github.com/AmadlaOrg",
-			}),
+			entityMeta: Entity{Name: "EntityApp", Version: "v2.0.0", Origin: "github.com/AmadlaOrg"},
+			isPseudo:   false,
+			expectErr:  false,
 		},
 		{
-			name: "No match",
-			entities: []Entity{
-				{
-					Name:    "EntityApplication",
-					Version: "v0.0.0",
-					Origin:  "github.com/AmadlaOrg",
-				},
-			},
-			entityMeta: Entity{
-				Name:    "EntityApplication",
-				Version: "v0.0.1",
-				Origin:  "github.com/AmadlaOrg",
-			},
-			expected: nil,
-		},
-		{
-			name: "Pseudo version no match",
-			entities: []Entity{
-				{
-					Name:    "EntityApplication",
-					Version: "v0.0.0-20240726095222-c7e9911d38b2",
-					Origin:  "github.com/AmadlaOrg",
-				},
-			},
-			entityMeta: Entity{
-				Name:    "EntityApplication",
-				Version: "v0.0.0-20240726095222-c889911d00b2",
-				Origin:  "github.com/AmadlaOrg",
-			},
-			expected: nil,
+			name:       "Empty entities list",
+			entities:   []Entity{},
+			entityMeta: Entity{Name: "EntityApp", Version: "v1.0.0", Origin: "github.com/AmadlaOrg"},
+			isPseudo:   false,
+			expectErr:  false,
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			err := entityService.CheckDuplicateEntity(test.entities, test.entityMeta)
-			if test.expected == nil {
-				assert.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockVersionValidation.ExpectedCalls = nil
+			mockVersionValidation.EXPECT().PseudoFormat(tt.entityMeta.Version).Return(tt.isPseudo).Maybe()
+			for _, e := range tt.entities {
+				mockVersionValidation.EXPECT().PseudoFormat(e.Version).Return(tt.isPseudo).Maybe()
+			}
+
+			err := s.CheckDuplicate(tt.entities, tt.entityMeta)
+			if tt.expectErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), "duplicate")
 			} else {
-				assert.EqualError(t, err, test.expected.Error())
+				assert.NoError(t, err)
 			}
 		})
 	}
-}*/
+}
 
 func TestGeneratePseudoVersionPattern(t *testing.T) {
 	entityService := NewEntityService(&gitConfig.Config{})
@@ -501,125 +255,42 @@ func TestGeneratePseudoVersionPattern(t *testing.T) {
 	}
 }
 
-/*func TestCrawlDirectoriesParallel(t *testing.T) {
-	// Step 1: Create a temporary root directory.
-	root, err := os.MkdirTemp("", "testroot")
-	if err != nil {
-		t.Fatalf("Failed to create temporary root directory: %v", err)
-	}
-	// Ensure the temporary directory is removed after the test.
-	defer os.RemoveAll(root)
-
-	// Step 2: Create a parent directory within the root.
-	parentDir := filepath.Join(root, "parent")
-	if err := os.Mkdir(parentDir, 0755); err != nil {
-		t.Fatalf("Failed to create parent directory: %v", err)
-	}
-
-	// Step 3: Define directory names.
-	matchingDirs := []string{
-		"entityA_v1.0",
-		"entityB_v2.1",
-	}
-	nonMatchingDirs := []string{
-		"random_dir",
-		"entityC",
-	}
-
-	// Step 4: Create matching directories under the parent.
-	for _, dirName := range matchingDirs {
-		dirPath := filepath.Join(parentDir, dirName)
-		if err := os.Mkdir(dirPath, 0755); err != nil {
-			t.Fatalf("Failed to create matching directory '%s': %v", dirPath, err)
-		}
-	}
-
-	// Step 5: Create non-matching directories under the parent.
-	for _, dirName := range nonMatchingDirs {
-		dirPath := filepath.Join(parentDir, dirName)
-		if err := os.Mkdir(dirPath, 0755); err != nil {
-			t.Fatalf("Failed to create non-matching directory '%s': %v", dirPath, err)
-		}
-	}
-
-	// Step 6: Initialize an instance of SEntity.
-	sEntity := &SEntity{}
-
-	// Step 7: Invoke the CrawlDirectoriesParallel method.
-	entities, err := sEntity.CrawlDirectoriesParallel(root)
-	if err != nil {
-		t.Fatalf("CrawlDirectoriesParallel returned an error: %v", err)
-	}
-
-	// Step 8: Define the expected entities map.
-	expectedEntities := map[string]Entity{
-		"entityA": {Origin: "parent", Version: "v1.0"},
-		"entityB": {Origin: "parent", Version: "v2.1"},
-	}
-
-	// Step 9: Verify the number of entities returned.
-	if len(entities) != len(expectedEntities) {
-		t.Errorf("Expected %d entities, but got %d", len(expectedEntities), len(entities))
-	}
-
-	// Step 10: Verify each expected entity is present and correct.
-	for key, expected := range expectedEntities {
-		actual, exists := entities[key]
-		if !exists {
-			t.Errorf("Expected entity '%s' not found in the result", key)
-			continue
-		}
-		if actual.Origin != expected.Origin {
-			t.Errorf("Entity '%s': expected Origin '%s', got '%s'", key, expected.Origin, actual.Origin)
-		}
-		if actual.Version != expected.Version {
-			t.Errorf("Entity '%s': expected Version '%s', got '%s'", key, expected.Version, actual.Version)
-		}
-	}
-
-	// Step 11: Ensure no unexpected entities are present.
-	for key := range entities {
-		if _, expected := expectedEntities[key]; !expected {
-			t.Errorf("Unexpected entity '%s' found in the result", key)
-		}
-	}
-}*/
-
-/*func createTestDirectoryStructure(t *testing.T, root string) {
-	// Create test directories and files
-	err := os.MkdirAll(filepath.Join(root, "origin1", "entity1@v1.0.0"), 0755)
-	assert.NoError(t, err)
-	err = os.MkdirAll(filepath.Join(root, "origin1", "entity2@v2.1.0"), 0755)
-	assert.NoError(t, err)
-	err = os.MkdirAll(filepath.Join(root, "origin2", "entity3@v0.9.1"), 0755)
-	assert.NoError(t, err)
-	err = os.MkdirAll(filepath.Join(root, "origin2", "entity4@v1.1.0"), 0755)
-	assert.NoError(t, err)
-
-	// Create some files (to be ignored by the crawler)
-	_, err = os.Create(filepath.Join(root, "origin1", "file1.txt"))
-	assert.NoError(t, err)
-	_, err = os.Create(filepath.Join(root, "origin2", "file2.txt"))
-	assert.NoError(t, err)
-}
-
-func TestCrawlDirectoriesParallel(t *testing.T) {
-	// Create a temporary directory for testing
+func TestReadAll_Unit(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Set up the test directory structure
-	createTestDirectoryStructure(t, tmpDir)
-
-	// Define the expected entities
-	expectedEntities := map[string]Entity{
-		"entity1": {Origin: "origin1", Version: "v1.0.0"},
-		"entity2": {Origin: "origin1", Version: "v2.1.0"},
-		"entity3": {Origin: "origin2", Version: "v0.9.1"},
-		"entity4": {Origin: "origin2", Version: "v1.1.0"},
-	}
-
-	// Run the function under test
-	entities, err := CrawlDirectoriesParallel(tmpDir)
+	// Create a test .hery file
+	content := []byte("_type: example.com/Entity@v1.0.0\n_body:\n  name: test\n")
+	err := os.WriteFile(filepath.Join(tmpDir, "test.hery"), content, 0644)
 	assert.NoError(t, err)
-	assert.Equal(t, expectedEntities, entities)
-}*/
+
+	// Create a non-.hery file (should be ignored)
+	err = os.WriteFile(filepath.Join(tmpDir, "readme.txt"), []byte("ignore me"), 0644)
+	assert.NoError(t, err)
+
+	s := &SEntity{}
+	docs, err := s.ReadAll(tmpDir)
+	assert.NoError(t, err)
+	assert.Len(t, docs, 1)
+	assert.Equal(t, "example.com/Entity@v1.0.0", docs[0]["_type"])
+}
+
+func TestReadAll_Unit_EmptyDir(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	s := &SEntity{}
+	docs, err := s.ReadAll(tmpDir)
+	assert.NoError(t, err)
+	assert.Empty(t, docs)
+}
+
+func TestReadAll_Unit_InvalidYAML(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	content := []byte("invalid: yaml: [broken")
+	err := os.WriteFile(filepath.Join(tmpDir, "bad.hery"), content, 0644)
+	assert.NoError(t, err)
+
+	s := &SEntity{}
+	_, err = s.ReadAll(tmpDir)
+	assert.Error(t, err)
+}

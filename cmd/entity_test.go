@@ -7,6 +7,12 @@ import (
 	"testing"
 )
 
+func executeCommand(root *cobra.Command, args ...string) (output string, err error) {
+	root.SetArgs(args)
+	_, err = root.ExecuteC()
+	return
+}
+
 func TestEntityCmd(t *testing.T) {
 	// Check that the EntityCmd is properly set up
 	assert.Equal(t, "entity", EntityCmd.Use)

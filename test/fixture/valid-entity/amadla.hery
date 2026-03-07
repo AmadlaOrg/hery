@@ -1,6 +1,6 @@
 ---
-_entity: "github.com/AmadlaOrg/Entity@latest"
-_body:
+_type: amadla.org/entity/Entity@latest
+_meta:
   name: Entity
   description: The root Entity definition.
   category: General

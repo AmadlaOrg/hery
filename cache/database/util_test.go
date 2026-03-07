@@ -114,14 +114,14 @@ func TestProcessRow(t *testing.T) {
 		inputRow             map[string]any
 		expectedColumnNames  []string
 		expectedPlaceholders []string
-		expectedColumnValues []string
+		expectedColumnValues []any
 	}{
 		{
 			name:                 "empty row",
 			inputRow:             map[string]any{},
 			expectedColumnNames:  []string{},
 			expectedPlaceholders: []string{},
-			expectedColumnValues: []string{},
+			expectedColumnValues: []any{},
 		},
 		{
 			name: "single column",
@@ -130,7 +130,7 @@ func TestProcessRow(t *testing.T) {
 			},
 			expectedColumnNames:  []string{"Id"},
 			expectedPlaceholders: []string{"?"},
-			expectedColumnValues: []string{"123"},
+			expectedColumnValues: []any{"123"},
 		},
 		{
 			name: "multiple columns",
@@ -142,7 +142,7 @@ func TestProcessRow(t *testing.T) {
 			},
 			expectedColumnNames:  []string{"Id", "Name", "Age", "Email"},
 			expectedPlaceholders: []string{"?", "?", "?", "?"},
-			expectedColumnValues: []string{"123", "John", "30", "john@example.com"},
+			expectedColumnValues: []any{"123", "John", 30, "john@example.com"},
 		},
 	}
 
@@ -202,13 +202,21 @@ func TestBuildGroupBy(t *testing.T) {
 	}{
 		{name: "Empty GroupBy", groupBy: map[string]any{}, expected: ""},
 		{name: "Single GroupBy", groupBy: map[string]any{"column1": "ASC"}, expected: " GROUP BY column1 ASC"},
-		{name: "Multiple GroupBy", groupBy: map[string]any{"column1": "ASC", "column2": "DESC"}, expected: " GROUP BY column1 ASC column2 DESC"},
+		{name: "Multiple GroupBy", groupBy: map[string]any{"column1": "ASC", "column2": "DESC"}, expected: ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := buildGroupBy(tt.groupBy)
-			assert.Equal(t, tt.expected, result)
+			if tt.name == "Multiple GroupBy" {
+				// Map iteration order is non-deterministic
+				assert.True(t,
+					result == " GROUP BY column1 ASC column2 DESC" ||
+						result == " GROUP BY column2 DESC column1 ASC",
+					"Unexpected GROUP BY result: %s", result)
+			} else {
+				assert.Equal(t, tt.expected, result)
+			}
 		})
 	}
 }

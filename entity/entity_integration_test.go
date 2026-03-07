@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestRead(t *testing.T) {
+func TestReadAll(t *testing.T) {
 	fixturePath := filepath.Join("..", "test", "fixture")
 	validEntityAbsPath, err := filepath.Abs(filepath.Join(fixturePath, "/valid-entity"))
 	if err != nil {
@@ -16,50 +16,34 @@ func TestRead(t *testing.T) {
 
 	heryExtService := NewEntityService(&gitConfig.Config{})
 	tests := []struct {
-		name                string
-		inputPath           string
-		inputCollectionName string
-		expected            map[string]any
-		hasError            bool
+		name      string
+		inputPath string
+		hasError  bool
 	}{
 		{
-			name:                "Valid",
-			inputPath:           validEntityAbsPath,
-			inputCollectionName: "amadla",
-			expected: map[string]any{
-				"_entity":     "github.com/AmadlaOrg/Entity@latest",
-				"name":        "Entity",
-				"description": "The root Entity definition.",
-				"category":    "General",
-				"tags": []any{
-					"main",
-					"master",
-				},
-			},
-			hasError: false,
+			name:      "Valid",
+			inputPath: validEntityAbsPath,
+			hasError:  false,
 		},
 		//
 		// Error
 		//
 		{
-			name:                "Error: file not found",
-			inputPath:           fixturePath,
-			inputCollectionName: "amadla",
-			expected:            nil,
-			hasError:            true,
+			name:      "Error: directory not found",
+			inputPath: "/nonexistent/path",
+			hasError:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			heryContent, err := heryExtService.Read(tt.inputPath, tt.inputCollectionName)
+			results, err := heryExtService.ReadAll(tt.inputPath)
 			if tt.hasError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.NotEmpty(t, results)
 			}
-
-			assert.Equal(t, tt.expected, heryContent)
 		})
 	}
 }

@@ -8,97 +8,51 @@ import (
 )
 
 func TestEntity(t *testing.T) {
-	/*fixturePath := filepath.Join("..", "..", "test", "fixture")
-	validEntityAbsPath, err := filepath.Abs(filepath.Join(fixturePath, "/valid-entity"))
-	if err != nil {
-		t.Fatal(err)
-	}*/
-
 	entityValidationService := NewEntityValidationService(&gitConfig.Config{})
 
 	tests := []struct {
-		name                string
-		inputCollectionName string
-		inputSchema         *jsonschema.Schema
-		heryContent         map[string]any
-		hasError            bool
+		name        string
+		inputSchema *jsonschema.Schema
+		heryContent map[string]any
+		hasError    bool
 	}{
-		// FIXME:
-		/*{
-			name:                "Valid: Same entityUri entity with root of `.hery` without `_self`",
-			inputCollectionName: "amadla",
-			inputSchema:         &jsonschema.Schema{},
-			heryContent: map[string]any{
-				"_entity":     "github.com/AmadlaOrg/Entity@latest",
-				"name":        "Entity",
-				"description": "The root Entity definition.",
-				"category":    "General",
-				"tags": []any{
-					"main",
-					"master",
-				},
-			},
-			hasError: false,
-		},*/
-		// FIXME:
-		/*{
-			name:                "Valid: With `_self`",
-			inputCollectionName: "amadla",
-			inputSchema:         &jsonschema.Schema{},
-			//inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
-			heryContent: map[string]any{
-				"_entity":     "github.com/AmadlaOrg/Entity@latest",
-				"name":        "Entity",
-				"description": "The root Entity definition.",
-				"category":    "General",
-				"tags": []any{
-					"main",
-					"master",
-				},
-				"_self": map[string]any{
-					"title":       "Some random title",
-					"description": "The random title description.",
-				},
-			},
-			hasError: false,
-		},*/
 		//
 		// Error
 		//
 		{
-			name:                "Error: entityUri should not be of the same entity that is set in the root of `.hery` if _self is set",
-			inputCollectionName: "amadla",
-			inputSchema:         &jsonschema.Schema{},
-			//inputEntityUri:      "github.com/AmadlaOrg/Entity@latest",
+			name:        "Error: _self should not be empty map",
+			inputSchema: &jsonschema.Schema{},
 			heryContent: map[string]any{
-				"_entity":     "github.com/AmadlaOrg/Entity@latest",
-				"name":        "Entity",
-				"description": "The root Entity definition.",
-				"category":    "General",
-				"tags": []any{
-					"main",
-					"master",
+				"_type": "github.com/AmadlaOrg/Entity@latest",
+				"_meta": map[string]any{
+					"name":        "Entity",
+					"description": "The root Entity definition.",
+					"category":    "General",
+					"tags": []any{
+						"main",
+						"master",
+					},
 				},
 				"_self": map[string]any{},
 			},
 			hasError: true,
 		},
 		{
-			name:                "Error: With `_self` that contains `_entity`",
-			inputSchema:         &jsonschema.Schema{},
-			inputCollectionName: "amadla",
-			//inputEntityUri:      "github.com/AmadlaOrg/QAFixturesEntityMultipleTagVersion@latest",
+			name:        "Error: _self contains _type",
+			inputSchema: &jsonschema.Schema{},
 			heryContent: map[string]any{
-				"_entity":     "github.com/AmadlaOrg/Entity@latest",
-				"name":        "Entity",
-				"description": "The root Entity definition.",
-				"category":    "General",
-				"tags": []any{
-					"main",
-					"master",
+				"_type": "github.com/AmadlaOrg/Entity@latest",
+				"_meta": map[string]any{
+					"name":        "Entity",
+					"description": "The root Entity definition.",
+					"category":    "General",
+					"tags": []any{
+						"main",
+						"master",
+					},
 				},
 				"_self": map[string]any{
-					"_entity":     "github.com/AmadlaOrg/Entity@latest",
+					"_type":       "github.com/AmadlaOrg/Entity@latest",
 					"title":       "Some random title",
 					"description": "The random title description.",
 				},
@@ -110,7 +64,6 @@ func TestEntity(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := entityValidationService.Entity(
-				tt.inputCollectionName,
 				tt.inputSchema,
 				tt.heryContent)
 			if tt.hasError {
