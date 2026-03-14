@@ -8,7 +8,7 @@ import (
 	"runtime"
 )
 
-type IStorage interface {
+type Storage interface {
 	Paths() (*AbsPaths, error)
 	Main() (string, error)
 	EntityPath(entitiesPath, entityRelativePath string) string

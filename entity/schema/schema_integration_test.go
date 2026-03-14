@@ -14,7 +14,7 @@ func TestLoad(t *testing.T) {
 		t.Fatalf("Failed to get absolute path for schema fixture: %v", err)
 	}
 
-	schemaLoader := &SSchema{}
+	schemaLoader := &schemaImpl{}
 
 	// Act
 	loadedSchema, err := schemaLoader.Load(schemaPath)
@@ -36,7 +36,7 @@ func TestLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	schemaMockService := SSchema{}
+	schemaMockService := schemaImpl{}
 
 	tests := []struct {
 		name            string
@@ -71,7 +71,7 @@ func TestLoad(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	schemaService := SSchema{}
+	schemaService := schemaImpl{}
 
 	tests := []struct {
 		name            string
@@ -133,7 +133,7 @@ func TestLoad(t *testing.T) {
 }*/
 
 func TestMergeSchemas(t *testing.T) {
-	schemaService := SSchema{}
+	schemaService := schemaImpl{}
 	tests := []struct {
 		name            string
 		inputBaseSchema map[string]any
@@ -156,12 +156,7 @@ func TestMergeSchemas(t *testing.T) {
 						"pattern":     "^[a-zA-Z0-9_\\-:/]+$",
 						"description": "A unique identifier for an entity dataset.",
 					},
-					"_self": map[string]any{
-						"type":                 "object",
-						"description":          "Used to reference the current entity inside another entity, so that there is no need to use _entity to define the entity block. In other words, it is a shorthand for _entity to reference the current entity.",
-						"additionalProperties": true,
 					},
-				},
 				"additionalProperties": false,
 				"$schema":              "https://json-schema.org/draft/2020-12/schema",
 				"id":                   "https://raw.githubusercontent.com/AmadlaOrg/hery/master/.schema/entity.schema.json",
@@ -259,12 +254,7 @@ func TestMergeSchemas(t *testing.T) {
 						"pattern":     "^[a-zA-Z0-9_\\-:/]+$",
 						"description": "A unique identifier for an entity dataset.",
 					},
-					"_self": map[string]any{
-						"type":                 "object",
-						"description":          "Used to reference the current entity inside another entity, so that there is no need to use _entity to define the entity block. In other words, it is a shorthand for _entity to reference the current entity.",
-						"additionalProperties": true,
 					},
-				},
 				"additionalProperties": false,
 				"required": []any{
 					"_entity",
@@ -353,7 +343,7 @@ func TestMergeSchemas(t *testing.T) {
 
 // TODO: Maybe there a better way to test this.
 func TestLoadSchemaFile(t *testing.T) {
-	entitySchemaService := NewEntitySchemaService()
+	entitySchemaService := New()
 	absPath, err := filepath.Abs(filepath.Join("..", "..", ".schema", "entity.schema.json"))
 	if err != nil {
 		return

@@ -2,7 +2,7 @@ package get
 
 /*func Test_Integration_GetInTmp(t *testing.T) {
 	entities := []string{"github.com/AmadlaOrg/Entity"}
-	entityBuild := NewGetService()
+	entityBuild := New()
 	paths, err := entityBuild.GetInTmp("amadla", entities)
 	if err != nil {
 		t.Fatal(err)
@@ -101,7 +101,7 @@ tests := []struct {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			entityBuild := NewGetService()
+			entityBuild := New()
 			err = entityBuild.Get(test.collectionName, &test.paths, test.entityURIs)
 			if test.hasError {
 				assert.Error(t, err)

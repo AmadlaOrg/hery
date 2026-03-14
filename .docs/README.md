@@ -1,49 +1,45 @@
 # Docs | HERY
-HERY stands for Hierarchical Entity Relational YAML.
 
-It also means: to glorify; praise.
+HERY (Hierarchical Entity Relational YAML) is a data model and storage system that extends YAML with entity management. It adds five reserved properties to organize content into versioned, schema-validated, relational entities.
 
-But to glorify what!?
+**Standard version:** Draft 3.5
 
-## History
+## Reserved Properties
 
-Whilst working on the [Amadla](https://github.com/AmadlaOrg/) project I tried different ways to store, and organize
-configurations and nothing was found that satisfied the requirements and the desideratum of what solutions it was
-supposed to provide.
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `_type` | string (URI) | Yes* | Entity type URI with version (e.g., `amadla.org/entity/application@v1.0.0`) |
+| `_extends` | string (URI) | No | Inherit values from another entity instance via deep merge (data only, no execution ordering) |
+| `_meta` | object | No | Metadata for filtering and search (schema-defined) |
+| `_body` | object | No | Entity content data (schema-defined) |
+| `_requires` | array of strings | No | Hard dependencies on other entities for execution ordering (DAG + topological sort) |
 
-So by trying out different ideas in code and on paper, HERY was born.
+\* `_type` can be inherited via `_extends` when not explicitly set.
 
-It was important for the [Amadla](https://github.com/AmadlaOrg/) project that the reinventing of the wheel not supervened nor should it be
-adding complexity by creating too many new concepts. A maximum of technologies needed to be familiar to the users.
+## Entity Identity
 
-This is why HERY is more of an extension to YAML than a completely new
-[Electronic Data Interchange (EDI)](https://en.wikipedia.org/wiki/Electronic_data_interchange)/storage/[markup](https://en.wikipedia.org/wiki/Markup_language) thingamajig.
+Entity identity is derived from the **git path** (directory position in the repository), not declared in the document. There is no `_id` property.
 
-But again back to the question... Glorify what!?
+## Storage
 
-- Simplicity
-- Management of markup
-- Relational markup content
-- Schema enforcement
+- **Global entity cache:** `~/.cache/hery/entity/` (cloned entity types, by git path)
+- **Project-level SQLite cache:** `.hery.cache` (gitignored, rebuilt from source `.hery` files)
+- **Project-level lock file:** `hery.lock` (JSON, committed to Git, portable snapshot of merged state)
 
-## What does it have more than YAML?
-- **Entities** - A block of YAML that has its own schema definition and tracking in a CVS with `git`
-- **[JSON Schema](https://json-schema.org/)** - Using this standard the entity has always predictable content, and it can help with IDEs tools for instance code autocompletion
-- **Hierarchy** - Entities can have a parent entity that it can overwrite so this way an entity can be reused multiple times with default values
-- **Relational content** - A property can point to one or multiple entities (in this context an entity is like a table in a RDBMS and a property is like a column)
-- `_entity` - Is a URI with a version number after `@` that informs what schema the content under it must follow
-- `_body` - Contains the entity properties and its values
-- `_id` - Is an ID given to a property to point to another entity
-- `_meta` - Is an optional property that contains an entity or entities for metadata to an entity
+## CLI Commands
 
-That's it!
+- `hery entity get` -- Fetch an entity by URI
+- `hery entity list` -- List entities
+- `hery entity validate` -- Validate entities against their schemas
+- `hery query` -- Two-stage query (selection flags + `--jq` transformation)
+- `hery compose` -- Compose and merge entities into the lock file and cache
 
-## `hery` cli as a tool
-`hery`-cli is used to get, validate, compose, and query the content in the entity, and entities.
+## Further Reading
 
-- **Query language** - the cli has its own query language plus it comes with [jq](https://jqlang.github.io/jq/) and [JSONPATH](https://jsonpath.com/)
-- **Caching** - inside `hery` uses [SQLite](https://www.sqlite.org/), since it is quicker to pull data than using text YAML files the file is saved at the root of the collection's directory
-- **Validation** - the cli makes it possible to validate an entity or many entities
-- **Get** - by using given entity URLs it will download the entity and its relational entities automatically
-- **Compose** - combines the entities together
-- And many other tools
+- [cache.md](cache.md) -- SQLite cache structure
+- [compose.md](compose.md) -- Entity composition and merging
+- [query.md](query.md) -- Two-stage query model
+- [schema.md](schema.md) -- JSON Schema conventions
+- [storage.md](storage.md) -- File system layout
+- [validation.md](validation.md) -- Entity validation
+- [version.md](version.md) -- Versioning model

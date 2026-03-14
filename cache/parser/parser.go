@@ -11,15 +11,15 @@ import (
 	"github.com/AmadlaOrg/hery/entity"
 )
 
-type IParser interface {
+type Parser interface {
 	Entity(entity *entity.Entity) ([]database.Table, error)
 	EntityToTableName(entity string) string
 	DatabaseTable(data []byte) (entity.Entity, error)
 	DatabaseRow(data []byte) (entity.Entity, error)
 }
 
-type SParser struct {
-	database database.IDatabase
+type parser struct {
+	database database.Database
 }
 
 var (
@@ -27,7 +27,7 @@ var (
 )
 
 // Entity parses the entity and inserts it into the entities table.
-func (s *SParser) Entity(e *entity.Entity) ([]database.Table, error) {
+func (s *parser) Entity(e *entity.Entity) ([]database.Table, error) {
 	if !s.database.IsInitialized() {
 		return nil, errors.New("database is not initialized")
 	}
@@ -44,25 +44,26 @@ func (s *SParser) Entity(e *entity.Entity) ([]database.Table, error) {
 	}, nil
 }
 
-func (s *SParser) entitiesEntityToTable(e *entity.Entity) database.Table {
+func (s *parser) entitiesEntityToTable(e *entity.Entity) database.Table {
 	metaJson, _ := jsonMarshal(e.Content.Meta)
 	bodyJson, _ := jsonMarshal(e.Content.Body)
+	requiresJson, _ := jsonMarshal(e.Content.Requires)
 
 	// Build the full merged document for merged_json
 	merged := map[string]any{
 		"_type": e.Content.Type,
 	}
-	if e.Content.Self != "" {
-		merged["_self"] = e.Content.Self
-	}
-	if e.Content.Parent != "" {
-		merged["_parent"] = e.Content.Parent
+	if e.Content.Extends != "" {
+		merged["_extends"] = e.Content.Extends
 	}
 	if e.Content.Meta != nil {
 		merged["_meta"] = e.Content.Meta
 	}
 	if e.Content.Body != nil {
 		merged["_body"] = e.Content.Body
+	}
+	if len(e.Content.Requires) > 0 {
+		merged["_requires"] = e.Content.Requires
 	}
 	mergedJson, _ := jsonMarshal(merged)
 
@@ -71,8 +72,7 @@ func (s *SParser) entitiesEntityToTable(e *entity.Entity) database.Table {
 	entitiesTable.Rows = []database.Row{
 		{
 			"entity_type":       e.Content.Type,
-			"entity_self":       e.Content.Self,
-			"entity_parent":     e.Content.Parent,
+			"entity_extends":    e.Content.Extends,
 			"uri":               e.Uri,
 			"name":              e.Name,
 			"repo_url":          e.RepoUrl,
@@ -87,6 +87,7 @@ func (s *SParser) entitiesEntityToTable(e *entity.Entity) database.Table {
 			"schema_json":       e.SchemaJson,
 			"meta_json":         string(metaJson),
 			"body_json":         string(bodyJson),
+			"requires_json":     string(requiresJson),
 			"merged_json":       string(mergedJson),
 		},
 	}
@@ -95,14 +96,14 @@ func (s *SParser) entitiesEntityToTable(e *entity.Entity) database.Table {
 }
 
 // EntityToTableName converts an entity URI to a valid SQL table name.
-func (s *SParser) EntityToTableName(entity string) string {
+func (s *parser) EntityToTableName(entity string) string {
 	re := regexp.MustCompile(`[^a-zA-Z0-9]+`)
 	tableName := re.ReplaceAllString(entity, "_")
 	return strings.Trim(tableName, "_")
 }
 
 // DatabaseTable parses a JSON-encoded table row into an Entity.
-func (s *SParser) DatabaseTable(data []byte) (entity.Entity, error) {
+func (s *parser) DatabaseTable(data []byte) (entity.Entity, error) {
 	var row map[string]any
 	if err := json.Unmarshal(data, &row); err != nil {
 		return entity.Entity{}, fmt.Errorf("failed to unmarshal table data: %w", err)
@@ -111,7 +112,7 @@ func (s *SParser) DatabaseTable(data []byte) (entity.Entity, error) {
 }
 
 // DatabaseRow parses a JSON-encoded database row into an Entity.
-func (s *SParser) DatabaseRow(data []byte) (entity.Entity, error) {
+func (s *parser) DatabaseRow(data []byte) (entity.Entity, error) {
 	var row map[string]any
 	if err := json.Unmarshal(data, &row); err != nil {
 		return entity.Entity{}, fmt.Errorf("failed to unmarshal row data: %w", err)
@@ -119,7 +120,7 @@ func (s *SParser) DatabaseRow(data []byte) (entity.Entity, error) {
 	return s.rowToEntity(row), nil
 }
 
-func (s *SParser) rowToEntity(row map[string]any) entity.Entity {
+func (s *parser) rowToEntity(row map[string]any) entity.Entity {
 	str := func(key string) string {
 		if v, ok := row[key].(string); ok {
 			return v
@@ -150,9 +151,8 @@ func (s *SParser) rowToEntity(row map[string]any) entity.Entity {
 		Exist:           boolVal("exist"),
 		SchemaJson:      str("schema_json"),
 		Content: entity.Content{
-			Type:   str("entity_type"),
-			Self:   str("entity_self"),
-			Parent: str("entity_parent"),
+			Type:    str("entity_type"),
+			Extends: str("entity_extends"),
 		},
 	}
 
@@ -166,6 +166,12 @@ func (s *SParser) rowToEntity(row map[string]any) entity.Entity {
 		var body map[string]any
 		if err := json.Unmarshal([]byte(bodyStr), &body); err == nil {
 			e.Content.Body = body
+		}
+	}
+	if requiresStr := str("requires_json"); requiresStr != "" {
+		var requires []string
+		if err := json.Unmarshal([]byte(requiresStr), &requires); err == nil {
+			e.Content.Requires = requires
 		}
 	}
 

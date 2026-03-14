@@ -7,8 +7,8 @@ import (
 
 func TestNewEntitySchemaService(t *testing.T) {
 	t.Run("should return a new instance of Schema", func(t *testing.T) {
-		service := NewEntitySchemaService()
+		service := New()
 		assert.NotNil(t, service)
-		assert.IsType(t, &SSchema{}, service)
+		assert.IsType(t, &schemaImpl{}, service)
 	})
 }

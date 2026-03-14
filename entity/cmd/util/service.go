@@ -2,9 +2,9 @@ package util
 
 import "github.com/AmadlaOrg/hery/storage"
 
-// NewEntityCmdUtilService to set up the Util service
-func NewEntityCmdUtilService() IUtil {
-	return &SUtil{
-		NewStorageService: storage.NewStorageService(),
+// New to set up the Util service
+func New() Util {
+	return &utilImpl{
+		New: storage.New(),
 	}
 }

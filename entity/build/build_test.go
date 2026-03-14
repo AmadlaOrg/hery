@@ -226,7 +226,7 @@ func TestMeta(t *testing.T) {
 			mockEntityVersionVal := versionValidationPkg.NewMockEntityVersionValidation(t)
 			test.mockEntityVersionVal(mockEntityVersionVal)
 
-			mockBuilder := SBuild{
+			mockBuilder := builder{
 				Entity:                  &mockEntity,
 				EntityValidation:        mockValidation,
 				EntityVersion:           mockEntityVersion,
@@ -383,7 +383,7 @@ func TestMetaFromRemoteWithoutVersion(t *testing.T) {
 				tt.internalEntityVersionLatest,
 				tt.internalEntityVersionLatestErr)
 
-			mockBuilder := SBuild{
+			mockBuilder := builder{
 				EntityVersion: &mockVersion,
 			}
 
@@ -671,11 +671,11 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 			mockEntityValidation := &validation.MockEntityValidation{}
 			mockEntity := &entity.MockEntity{}
 
-			mockBuilder := SBuild{
+			mockBuilder := builder{
 				EntityVersion:           mockVersion,
 				EntityValidation:        mockEntityValidation,
 				Entity:                  mockEntity,
-				EntityVersionValidation: &versionValidationPkg.SValidation{},
+				EntityVersionValidation: versionValidationPkg.New(nil),
 			}
 
 			entityMeta, err := mockBuilder.metaFromRemoteWithVersion(tt.inputEntityUri, tt.inputEntityVersion)
@@ -696,14 +696,14 @@ func TestMetaFromRemoteWithVersion(t *testing.T) {
 }
 
 func TestMetaFromLocalWithVersion_Error_FromExtractRepoUrl(t *testing.T) {
-	builder := SBuild{}
+	builder := builder{}
 	_, err := builder.metaFromLocalWithVersion("https://github.com", "v1.0.0")
 
 	assert.Error(t, err)
 }
 
 func TestConstructOrigin(t *testing.T) {
-	mockBuilder := SBuild{}
+	mockBuilder := builder{}
 
 	tests := []struct {
 		name           string

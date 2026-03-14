@@ -39,8 +39,8 @@ const (
 	DataFormatDuration DataFormat = "duration"
 )
 
-// Schema different data
-type Schema struct {
+// Definition holds compiled schema data
+type Definition struct {
 	CompiledSchema *jsonschema.Schema
 	SchemaPath     string
 	SchemaName     string

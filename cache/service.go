@@ -5,16 +5,16 @@ import (
 	"github.com/AmadlaOrg/hery/cache/parser"
 )
 
-// NewCacheService to set up the entity Cache service
+// New to set up the entity Cache service
 //
 // To be able to use the cache service it is important to use both `Open` and `Close` methods.
 //
 // The cache service is using a db connection to handle the storage, so it needs to initialize the connection and
 // the closing of the db connection.
-func NewCacheService(cacheAbsPath string) ICache {
-	db := database.NewDatabaseService(cacheAbsPath)
-	return &SCache{
+func New(cacheAbsPath string) Cache {
+	db := database.New(cacheAbsPath)
+	return &cacheImpl{
 		Database: db,
-		Parser:   parser.NewParserService(db),
+		Parser:   parser.New(db),
 	}
 }

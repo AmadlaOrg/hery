@@ -8,12 +8,12 @@ import (
 	entityVersionValidation "github.com/AmadlaOrg/hery/entity/version/validation"
 )
 
-// NewEntityBuildService to set up the entity Build service
-func NewEntityBuildService(gitConfig *gitConfig.Config) IBuild {
-	return &SBuild{
-		Entity:                  entity.NewEntityService(gitConfig),
-		EntityValidation:        entityValidation.NewEntityValidationService(gitConfig),
-		EntityVersion:           version.NewEntityVersionService(gitConfig),
-		EntityVersionValidation: entityVersionValidation.NewEntityVersionValidationService(gitConfig),
+// New to set up the entity Build service
+func New(gitConfig *gitConfig.Config) Builder {
+	return &builder{
+		Entity:                  entity.New(gitConfig),
+		EntityValidation:        entityValidation.New(gitConfig),
+		EntityVersion:           version.New(gitConfig),
+		EntityVersionValidation: entityVersionValidation.New(gitConfig),
 	}
 }

@@ -34,7 +34,7 @@ var ValidateCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 
-			getService := get.NewGetService(&gitConfig.Config{})
+			getService := get.New(&gitConfig.Config{})
 			paths, err := getService.GetInTmp(args)
 			if err != nil {
 				log.Fatal(err)
@@ -44,9 +44,9 @@ var ValidateCmd = &cobra.Command{
 			return
 		} else if isValidateAll {
 			gitCfg := &gitConfig.Config{}
-			entityCmdUtilService := util.NewEntityCmdUtilService()
+			entityCmdUtilService := util.New()
 			err := entityCmdUtilService.Concoct(cmd, args, func(paths *storage.AbsPaths, args []string) {
-				entityService := entityPkg.NewEntityService(gitCfg)
+				entityService := entityPkg.New(gitCfg)
 				entityList, err := entityService.CrawlDirectoriesParallel(paths.Entities)
 				if err != nil {
 					log.Fatal(err)
@@ -57,7 +57,7 @@ var ValidateCmd = &cobra.Command{
 					return
 				}
 
-				validationService := entityValidation.NewEntityValidationService(gitCfg)
+				validationService := entityValidation.New(gitCfg)
 				for name, e := range entityList {
 					docs, readErr := entityService.ReadAll(e.AbsPath)
 					if readErr != nil {

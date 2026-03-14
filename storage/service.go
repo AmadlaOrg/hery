@@ -1,6 +1,6 @@
 package storage
 
-// NewStorageService to set up the storage service
-func NewStorageService() *AbsPaths {
+// New to set up the storage service
+func New() *AbsPaths {
 	return &AbsPaths{}
 }

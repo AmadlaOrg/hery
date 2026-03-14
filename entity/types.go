@@ -28,18 +28,18 @@ type Entity struct {
 	Hash            string         // The hash of the entity to verify if the repository on the local environment was corrupted or not (e.g.: c7e9911d38b263a69c664b8e0b5d4f27e607554d)
 	Exist           bool           // True if it was found and false if not found with Git remote (e.g.: true)
 	SchemaJson      string         // The JSON-Schema in string
-	Schema          *schema.Schema // The entity's Schema for caching
+	Schema          *schema.Definition // The entity's Schema for caching
 	ContentJson     string         // The content in JSON format for storage in the caching
 	Content         Content        // Is the structured version of the content used by the rest the application
 }
 
 // Content of an entity
 type Content struct {
-	Type   string             `json:"_type"`
-	Self   string             `json:"_self,omitempty"`
-	Parent string             `json:"_parent,omitempty"`
-	Meta   NotFormatedContent `json:"_meta,omitempty"`
-	Body   NotFormatedContent `json:"_body,omitempty"`
+	Type     string             `json:"_type"`
+	Extends  string             `json:"_extends,omitempty"`
+	Meta     NotFormatedContent `json:"_meta,omitempty"`
+	Body     NotFormatedContent `json:"_body,omitempty"`
+	Requires []string           `json:"_requires,omitempty"`
 }
 
 // NotFormatedContent when the content of entity as not been structured

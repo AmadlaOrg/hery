@@ -6,10 +6,10 @@ import (
 	"github.com/AmadlaOrg/hery/storage"
 )
 
-// NewComposeService creates a new compose service.
-func NewComposeService(gitCfg *gitConfig.Config) IComposer {
-	return &SComposer{
-		Storage: storage.NewStorageService(),
-		Entity:  entity.NewEntityService(gitCfg),
+// New creates a new compose service.
+func New(gitCfg *gitConfig.Config) Composer {
+	return &composer{
+		Storage: storage.New(),
+		Entity:  entity.New(gitCfg),
 	}
 }

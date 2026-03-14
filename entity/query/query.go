@@ -9,27 +9,26 @@ import (
 	"github.com/itchyny/gojq"
 )
 
-// IQuery interface for the query service.
-type IQuery interface {
+// Query interface for the query service.
+type Query interface {
 	Query(opts SelectionOpts) ([]map[string]any, error)
 }
 
 // SelectionOpts holds the CLI flag values for stage-1 selection.
 type SelectionOpts struct {
 	Type string // --type glob pattern (matched with GLOB operator)
-	Self string // --self exact match
 	Meta string // --meta substring match in meta_json
 	Tag  string // --tag substring match in meta_json
 	JQ   string // --jq expression for stage-2 transformation
 }
 
-// SQuery implements IQuery with a database backend.
-type SQuery struct {
-	Database database.IDatabase
+// queryImpl implements Query with a database backend.
+type queryImpl struct {
+	Database database.Database
 }
 
 // Query performs two-stage query: selection from SQLite, then optional jq transformation.
-func (q *SQuery) Query(opts SelectionOpts) ([]map[string]any, error) {
+func (q *queryImpl) Query(opts SelectionOpts) ([]map[string]any, error) {
 	// Stage 1: Build selection query
 	var conditions []string
 	var args []any
@@ -37,10 +36,6 @@ func (q *SQuery) Query(opts SelectionOpts) ([]map[string]any, error) {
 	if opts.Type != "" {
 		conditions = append(conditions, "entity_type GLOB ?")
 		args = append(args, opts.Type)
-	}
-	if opts.Self != "" {
-		conditions = append(conditions, "entity_self = ?")
-		args = append(args, opts.Self)
 	}
 	if opts.Meta != "" {
 		conditions = append(conditions, "meta_json LIKE ?")

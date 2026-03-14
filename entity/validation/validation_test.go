@@ -6,7 +6,7 @@ import (
 )
 
 func TestEntityUri(t *testing.T) {
-	entityValidationService := NewEntityValidationService(&gitConfig.Config{})
+	entityValidationService := New(&gitConfig.Config{})
 	tests := []struct {
 		path     string
 		expected bool

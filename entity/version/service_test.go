@@ -8,8 +8,8 @@ import (
 
 func TestNewEntityVersionService(t *testing.T) {
 	t.Run("should return a new instance of Entity Version", func(t *testing.T) {
-		entityVersionService := NewEntityVersionService(&gitConfig.Config{})
+		entityVersionService := New(&gitConfig.Config{})
 		assert.NotNil(t, entityVersionService)
-		assert.IsType(t, &SVersion{}, entityVersionService)
+		assert.IsType(t, &versionImpl{}, entityVersionService)
 	})
 }

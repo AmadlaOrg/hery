@@ -17,8 +17,8 @@ import (
 	"github.com/AmadlaOrg/hery/storage"
 )
 
-// IBuild to help with mocking and to gather metadata from remote and local sources.
-type IBuild interface {
+// Builder to help with mocking and to gather metadata from remote and local sources.
+type Builder interface {
 	Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, error)
 	metaFromLocalWithVersion(entityUri, entityVersion string) (entity.Entity, error)
 	metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error)
@@ -26,12 +26,12 @@ type IBuild interface {
 	constructOrigin(entityUri, name, version string) string
 }
 
-// SBuild struct implements the MetaBuilder interface.
-type SBuild struct {
-	Entity                  entity.IEntity
-	EntityValidation        validation.IValidation
-	EntityVersion           version.IVersion
-	EntityVersionValidation versionValidationPkg.IValidation
+// builder struct implements the MetaBuilder interface.
+type builder struct {
+	Entity                  entity.Service
+	EntityValidation        validation.Validator
+	EntityVersion           version.Version
+	EntityVersionValidation versionValidationPkg.Validator
 }
 
 // Help with mocking
@@ -41,7 +41,7 @@ var (
 
 // Meta gathers as many details about an Entity as possible from git and from the URI passed to populate the
 // Entity struct. It also validates values that are passed to it.
-func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
+func (s *builder) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, error) {
 	var (
 		entityVals = entity.Entity{
 			Have:  false,
@@ -101,7 +101,7 @@ func (s *SBuild) Meta(paths storage.AbsPaths, entityUri string) (entity.Entity, 
 }
 
 // metaFromLocalWithVersion
-func (s *SBuild) metaFromLocalWithVersion(entityUri, entityVersion string) (entity.Entity, error) {
+func (s *builder) metaFromLocalWithVersion(entityUri, entityVersion string) (entity.Entity, error) {
 	var (
 		entityVals = entity.Entity{
 			Have:  false,
@@ -130,7 +130,7 @@ func (s *SBuild) metaFromLocalWithVersion(entityUri, entityVersion string) (enti
 }
 
 // metaFromRemoteWithoutVersion
-func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error) {
+func (s *builder) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, error) {
 	var (
 		entityVals = entity.Entity{
 			Have:  false,
@@ -173,7 +173,7 @@ func (s *SBuild) metaFromRemoteWithoutVersion(entityUri string) (entity.Entity, 
 }
 
 // metaFromRemoteWithVersion
-func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (entity.Entity, error) {
+func (s *builder) metaFromRemoteWithVersion(entityUri, entityVersion string) (entity.Entity, error) {
 	var (
 		entityVals = entity.Entity{
 			Have:  false,
@@ -225,7 +225,7 @@ func (s *SBuild) metaFromRemoteWithVersion(entityUri, entityVersion string) (ent
 }
 
 // constructOrigin generates the last part of the full path from the repository URI host and path with the version
-func (s *SBuild) constructOrigin(entityUri, name, version string) string {
+func (s *builder) constructOrigin(entityUri, name, version string) string {
 	return strings.Replace(
 		entityUri,
 		fmt.Sprintf("%s@%s", name, version),

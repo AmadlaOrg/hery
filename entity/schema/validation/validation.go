@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-// IValidation
-type IValidation interface {
+// Validator
+type Validator interface {
 	Id(id, entityUri string) error
 }
 
-// SValidation
-type SValidation struct {
-	Schema schemaPkg.ISchema
+// validator
+type validator struct {
+	Schema schemaPkg.Schema
 }
 
 // Id validation of JSON-Schema for an entity
-func (s *SValidation) Id(id, entityUri string) error {
+func (s *validator) Id(id, entityUri string) error {
 
 	// 1. Validates that the `id` is not empty
 	if id == "" {

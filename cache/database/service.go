@@ -1,8 +1,8 @@
 package database
 
-// NewDatabaseService to set up the entity Cache service
-func NewDatabaseService(dbAbsPath string) IDatabase {
-	return &SDatabase{
+// New to set up the entity Cache service
+func New(dbAbsPath string) Database {
+	return &dbImpl{
 		dbAbsPath: dbAbsPath,
 		queries: &Queries{
 			CreateTable: []Query{},

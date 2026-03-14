@@ -26,8 +26,8 @@ var (
 	fileExists    = file.Exists
 )
 
-// IEntity used for mock
-type IEntity interface {
+// Service used for mock
+type Service interface {
 	FindDir(paths storage.AbsPaths, entityVals Entity) (string, error)
 	CheckDuplicate(entities []Entity, entityMeta Entity) error
 	GeneratePseudoVersionPattern(name, version string) string
@@ -35,15 +35,15 @@ type IEntity interface {
 	ReadAll(path string) ([]map[string]any, error)
 }
 
-// SEntity used for mock
-type SEntity struct {
-	EntityVersion           version.IVersion
-	EntityVersionValidation versionValidationPkg.IValidation
-	EntityValidation        validation.IValidation
+// service used for mock
+type service struct {
+	EntityVersion           version.Version
+	EntityVersionValidation versionValidationPkg.Validator
+	EntityValidation        validation.Validator
 }
 
 // setContent extracts the five reserved HERY properties from raw YAML content.
-func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
+func (s *service) setContent(entity Entity, heryContent NotFormatedContent) (Content, error) {
 	// 1. Extract `_type` (required)
 	typeSection, _ := heryContent["_type"].(string)
 	if entity.Uri != "" {
@@ -53,29 +53,36 @@ func (s *SEntity) setContent(entity Entity, heryContent NotFormatedContent) (Con
 		return Content{}, errors.New("_type is required")
 	}
 
-	// 2. Extract `_self` (optional)
-	selfSection, _ := heryContent["_self"].(string)
+	// 2. Extract `_extends` (optional)
+	extendsSection, _ := heryContent["_extends"].(string)
 
-	// 3. Extract `_parent` (optional)
-	parentSection, _ := heryContent["_parent"].(string)
-
-	// 4. Extract `_meta` (optional)
+	// 3. Extract `_meta` (optional)
 	metaSection, _ := heryContent["_meta"].(map[string]any)
 
-	// 5. Extract `_body` (optional)
+	// 4. Extract `_body` (optional)
 	bodySection, _ := heryContent["_body"].(map[string]any)
 
+	// 5. Extract `_requires` (optional)
+	var requiresSection []string
+	if rawRequires, ok := heryContent["_requires"].([]any); ok {
+		for _, item := range rawRequires {
+			if s, ok := item.(string); ok {
+				requiresSection = append(requiresSection, s)
+			}
+		}
+	}
+
 	return Content{
-		Type:   typeSection,
-		Self:   selfSection,
-		Parent: parentSection,
-		Meta:   metaSection,
-		Body:   bodySection,
+		Type:     typeSection,
+		Extends:  extendsSection,
+		Meta:     metaSection,
+		Body:     bodySection,
+		Requires: requiresSection,
 	}, nil
 }
 
 // FindDir can find pseudo versioned entity directories and static versioned entities
-func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
+func (s *service) FindDir(paths storage.AbsPaths, entityVals Entity) (string, error) {
 	if !s.EntityVersionValidation.PseudoFormat(entityVals.Version) {
 		exactPath := entityVals.Uri
 
@@ -119,7 +126,7 @@ func (s *SEntity) FindDir(paths storage.AbsPaths, entityVals Entity) (string, er
 }
 
 // CheckDuplicate checks if entityMeta is already in entityBuilds.
-func (s *SEntity) CheckDuplicate(entities []Entity, entityMeta Entity) error {
+func (s *service) CheckDuplicate(entities []Entity, entityMeta Entity) error {
 	for _, existingEntity := range entities {
 		if existingEntity.Origin == entityMeta.Origin &&
 			existingEntity.Name == entityMeta.Name {
@@ -140,12 +147,12 @@ func (s *SEntity) CheckDuplicate(entities []Entity, entityMeta Entity) error {
 }
 
 // GeneratePseudoVersionPattern delegates to version.GeneratePseudoPattern.
-func (s *SEntity) GeneratePseudoVersionPattern(name, ver string) string {
+func (s *service) GeneratePseudoVersionPattern(name, ver string) string {
 	return s.EntityVersion.GeneratePseudoPattern(name, ver)
 }
 
 // CrawlDirectoriesParallel crawls the directories in parallel and returns a map of entities.
-func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
+func (s *service) CrawlDirectoriesParallel(root string) (map[string]Entity, error) {
 	entities := make(map[string]Entity)
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -212,7 +219,7 @@ func (s *SEntity) CrawlDirectoriesParallel(root string) (map[string]Entity, erro
 
 // ReadAll reads all .hery files in a directory and returns each YAML document as a map.
 // Supports multi-document YAML files (separated by ---).
-func (s *SEntity) ReadAll(dir string) ([]map[string]any, error) {
+func (s *service) ReadAll(dir string) ([]map[string]any, error) {
 	var documents []map[string]any
 
 	err := filepathWalk(dir, func(path string, info os.FileInfo, walkErr error) error {

@@ -8,7 +8,7 @@ import (
 )
 
 func TestEntity(t *testing.T) {
-	entityValidationService := NewEntityValidationService(&gitConfig.Config{})
+	entityValidationService := New(&gitConfig.Config{})
 
 	tests := []struct {
 		name        string
@@ -16,46 +16,19 @@ func TestEntity(t *testing.T) {
 		heryContent map[string]any
 		hasError    bool
 	}{
-		//
-		// Error
-		//
 		{
-			name:        "Error: _self should not be empty map",
+			name:        "Valid: minimal entity with _type",
 			inputSchema: &jsonschema.Schema{},
 			heryContent: map[string]any{
 				"_type": "github.com/AmadlaOrg/Entity@latest",
-				"_meta": map[string]any{
-					"name":        "Entity",
-					"description": "The root Entity definition.",
-					"category":    "General",
-					"tags": []any{
-						"main",
-						"master",
-					},
-				},
-				"_self": map[string]any{},
 			},
-			hasError: true,
+			hasError: false,
 		},
 		{
-			name:        "Error: _self contains _type",
+			name:        "Error: missing _type",
 			inputSchema: &jsonschema.Schema{},
 			heryContent: map[string]any{
-				"_type": "github.com/AmadlaOrg/Entity@latest",
-				"_meta": map[string]any{
-					"name":        "Entity",
-					"description": "The root Entity definition.",
-					"category":    "General",
-					"tags": []any{
-						"main",
-						"master",
-					},
-				},
-				"_self": map[string]any{
-					"_type":       "github.com/AmadlaOrg/Entity@latest",
-					"title":       "Some random title",
-					"description": "The random title description.",
-				},
+				"_body": map[string]any{"key": "value"},
 			},
 			hasError: true,
 		},

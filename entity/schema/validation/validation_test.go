@@ -7,7 +7,7 @@ import (
 )
 
 func TestId(t *testing.T) {
-	entitySchemaValidationService := NewEntitySchemaValidationService()
+	entitySchemaValidationService := New()
 	tests := []struct {
 		name           string
 		inputId        string

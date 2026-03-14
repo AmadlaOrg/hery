@@ -27,8 +27,8 @@ func TestConcoct_Success(t *testing.T) {
 		require.Empty(t, args)
 	}
 
-	mockSUtil := SUtil{
-		NewStorageService: &mockStorage,
+	mockSUtil := utilImpl{
+		New: &mockStorage,
 	}
 
 	err := mockSUtil.Concoct(&cobra.Command{}, []string{}, handler)
@@ -48,8 +48,8 @@ func TestConcoct_StoragePathsError(t *testing.T) {
 	mockStorage := storage.MockStorage{}
 	mockStorage.EXPECT().Paths().Return(nil, fmt.Errorf("mock error from Paths"))
 
-	mockSUtil := SUtil{
-		NewStorageService: &mockStorage,
+	mockSUtil := utilImpl{
+		New: &mockStorage,
 	}
 
 	handlerCalled := false

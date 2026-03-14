@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-// IVersion is an interface for managing versions.
-type IVersion interface {
+// Version is an interface for managing versions.
+type Version interface {
 	Extract(url string) (string, error)
 	List(entityUrlPath string) ([]string, error)
 	Latest(versions []string) (string, error)
@@ -21,22 +21,22 @@ type IVersion interface {
 	GeneratePseudoPattern(name, version string) string
 }
 
-// SVersion struct implements the Manager interface.
-type SVersion struct {
+// versionImpl struct implements the Manager interface.
+type versionImpl struct {
 	GitRemoteConfig *gitConfig.Config
 }
 
 var (
-	remoteNewGitRemoteService = remote.NewGitRemoteService
+	remoteNew = remote.New
 )
 
-// Extract extracts the version from a URI string.
+// Extract extracts the version from a URI string. The version maps directly to a git tag.
 //
 // Supported version types:
 //   - Normal: v1.0.1, v1.0.0-beta.2
 //   - Pseudo: v0.0.0-20240924093300-abcd1234efgh (base version + timestamp + commit hash prefix)
 //   - Latest: returns "latest" if @latest is specified; returns ErrorExtractNoVersionFound if no @ present
-func (s *SVersion) Extract(url string) (string, error) {
+func (s *versionImpl) Extract(url string) (string, error) {
 	versionAnnotationCount := strings.Count(url, "@")
 	if versionAnnotationCount > 1 {
 		return "", errors.Join(ErrorExtractVersionAnnotationCountMoreThanOne, fmt.Errorf("url: %s", url))
@@ -59,9 +59,10 @@ func (s *SVersion) Extract(url string) (string, error) {
 	return matches[1], nil
 }
 
-// List returns a list of all the versions in tags with the format `v1.0.0`, `v1.0`, or `v1`.
-func (s *SVersion) List(entityUrlPath string) ([]string, error) {
-	gitRemote := remoteNewGitRemoteService(entityUrlPath, s.GitRemoteConfig)
+// List returns all versions from git tags matching semver format (v1.0.0, v1.0.0-beta.2).
+// Entity versions map directly to git tags — e.g., @v1.0.0 in a _type URI resolves to git tag v1.0.0.
+func (s *versionImpl) List(entityUrlPath string) ([]string, error) {
+	gitRemote := remoteNew(entityUrlPath, s.GitRemoteConfig)
 
 	tags, err := gitRemote.Tags()
 	if err != nil {
@@ -88,7 +89,7 @@ func (s *SVersion) List(entityUrlPath string) ([]string, error) {
 }
 
 // Latest returns the most recent version from the list of versions.
-func (s *SVersion) Latest(versions []string) (string, error) {
+func (s *versionImpl) Latest(versions []string) (string, error) {
 	if len(versions) == 0 {
 		return "", ErrorLatestVersionsLenIsZero
 	}
@@ -101,8 +102,8 @@ func (s *SVersion) Latest(versions []string) (string, error) {
 }
 
 // GeneratePseudo generates a pseudo version to be used when there is no other source to identify the version of the entity.
-func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
-	gitRemote := remoteNewGitRemoteService(entityFullRepoUrl, s.GitRemoteConfig)
+func (s *versionImpl) GeneratePseudo(entityFullRepoUrl string) (string, error) {
+	gitRemote := remoteNew(entityFullRepoUrl, s.GitRemoteConfig)
 
 	commitHeadHash, err := gitRemote.CommitHeadHash()
 	if err != nil {
@@ -116,7 +117,7 @@ func (s *SVersion) GeneratePseudo(entityFullRepoUrl string) (string, error) {
 }
 
 // GeneratePseudoPattern generates a glob pattern for matching pseudo-versioned entity directories.
-func (s *SVersion) GeneratePseudoPattern(name, version string) string {
+func (s *versionImpl) GeneratePseudoPattern(name, version string) string {
 	return fmt.Sprintf("%s@%s-*-%s", name, version[:6], version[22:])
 }
 
@@ -125,12 +126,12 @@ func (s *SVersion) GeneratePseudoPattern(name, version string) string {
 //
 
 // versionLess compares two version strings and returns true if v1 < v2.
-func (s *SVersion) versionLess(v1, v2 string) bool {
+func (s *versionImpl) versionLess(v1, v2 string) bool {
 	return s.compareVersions(v1, v2) < 0
 }
 
 // compareVersions compares two version strings and returns -1, 0, or 1 if v1 < v2, v1 == v2, or v1 > v2.
-func (s *SVersion) compareVersions(v1, v2 string) int {
+func (s *versionImpl) compareVersions(v1, v2 string) int {
 	parts1, pre1 := s.parseVersion(v1)
 	parts2, pre2 := s.parseVersion(v2)
 
@@ -161,7 +162,7 @@ func (s *SVersion) compareVersions(v1, v2 string) int {
 }
 
 // comparePreRelease compares pre-release versions and returns -1, 0, or 1 if pre1 < pre2, pre1 == pre2, or pre1 > pre2.
-func (s *SVersion) comparePreRelease(pre1, pre2 string) int {
+func (s *versionImpl) comparePreRelease(pre1, pre2 string) int {
 	preOrder := map[string]int{"alpha": 0, "beta": 1, "rc": 2}
 
 	parts1 := strings.Split(pre1, ".")
@@ -196,7 +197,7 @@ func (s *SVersion) comparePreRelease(pre1, pre2 string) int {
 }
 
 // parseVersion parses a version string into its components and a pre-release identifier.
-func (s *SVersion) parseVersion(version string) ([]int, string) {
+func (s *versionImpl) parseVersion(version string) ([]int, string) {
 	re := regexp.MustCompile(ParseVersionFormat)
 	matches := re.FindStringSubmatch(version)
 

@@ -2,13 +2,13 @@ package merge
 
 import "fmt"
 
-// ResolveParentChain resolves _parent references and deep merges entity bodies.
-// The lookup function retrieves a parsed entity body by its _self URI.
-// Returns the fully merged body after walking the parent chain.
-func ResolveParentChain(entityBody map[string]any, lookup func(selfURI string) (map[string]any, error)) (map[string]any, error) {
-	parentURI, ok := entityBody["_parent"].(string)
-	if !ok || parentURI == "" {
-		// No parent — return entity body as-is
+// ResolveExtendsChain resolves _extends references and deep merges entity bodies.
+// The lookup function retrieves a parsed entity body by its URI.
+// Returns the fully merged body after walking the extends chain.
+func ResolveExtendsChain(entityBody map[string]any, lookup func(extendsURI string) (map[string]any, error)) (map[string]any, error) {
+	extendsURI, ok := entityBody["_extends"].(string)
+	if !ok || extendsURI == "" {
+		// No extends — return entity body as-is
 		return entityBody, nil
 	}
 
@@ -18,32 +18,32 @@ func ResolveParentChain(entityBody map[string]any, lookup func(selfURI string) (
 }
 
 func resolveChain(child map[string]any, lookup func(string) (map[string]any, error), seen map[string]bool) (map[string]any, error) {
-	parentURI, ok := child["_parent"].(string)
-	if !ok || parentURI == "" {
+	extendsURI, ok := child["_extends"].(string)
+	if !ok || extendsURI == "" {
 		return child, nil
 	}
 
-	if seen[parentURI] {
-		return nil, fmt.Errorf("circular _parent reference detected: %s", parentURI)
+	if seen[extendsURI] {
+		return nil, fmt.Errorf("circular _extends reference detected: %s", extendsURI)
 	}
-	seen[parentURI] = true
+	seen[extendsURI] = true
 
-	parentBody, err := lookup(parentURI)
+	extendsBody, err := lookup(extendsURI)
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve _parent %s: %w", parentURI, err)
+		return nil, fmt.Errorf("failed to resolve _extends %s: %w", extendsURI, err)
 	}
 
-	// Recursively resolve the parent's own _parent first
-	resolvedParent, err := resolveChain(parentBody, lookup, seen)
+	// Recursively resolve the extended entity's own _extends first
+	resolvedExtends, err := resolveChain(extendsBody, lookup, seen)
 	if err != nil {
 		return nil, err
 	}
 
-	// Deep merge: parent is base, child overrides
-	merged := DeepMerge(resolvedParent, child)
+	// Deep merge: extended entity is base, child overrides
+	merged := DeepMerge(resolvedExtends, child)
 
-	// Remove _parent from the merged result since it's been resolved
-	delete(merged, "_parent")
+	// Remove _extends from the merged result since it's been resolved
+	delete(merged, "_extends")
 
 	return merged, nil
 }

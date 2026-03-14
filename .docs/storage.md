@@ -1,24 +1,53 @@
 # Storage | Docs | HERY
-All the entities are stored in two possible places:
-- The root of a project
-  - `{project root}/.hery/`
-- The home directory:
-  - Unix: `~/.hery/`
-  - Windows: `{APPDATA}\Hery\`
 
-Inside the storage directory `.hery/` the next layer of directories are of collections.
+## Project Level
 
-Example of a storage structure:
-- `.hery/` - The root of the storage for collections of entities
-  - `collection/` - All collections are stored inside this directory
-    - `amadla/` - An example of a collection
-      - `entity/` - All the entities are stored inside of this directory
-        - `github.com/` - From this point forward the path to the entity is broken down into directories
-          - `AmadlaOrg/`
-            - `Entity@v1.0.0/` - Entity name with the version
-              - `.amadla/` - The directory is always named after the collection
-                - `schema.hery.json` - The schema for the entity
-              - `amadla.hery` - Is an entity with data, normally used to define an entity
-            - `EntityApplication@v1.0.0/` - This is just another entity
-              - ...
-      - `amadla.cache` - The [SQLite](https://www.sqlite.org/) caching
+A project's entity content lives at the project root:
+
+```
+my-project/
+  webserver.hery           # Entity instances (source of truth, committed)
+  network.hery             # Entity instances
+  database.hery            # Entity instances
+  hery.lock                # Lock file (JSON, committed to Git)
+  .hery.cache              # SQLite cache (gitignored, rebuilt from .hery files)
+```
+
+- **`*.hery`** -- entity content files (committed)
+- **`hery.lock`** -- portable JSON snapshot of the merged state (committed). Same data as .hery.cache but in a portable, debuggable format.
+- **`.hery.cache`** -- SQLite database for fast queries (gitignored, derived)
+
+## Global Entity Cache
+
+Resolved entity types are cached globally at `~/.cache/hery/entity/`, organized by git path:
+
+```
+~/.cache/hery/
+  entity/
+    amadla.org/
+      entity/
+        application@v1.0.0/
+          schema.hery.json
+          default.hery
+        network@v1.0.0/
+          schema.hery.json
+          default.hery
+    github.com/
+      AmadlaOrg/
+        EntityApplication@v1.0.0/
+          schema.hery.json
+          default.hery
+      jnbdz/
+        personal-website/        # Cloned for _extends resolution
+          webserver/
+            webserver.hery
+```
+
+The cache is disposable -- hery re-fetches from Git when needed.
+
+## Global Config (optional)
+
+```
+~/.config/hery/
+  config.yaml              # Global hery settings
+```

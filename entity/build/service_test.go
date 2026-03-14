@@ -8,8 +8,8 @@ import (
 
 func TestNewEntityBuildService(t *testing.T) {
 	t.Run("should return a new instance of Build", func(t *testing.T) {
-		service := NewEntityBuildService(&gitConfig.Config{})
+		service := New(&gitConfig.Config{})
 		assert.NotNil(t, service)
-		assert.IsType(t, &SBuild{}, service)
+		assert.IsType(t, &builder{}, service)
 	})
 }

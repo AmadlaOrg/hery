@@ -3,8 +3,7 @@
 -- This table stores information about entities
 CREATE TABLE IF NOT EXISTS entities (
     entity_type TEXT NOT NULL,  -- _type: entity type URI with version
-    entity_self TEXT,           -- _self: resolvable URI (merge discriminator)
-    entity_parent TEXT,         -- _parent: URI to parent entity instance
+    entity_extends TEXT,        -- _extends: URI to extended entity instance
     uri TEXT UNIQUE,            -- Full entity URI (type@version)
     name TEXT,                  -- Simple name of the entity
     repo_url TEXT,              -- Full URL to the repository
@@ -26,7 +25,6 @@ CREATE TABLE IF NOT EXISTS entities (
 );
 
 CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type);
-CREATE INDEX IF NOT EXISTS idx_entities_self ON entities(entity_self);
 CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(name);
 CREATE INDEX IF NOT EXISTS idx_entities_uri ON entities(uri);
 CREATE INDEX IF NOT EXISTS idx_entities_repo_url ON entities(repo_url);

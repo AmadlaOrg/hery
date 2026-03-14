@@ -14,7 +14,7 @@ func TestQuery_NoFilters(t *testing.T) {
 		{"merged_json": `{"_type":"example.com/App@v1.0.0","_body":{"name":"test"}}`},
 	}, nil)
 
-	q := &SQuery{Database: mockDb}
+	q := &queryImpl{Database: mockDb}
 	results, err := q.Query(SelectionOpts{})
 	assert.NoError(t, err)
 	assert.Len(t, results, 1)
@@ -30,7 +30,7 @@ func TestQuery_WithTypeFilter(t *testing.T) {
 		{"merged_json": `{"_type":"example.com/App@v1.0.0","_body":{"name":"matched"}}`},
 	}, nil)
 
-	q := &SQuery{Database: mockDb}
+	q := &queryImpl{Database: mockDb}
 	results, err := q.Query(SelectionOpts{Type: "example.com/App*"})
 	assert.NoError(t, err)
 	assert.Len(t, results, 1)
@@ -42,7 +42,7 @@ func TestQuery_WithJQ(t *testing.T) {
 		{"merged_json": `{"_type":"example.com/App@v1.0.0","_body":{"name":"test","color":"blue"}}`},
 	}, nil)
 
-	q := &SQuery{Database: mockDb}
+	q := &queryImpl{Database: mockDb}
 	results, err := q.Query(SelectionOpts{JQ: "._body"})
 	assert.NoError(t, err)
 	assert.Len(t, results, 1)
@@ -52,11 +52,11 @@ func TestQuery_WithJQ(t *testing.T) {
 
 func TestQuery_EmptyResults(t *testing.T) {
 	mockDb := &database.MockCacheDatabase{}
-	mockDb.EXPECT().QueryRows("SELECT merged_json FROM entities WHERE entity_self = ?", mock.Anything).
+	mockDb.EXPECT().QueryRows("SELECT merged_json FROM entities WHERE entity_type GLOB ?", mock.Anything).
 		Return([]map[string]any{}, nil)
 
-	q := &SQuery{Database: mockDb}
-	results, err := q.Query(SelectionOpts{Self: "nonexistent"})
+	q := &queryImpl{Database: mockDb}
+	results, err := q.Query(SelectionOpts{Type: "nonexistent"})
 	assert.NoError(t, err)
 	assert.Empty(t, results)
 }

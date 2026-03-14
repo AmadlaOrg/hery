@@ -24,8 +24,7 @@ var InitCmd = &cobra.Command{
   "type": "object",
   "properties": {
     "_type": { "type": "string" },
-    "_self": { "type": "string" },
-    "_parent": { "type": "string" },
+    "_extends": { "type": "string" },
     "_meta": { "type": "object" },
     "_body": { "type": "object" }
   },

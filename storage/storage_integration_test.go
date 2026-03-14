@@ -8,7 +8,7 @@ import (
 )
 
 func Test_Integration_Main(t *testing.T) {
-	storageService := NewStorageService()
+	storageService := New()
 	paths, err := storageService.Paths()
 	if err != nil {
 		t.Fatal("Failed to get paths")

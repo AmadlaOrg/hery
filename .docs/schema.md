@@ -1,21 +1,71 @@
 # Schema | Docs | HERY
-The `.hery` files are YAML files with reserved properties: `_entity`, `_id`, `_body`, `_meta`. So not too complicated. That said,
-every entity has its own standard set of properties and data format. And those are standardized in a [JSON Schema](https://json-schema.org/)
-file named: `schema.hery.json`. This schema file is found in the `.<collection name>/schema.hery.json` directory.
 
-Inside this [JSON Schema](https://json-schema.org/) file there are standards that need to be followed.
+Every entity type has a JSON Schema file (`schema.hery.json`) at the root of its repository directory. This schema validates `_meta` and `_body` content for entities of that type.
 
-1. The naming of the schema file.
-  - It has the word `hery` in it for better IDE integration
-  - An IDE plugin can quickly identify that it is part of a HERY entity schema definition since they vary from a normal [JSON Schema](https://json-schema.org/)
-2. Inside the schema file there is the `id` property
-   - It is required, compared to the [JSON Schema](https://json-schema.org/) standard
-   - It uses a HERY standard URN that is prefixed with: `urn:hery:<collection name>:`
-   - The URN is used so that the content of the schema can be identified as a HERY schema and so to not be confused with any other [JSON Schema](https://json-schema.org/)
-   - This also helps with IDE plugins
-   - The rest of the content is the same as `_entity` but `/` and `@` is replaced with `:`
-3. The schema of an entity is always merged with `.schema/entity.schema.json` to make sure that when validation happens the standard HERY properties are also validated
+## Schema File Location
 
-> HERY is for developers and developers need the technology they use to have a good integration with their IDEs.
-> So this is why some of these standard and rules exists. It adds to the responsibility of using HERY but makes working with it
-> with developer tools a breeze.
+```
+application/
+  schema.hery.json          # JSON Schema (the type definition)
+  default.hery              # Default values (optional)
+```
+
+The schema file is **visible** (not in a hidden directory). One schema per entity type directory.
+
+## Schema ID Format
+
+Schema IDs use the HERY URN format:
+
+```
+urn:hery:<type-uri-with-/-and-@-replaced-by-:>
+```
+
+Example: `urn:hery:amadla.org:entity:application:v1.0.0`
+
+For sub-types, the sub-type name is appended: `urn:hery:amadla.org:entity:application:db:v1.0.0`
+
+## Base Schema
+
+All entity schemas must extend the base HERY schema via `allOf`:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hery:amadla.org:entity:application:v1.0.0",
+  "allOf": [
+    { "$ref": "amadla.org/entity/hery@v1.0.0" }
+  ]
+}
+```
+
+The base schema (`amadla.org/entity/hery@v1.0.0`) defines the five reserved properties that all entities inherit: `_type`, `_extends`, `_meta`, `_body`, `_requires`.
+
+## Entity Composition
+
+For nested entity data, the schema uses standard JSON Schema `$ref` to reference sub-entity schemas:
+
+```json
+{
+  "properties": {
+    "_body": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "$ref": "urn:hery:amadla.org:entity:application:db:v1.0.0#/properties/_body"
+        }
+      }
+    }
+  }
+}
+```
+
+This tells parsers and downstream tools (weaver, judge) which parts of `_body` correspond to which entity types.
+
+## Validation Flow
+
+1. Parse YAML (resolve anchors/aliases and merge keys)
+2. Extract `_type` to determine the entity type
+3. Resolve `_type` URI to fetch the entity type (Git clone/pull)
+4. Load `schema.hery.json` from the entity type directory
+5. Compose the schema (entity schema + base HERY schema via `allOf`)
+6. Validate the document against the composed schema

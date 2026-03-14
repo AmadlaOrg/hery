@@ -7,8 +7,8 @@ import (
 
 func TestNewEntitySchemaValidationService(t *testing.T) {
 	t.Run("should return a new instance of Validation", func(t *testing.T) {
-		service := NewEntitySchemaValidationService()
+		service := New()
 		assert.NotNil(t, service)
-		assert.IsType(t, &SValidation{}, service)
+		assert.IsType(t, &validator{}, service)
 	})
 }

@@ -4,99 +4,99 @@ issue-845-fix: True
 packages:
   github.com/AmadlaOrg/hery/cache:
     interfaces:
-      ICache:
+      Cache:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockCache"
           inpackage: True
   github.com/AmadlaOrg/hery/cache/database:
     interfaces:
-      IDatabase:
+      Database:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockCacheDatabase"
           inpackage: True
-      ISqlDb:
+      SqlDB:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockSqlDb"
-      ISqlTx:
+      SqlTx:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockSqlTx"
   github.com/AmadlaOrg/hery/cache/parser:
     interfaces:
-      IParser:
+      Parser:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockCacheParser"
           inpackage: True
   github.com/AmadlaOrg/hery/entity:
     interfaces:
-      IEntity:
+      Service:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntity"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/build:
     interfaces:
-      IBuild:
+      Builder:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityBuild"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/cmd/util:
     interfaces:
-      IUtil:
+      Util:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityCmdUtil"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/get:
     interfaces:
-      IGet:
+      Getter:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityGet"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/schema:
     interfaces:
-      ISchema:
+      Schema:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntitySchema"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/schema/validation:
     interfaces:
-      IValidation:
+      Validator:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntitySchemaValidation"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/validation:
     interfaces:
-      IValidation:
+      Validator:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityValidation"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/version:
     interfaces:
-      IVersion:
+      Version:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityVersion"
           inpackage: True
   github.com/AmadlaOrg/hery/entity/version/validation:
     interfaces:
-      IValidation:
+      Validator:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockEntityVersionValidation"
           inpackage: True
   github.com/AmadlaOrg/hery/storage:
     interfaces:
-      IStorage:
+      Storage:
         config:
           dir: "{{.InterfaceDir}}"
           mockName: "MockStorage"

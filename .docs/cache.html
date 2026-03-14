@@ -1,0 +1,681 @@
+<!doctype html>
+<html>
+ <head>
+  <title>IntelliJ Markdown Preview</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none';
+script-src 'self';
+style-src 'unsafe-inline';
+img-src file: *;
+connect-src 'none';
+font-src * data: *;
+object-src 'none';
+media-src 'none';
+child-src 'none';">    
+  <style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style>
+  <style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style>
+  <style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style>        
+  <style id="MJX-SVG-styles">
+mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+  min-height: 1px;
+  min-width: 1px;
+}
+
+mjx-container[jax="SVG"] > svg a {
+  fill: blue;
+  stroke: blue;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][display="true"][width="full"] {
+  display: flex;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line], svg[data-table] > g > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame], svg[data-table] > g > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed, svg[data-table] > g > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted, svg[data-table] > g > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > g > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c] {
+  stroke-width: 3;
+}
+</style>
+ </head>
+ <body>
+  <div md-src-pos="0..28067">
+   <h1 id="cache--docs--hery" md-src-pos="0..21">Cache | Docs | HERY</h1>
+   <p md-src-pos="22..92"><span md-src-pos="22..92">To be able to have an efficient querying system caching is essentials.</span></p>
+   <p md-src-pos="94..246"><span md-src-pos="94..121">Entity data is cached in an</span> <a href="https://www.sqlite.org/" md-src-pos="122..155">SQLite</a> <span md-src-pos="156..202">DB that is saved to the root of the collection</span>'<span md-src-pos="203..204">s</span> <span md-src-pos="205..222">storage directory</span> (<span md-src-pos="224..228">e.g.</span>: <code md-src-pos="230..244">amadla.cache</code>)<span md-src-pos="245..246">.</span></p>
+   <p md-src-pos="248..306"><span md-src-pos="248..305">Here is an example what it looks like inside the cache DB</span>:</p>
+   <p md-src-pos="308..375"><img src="http://localhost:63343/markdownPreview/1774327107/.docs/diagram/caching-db-struct.svg" alt="Example of a cache DB structure" __idea-generated="true" md-src-pos="308..375" data-original-src=".docs/diagram/caching-db-struct.svg"></p>
+   <blockquote md-src-pos="377..500">
+    <p md-src-pos="379..500">[!NOTE] <code md-src-pos="389..395">hery</code><span md-src-pos="395..427">-cli does not support other DBs,</span> <span md-src-pos="428..453">and it comes with its own</span> <a href="https://github.com/mattn/go-sqlite3" md-src-pos="454..499">SQLite</a><span md-src-pos="499..500">.</span></p>
+   </blockquote>
+   <h2 id="queries" md-src-pos="502..512">Queries</h2>
+   <pre class="code-fence" md-src-pos="513..558"><div class="code-fence-highlighter-copy-button" data-fence-content="LnRhYmxlcwouc2NoZW1hIDx0YWJsZSBuYW1lPgouaGVscA==">
+  <img class="code-fence-highlighter-copy-button-icon" data-original-src=".docs" src="http://localhost:63343/markdownPreview/1774327107/.docs">
+  <span class="tooltiptext">Copy to clipboard</span>
+</div><code class="language-sql" md-src-pos="513..558"><span md-src-pos="513..520"></span><span md-src-pos="520..521" style="color: rgb(188, 190, 196);">.</span><span md-src-pos="521..528">tables
+</span><span md-src-pos="528..529" style="color: rgb(188, 190, 196);">.</span><span md-src-pos="529..537">schema &lt;</span><span md-src-pos="537..542" style="color: rgb(207, 142, 109);">table</span><span md-src-pos="542..543"> </span><span md-src-pos="543..547" style="color: rgb(207, 142, 109);">name</span><span md-src-pos="547..549">&gt;
+</span><span md-src-pos="549..550" style="color: rgb(188, 190, 196);">.</span><span md-src-pos="550..555">help
+</span><span md-src-pos="555..558"></span></code></pre>
+   <pre class="code-fence" md-src-pos="559..660"><div class="code-fence-highlighter-copy-button" data-fence-content="U0VMRUNUICogRlJPTSBlbnRpdGllczsKU0VMRUNUICogRlJPTSBtZXRhOwpTRUxFQ1QgKiBGUk9NIGJvZHk7ClNFTEVDVCAqIEZST00gYm9keV9tZXJnZWQ7">
+  <img class="code-fence-highlighter-copy-button-icon" data-original-src=".docs" src="http://localhost:63343/markdownPreview/1774327107/.docs">
+  <span class="tooltiptext">Copy to clipboard</span>
+</div><code class="language-sql" md-src-pos="559..660"><span md-src-pos="559..566"></span><span md-src-pos="566..572" style="color: rgb(207, 142, 109);">SELECT</span><span md-src-pos="572..575"> * </span><span md-src-pos="575..579" style="color: rgb(207, 142, 109);">FROM</span><span md-src-pos="579..588"> entities</span><span md-src-pos="588..589" style="color: rgb(188, 190, 196);">;</span><span md-src-pos="589..590">
+</span><span md-src-pos="590..596" style="color: rgb(207, 142, 109);">SELECT</span><span md-src-pos="596..599"> * </span><span md-src-pos="599..603" style="color: rgb(207, 142, 109);">FROM</span><span md-src-pos="603..608"> meta</span><span md-src-pos="608..609" style="color: rgb(188, 190, 196);">;</span><span md-src-pos="609..610">
+</span><span md-src-pos="610..616" style="color: rgb(207, 142, 109);">SELECT</span><span md-src-pos="616..619"> * </span><span md-src-pos="619..623" style="color: rgb(207, 142, 109);">FROM</span><span md-src-pos="623..628"> body</span><span md-src-pos="628..629" style="color: rgb(188, 190, 196);">;</span><span md-src-pos="629..630">
+</span><span md-src-pos="630..636" style="color: rgb(207, 142, 109);">SELECT</span><span md-src-pos="636..639"> * </span><span md-src-pos="639..643" style="color: rgb(207, 142, 109);">FROM</span><span md-src-pos="643..655"> body_merged</span><span md-src-pos="655..656" style="color: rgb(188, 190, 196);">;</span><span md-src-pos="656..657">
+</span><span md-src-pos="657..660"></span></code></pre>
+   <h2 id="internals" md-src-pos="662..674">Internals</h2>
+   <h3 id="tables" md-src-pos="675..685">Tables</h3>
+   <h4 id="entities" md-src-pos="686..701"><code md-src-pos="691..701">entities</code></h4>
+   <p md-src-pos="702..779"><code md-src-pos="702..712">entities</code> <span md-src-pos="713..779">table contains the definition of a entity with a specific version.</span></p>
+   <table md-src-pos="781..6828">
+    <thead>
+     <tr md-src-pos="781..1158">
+      <th md-src-pos="782..800">Column Name</th>
+      <th md-src-pos="801..836">Column Type</th>
+      <th md-src-pos="837..1076">Description</th>
+      <th md-src-pos="1077..1157">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="1537..1914">
+      <td md-src-pos="1538..1556">_entity</td>
+      <td md-src-pos="1557..1592">TEXT</td>
+      <td md-src-pos="1593..1832">Contains the entities URI (not unique)</td>
+      <td md-src-pos="1833..1913">github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="1915..2292">
+      <td md-src-pos="1916..1934">Name</td>
+      <td md-src-pos="1935..1970">TEXT</td>
+      <td md-src-pos="1971..2210">Just the name of the entity (not unique)</td>
+      <td md-src-pos="2211..2291">WebServer</td>
+     </tr>
+     <tr md-src-pos="2293..2670">
+      <td md-src-pos="2294..2312">RepoUrl</td>
+      <td md-src-pos="2313..2348">TEXT</td>
+      <td md-src-pos="2349..2588">The full URL to the repository containing the entity</td>
+      <td md-src-pos="2589..2669"><a href="https://github.com/AmadlaOrg/EntityApplication" md-src-pos="2590..2636">https://github.com/AmadlaOrg/EntityApplication</a></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="2671..3048">
+      <td md-src-pos="2672..2690">Origin</td>
+      <td md-src-pos="2691..2726">TEXT</td>
+      <td md-src-pos="2727..2966">Contains the partial path of the entity (from the domain directory to the root directory of the entity)</td>
+      <td md-src-pos="2967..3047">github.com/AmadlaOrg/EntityApplication</td>
+     </tr>
+     <tr md-src-pos="3049..3426">
+      <td md-src-pos="3050..3068">Version</td>
+      <td md-src-pos="3069..3104">TEXT</td>
+      <td md-src-pos="3105..3344">The entity version (not unique in the context of the table but for the entities yes)</td>
+      <td md-src-pos="3345..3425"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="3427..3804">
+      <td md-src-pos="3428..3446">IsLatestVersion</td>
+      <td md-src-pos="3447..3482">BOOLEAN</td>
+      <td md-src-pos="3483..3722">If the entity with this version is latest then this true (not unique in the context of the table but for the entities yes)</td>
+      <td md-src-pos="3723..3803"></td>
+     </tr>
+     <tr md-src-pos="3805..4182">
+      <td md-src-pos="3806..3824">IsPseudoVersion</td>
+      <td md-src-pos="3825..3860">BOOLEAN</td>
+      <td md-src-pos="3861..4100">Sometimes there a no fix version, if that is the case then this is set to true (not unique in the context of the table but for the entities yes)</td>
+      <td md-src-pos="4101..4181"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="4183..4560">
+      <td md-src-pos="4184..4202">AbsPath</td>
+      <td md-src-pos="4203..4238">TEXT <code md-src-pos="4209..4231">{constraint: unique}</code></td>
+      <td md-src-pos="4239..4478">The full system path to the entity files (unique)</td>
+      <td md-src-pos="4479..4559"></td>
+     </tr>
+     <tr md-src-pos="4561..4938">
+      <td md-src-pos="4562..4580">Have</td>
+      <td md-src-pos="4581..4616">BOOLEAN</td>
+      <td md-src-pos="4617..4856">This flag indicates that the content of the entity is on the local machine</td>
+      <td md-src-pos="4857..4937"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="4939..5316">
+      <td md-src-pos="4940..4958">Hash</td>
+      <td md-src-pos="4959..4994">TEXT</td>
+      <td md-src-pos="4995..5234">This the hash of the content (files, etc) for quick comparison and validation</td>
+      <td md-src-pos="5235..5315"></td>
+     </tr>
+     <tr md-src-pos="5317..5694">
+      <td md-src-pos="5318..5336">Exist</td>
+      <td md-src-pos="5337..5372">BOOLEAN</td>
+      <td md-src-pos="5373..5612">This flag indicates that the entitie's repository was found</td>
+      <td md-src-pos="5613..5693"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="5695..6072">
+      <td md-src-pos="5696..5714">Schema</td>
+      <td md-src-pos="5715..5750">TEXT</td>
+      <td md-src-pos="5751..5990">The entire <a href="https://json-schema.org/" md-src-pos="5763..5802">JSON-Schema</a> content</td>
+      <td md-src-pos="5991..6071"></td>
+     </tr>
+     <tr md-src-pos="6073..6450">
+      <td md-src-pos="6074..6092">insert_date_time</td>
+      <td md-src-pos="6093..6128">DATETIME</td>
+      <td md-src-pos="6129..6368">Is the date when this row was added</td>
+      <td md-src-pos="6369..6449"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="6451..6828">
+      <td md-src-pos="6452..6470">update_date_time</td>
+      <td md-src-pos="6471..6506">DATETIME</td>
+      <td md-src-pos="6507..6746">Is the latest date of when this row was updated</td>
+      <td md-src-pos="6747..6827"></td>
+     </tr>
+    </tbody>
+   </table>
+   <blockquote md-src-pos="6830..7023">
+    <p md-src-pos="6832..7023">[!NOTE] <a href="https://www.json.org/" md-src-pos="6842..6871">JSON</a> <span md-src-pos="6872..6956">is used for the storage of the cache because it then does not need to be transformed</span> <span md-src-pos="6959..6963">from</span> <a href="https://yaml.org/" md-src-pos="6964..6989">YAML</a> <span md-src-pos="6990..6992">to</span> <a href="https://www.json.org/" md-src-pos="6993..7022">JSON</a><span md-src-pos="7022..7023">.</span></p>
+   </blockquote>
+   <h3 id="_id" md-src-pos="7025..7034"><code md-src-pos="7029..7034">_id</code></h3>
+   <p md-src-pos="7035..7274"><span md-src-pos="7035..7073">Is chief when it comes to entity data.</span> <code md-src-pos="7074..7084">entities</code> <span md-src-pos="7085..7124">is just for defining the entity and the</span> <code md-src-pos="7125..7130">_id</code> <span md-src-pos="7131..7152">table is for the data</span> <span md-src-pos="7153..7169">for that entity.</span> <span md-src-pos="7170..7191">There can be multiple</span> <code md-src-pos="7192..7197">_id</code> <span md-src-pos="7198..7212">for an entity.</span> <span md-src-pos="7213..7274">In other words there can be multiple data sets for an entity.</span></p>
+   <p md-src-pos="7276..7464"><code md-src-pos="7276..7281">_id</code> <span md-src-pos="7282..7321">is a string that must match the pattern</span> <code md-src-pos="7322..7343">^[a-zA-Z0-9_\-:/]+$</code><span md-src-pos="7343..7344">.</span> <span md-src-pos="7345..7356">If omitted,</span> <span md-src-pos="7357..7391">a UUID v4 is auto-generated as the</span> <span md-src-pos="7392..7406">default value.</span> <span md-src-pos="7407..7464">Custom IDs are allowed as long as they match the pattern.</span></p>
+   <table md-src-pos="7466..9929">
+    <thead>
+     <tr md-src-pos="7466..7817">
+      <th md-src-pos="7467..7488">Column Name</th>
+      <th md-src-pos="7489..7522">Column Type</th>
+      <th md-src-pos="7523..7762">Description</th>
+      <th md-src-pos="7763..7816">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="8170..8521">
+      <td md-src-pos="8171..8192">entities_id</td>
+      <td md-src-pos="8193..8226">INT {constraint: foreign_key}</td>
+      <td md-src-pos="8227..8466"></td>
+      <td md-src-pos="8467..8520"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="8522..8873">
+      <td md-src-pos="8523..8544">id_with_entities_id</td>
+      <td md-src-pos="8545..8578">TEXT {constraint: unique}</td>
+      <td md-src-pos="8579..8818">Only there to avoid caching collisions in the caching (it merges the <code md-src-pos="8649..8662">entities_id</code> with <code md-src-pos="8668..8673">_id</code>)</td>
+      <td md-src-pos="8819..8872">1-d4b783-f448-483c-8111-380d6082ae1c</td>
+     </tr>
+     <tr md-src-pos="8874..9225">
+      <td md-src-pos="8875..8896">_id</td>
+      <td md-src-pos="8897..8930">TEXT</td>
+      <td md-src-pos="8931..9170">To uniquely identifying each entity content (not unique in the caching, only unique for an entity type and version)</td>
+      <td md-src-pos="9171..9224">97d4b783-f448-483c-8111-380d6082ae1c or a custom ID</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="9226..9577">
+      <td md-src-pos="9227..9248">insert_date_time</td>
+      <td md-src-pos="9249..9282">DATETIME</td>
+      <td md-src-pos="9283..9522">Is the date when this row was added</td>
+      <td md-src-pos="9523..9576"></td>
+     </tr>
+     <tr md-src-pos="9578..9929">
+      <td md-src-pos="9579..9600">update_date_time</td>
+      <td md-src-pos="9601..9634">DATETIME</td>
+      <td md-src-pos="9635..9874">Is the latest date of when this row was updated</td>
+      <td md-src-pos="9875..9928"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="meta" md-src-pos="9931..9941"><code md-src-pos="9935..9941">meta</code></h3>
+   <p md-src-pos="9942..10010"><span md-src-pos="9942..9958">Links the parent</span> <code md-src-pos="9959..9964">_id</code> <span md-src-pos="9965..10010">of an entity to the entity it is the meta of.</span></p>
+   <table md-src-pos="10012..11889">
+    <thead>
+     <tr md-src-pos="10012..10324">
+      <th md-src-pos="10013..10031">Column Name</th>
+      <th md-src-pos="10032..10071">Column Type</th>
+      <th md-src-pos="10072..10313">Description</th>
+      <th md-src-pos="10314..10323">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="10638..10950">
+      <td md-src-pos="10639..10657">id</td>
+      <td md-src-pos="10658..10697">INT <code md-src-pos="10663..10690">{constraint: primary_key}</code></td>
+      <td md-src-pos="10698..10939">The <code md-src-pos="10703..10707">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="10940..10949">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="10951..11263">
+      <td md-src-pos="10952..10970">entities_id</td>
+      <td md-src-pos="10971..11010">INT {constraint: foreign_key}</td>
+      <td md-src-pos="11011..11252"></td>
+      <td md-src-pos="11253..11262"></td>
+     </tr>
+     <tr md-src-pos="11264..11576">
+      <td md-src-pos="11265..11283">insert_date_time</td>
+      <td md-src-pos="11284..11323">DATETIME</td>
+      <td md-src-pos="11324..11565">Is the date when this row was added</td>
+      <td md-src-pos="11566..11575"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="11577..11889">
+      <td md-src-pos="11578..11596">update_date_time</td>
+      <td md-src-pos="11597..11636">DATETIME</td>
+      <td md-src-pos="11637..11878">Is the latest date of when this row was updated</td>
+      <td md-src-pos="11879..11888"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="entity_inclusion" md-src-pos="11891..11913"><code md-src-pos="11895..11913">entity_inclusion</code></h3>
+   <table md-src-pos="11914..13803">
+    <thead>
+     <tr md-src-pos="11914..12291">
+      <th md-src-pos="11915..11933">Column Name</th>
+      <th md-src-pos="11934..11969">Column Type</th>
+      <th md-src-pos="11970..12209">Description</th>
+      <th md-src-pos="12210..12290">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="12670..13047">
+      <td md-src-pos="12671..12689">id</td>
+      <td md-src-pos="12690..12725">INT <code md-src-pos="12695..12722">{constraint: primary_key}</code></td>
+      <td md-src-pos="12726..12965">The <code md-src-pos="12731..12735">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="12966..13046">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="13048..13425">
+      <td md-src-pos="13049..13067">insert_date_time</td>
+      <td md-src-pos="13068..13103">DATETIME</td>
+      <td md-src-pos="13104..13343">Is the date when this row was added</td>
+      <td md-src-pos="13344..13424"></td>
+     </tr>
+     <tr md-src-pos="13426..13803">
+      <td md-src-pos="13427..13445">update_date_time</td>
+      <td md-src-pos="13446..13481">DATETIME</td>
+      <td md-src-pos="13482..13721">Is the latest date of when this row was updated</td>
+      <td md-src-pos="13722..13802"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="body" md-src-pos="13805..13815"><code md-src-pos="13809..13815">body</code></h3>
+   <table md-src-pos="13816..16596">
+    <thead>
+     <tr md-src-pos="13816..14124">
+      <th md-src-pos="13817..13837">Column Name</th>
+      <th md-src-pos="13838..13873">Column Type</th>
+      <th md-src-pos="13874..14113">Description</th>
+      <th md-src-pos="14114..14123">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="14434..14742">
+      <td md-src-pos="14435..14455">id</td>
+      <td md-src-pos="14456..14491">INT <code md-src-pos="14461..14488">{constraint: primary_key}</code></td>
+      <td md-src-pos="14492..14731">The <code md-src-pos="14497..14501">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="14732..14741">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="14743..15051">
+      <td md-src-pos="14744..14764">_id_id</td>
+      <td md-src-pos="14765..14800">INT {constraint: foreign_key}</td>
+      <td md-src-pos="14801..15040"></td>
+      <td md-src-pos="15041..15050"></td>
+     </tr>
+     <tr md-src-pos="15052..15360">
+      <td md-src-pos="15053..15073">schema_property_id</td>
+      <td md-src-pos="15074..15109">INT {constraint: foreign_key}</td>
+      <td md-src-pos="15110..15349"></td>
+      <td md-src-pos="15350..15359"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="15361..15669">
+      <td md-src-pos="15362..15382">property_name</td>
+      <td md-src-pos="15383..15418">TEXT</td>
+      <td md-src-pos="15419..15658"></td>
+      <td md-src-pos="15659..15668"></td>
+     </tr>
+     <tr md-src-pos="15670..15978">
+      <td md-src-pos="15671..15691">property_value</td>
+      <td md-src-pos="15692..15727">TEXT</td>
+      <td md-src-pos="15728..15967">Simple string or JSON if there is other dimension to the content</td>
+      <td md-src-pos="15968..15977"></td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="15979..16287">
+      <td md-src-pos="15980..16000">insert_date_time</td>
+      <td md-src-pos="16001..16036">DATETIME</td>
+      <td md-src-pos="16037..16276">Is the date when this row was added</td>
+      <td md-src-pos="16277..16286"></td>
+     </tr>
+     <tr md-src-pos="16288..16596">
+      <td md-src-pos="16289..16309">update_date_time</td>
+      <td md-src-pos="16310..16345">DATETIME</td>
+      <td md-src-pos="16346..16585">Is the latest date of when this row was updated</td>
+      <td md-src-pos="16586..16595"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="schema" md-src-pos="16598..16610"><code md-src-pos="16602..16610">schema</code></h3>
+   <table md-src-pos="16611..18500">
+    <thead>
+     <tr md-src-pos="16611..16988">
+      <th md-src-pos="16612..16630">Column Name</th>
+      <th md-src-pos="16631..16666">Column Type</th>
+      <th md-src-pos="16667..16906">Description</th>
+      <th md-src-pos="16907..16987">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="17367..17744">
+      <td md-src-pos="17368..17386">id</td>
+      <td md-src-pos="17387..17422">INT <code md-src-pos="17392..17419">{constraint: primary_key}</code></td>
+      <td md-src-pos="17423..17662">The <code md-src-pos="17428..17432">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="17663..17743">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="17745..18122">
+      <td md-src-pos="17746..17764">insert_date_time</td>
+      <td md-src-pos="17765..17800">DATETIME</td>
+      <td md-src-pos="17801..18040">Is the date when this row was added</td>
+      <td md-src-pos="18041..18121"></td>
+     </tr>
+     <tr md-src-pos="18123..18500">
+      <td md-src-pos="18124..18142">update_date_time</td>
+      <td md-src-pos="18143..18178">DATETIME</td>
+      <td md-src-pos="18179..18418">Is the latest date of when this row was updated</td>
+      <td md-src-pos="18419..18499"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="schema_properties" md-src-pos="18502..18525"><code md-src-pos="18506..18525">schema_properties</code></h3>
+   <table md-src-pos="18526..20415">
+    <thead>
+     <tr md-src-pos="18526..18903">
+      <th md-src-pos="18527..18545">Column Name</th>
+      <th md-src-pos="18546..18581">Column Type</th>
+      <th md-src-pos="18582..18821">Description</th>
+      <th md-src-pos="18822..18902">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="19282..19659">
+      <td md-src-pos="19283..19301">id</td>
+      <td md-src-pos="19302..19337">INT <code md-src-pos="19307..19334">{constraint: primary_key}</code></td>
+      <td md-src-pos="19338..19577">The <code md-src-pos="19343..19347">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="19578..19658">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="19660..20037">
+      <td md-src-pos="19661..19679">insert_date_time</td>
+      <td md-src-pos="19680..19715">DATETIME</td>
+      <td md-src-pos="19716..19955">Is the date when this row was added</td>
+      <td md-src-pos="19956..20036"></td>
+     </tr>
+     <tr md-src-pos="20038..20415">
+      <td md-src-pos="20039..20057">update_date_time</td>
+      <td md-src-pos="20058..20093">DATETIME</td>
+      <td md-src-pos="20094..20333">Is the latest date of when this row was updated</td>
+      <td md-src-pos="20334..20414"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="schema_property" md-src-pos="20417..20438"><code md-src-pos="20421..20438">schema_property</code></h3>
+   <table md-src-pos="20439..22328">
+    <thead>
+     <tr md-src-pos="20439..20816">
+      <th md-src-pos="20440..20458">Column Name</th>
+      <th md-src-pos="20459..20494">Column Type</th>
+      <th md-src-pos="20495..20734">Description</th>
+      <th md-src-pos="20735..20815">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="21195..21572">
+      <td md-src-pos="21196..21214">id</td>
+      <td md-src-pos="21215..21250">INT <code md-src-pos="21220..21247">{constraint: primary_key}</code></td>
+      <td md-src-pos="21251..21490">The <code md-src-pos="21256..21260">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="21491..21571">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="21573..21950">
+      <td md-src-pos="21574..21592">insert_date_time</td>
+      <td md-src-pos="21593..21628">DATETIME</td>
+      <td md-src-pos="21629..21868">Is the date when this row was added</td>
+      <td md-src-pos="21869..21949"></td>
+     </tr>
+     <tr md-src-pos="21951..22328">
+      <td md-src-pos="21952..21970">update_date_time</td>
+      <td md-src-pos="21971..22006">DATETIME</td>
+      <td md-src-pos="22007..22246">Is the latest date of when this row was updated</td>
+      <td md-src-pos="22247..22327"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="schema_item" md-src-pos="22330..22347"><code md-src-pos="22334..22347">schema_item</code></h3>
+   <table md-src-pos="22348..24237">
+    <thead>
+     <tr md-src-pos="22348..22725">
+      <th md-src-pos="22349..22367">Column Name</th>
+      <th md-src-pos="22368..22403">Column Type</th>
+      <th md-src-pos="22404..22643">Description</th>
+      <th md-src-pos="22644..22724">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="23104..23481">
+      <td md-src-pos="23105..23123">id</td>
+      <td md-src-pos="23124..23159">INT <code md-src-pos="23129..23156">{constraint: primary_key}</code></td>
+      <td md-src-pos="23160..23399">The <code md-src-pos="23165..23169">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="23400..23480">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="23482..23859">
+      <td md-src-pos="23483..23501">insert_date_time</td>
+      <td md-src-pos="23502..23537">DATETIME</td>
+      <td md-src-pos="23538..23777">Is the date when this row was added</td>
+      <td md-src-pos="23778..23858"></td>
+     </tr>
+     <tr md-src-pos="23860..24237">
+      <td md-src-pos="23861..23879">update_date_time</td>
+      <td md-src-pos="23880..23915">DATETIME</td>
+      <td md-src-pos="23916..24155">Is the latest date of when this row was updated</td>
+      <td md-src-pos="24156..24236"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="schema_item_properties" md-src-pos="24239..24267"><code md-src-pos="24243..24267">schema_item_properties</code></h3>
+   <table md-src-pos="24268..26157">
+    <thead>
+     <tr md-src-pos="24268..24645">
+      <th md-src-pos="24269..24287">Column Name</th>
+      <th md-src-pos="24288..24323">Column Type</th>
+      <th md-src-pos="24324..24563">Description</th>
+      <th md-src-pos="24564..24644">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="25024..25401">
+      <td md-src-pos="25025..25043">id</td>
+      <td md-src-pos="25044..25079">INT <code md-src-pos="25049..25076">{constraint: primary_key}</code></td>
+      <td md-src-pos="25080..25319">The <code md-src-pos="25085..25089">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="25320..25400">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="25402..25779">
+      <td md-src-pos="25403..25421">insert_date_time</td>
+      <td md-src-pos="25422..25457">DATETIME</td>
+      <td md-src-pos="25458..25697">Is the date when this row was added</td>
+      <td md-src-pos="25698..25778"></td>
+     </tr>
+     <tr md-src-pos="25780..26157">
+      <td md-src-pos="25781..25799">update_date_time</td>
+      <td md-src-pos="25800..25835">DATETIME</td>
+      <td md-src-pos="25836..26075">Is the latest date of when this row was updated</td>
+      <td md-src-pos="26076..26156"></td>
+     </tr>
+    </tbody>
+   </table>
+   <h3 id="schema_defs" md-src-pos="26159..26176"><code md-src-pos="26163..26176">schema_defs</code></h3>
+   <table md-src-pos="26177..28066">
+    <thead>
+     <tr md-src-pos="26177..26554">
+      <th md-src-pos="26178..26196">Column Name</th>
+      <th md-src-pos="26197..26232">Column Type</th>
+      <th md-src-pos="26233..26472">Description</th>
+      <th md-src-pos="26473..26553">Example</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr md-src-pos="26933..27310">
+      <td md-src-pos="26934..26952">id</td>
+      <td md-src-pos="26953..26988">INT <code md-src-pos="26958..26985">{constraint: primary_key}</code></td>
+      <td md-src-pos="26989..27228">The <code md-src-pos="26994..26998">id</code> in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)</td>
+      <td md-src-pos="27229..27309">1</td>
+     </tr>
+     <tr class="intellij-row-even" md-src-pos="27311..27688">
+      <td md-src-pos="27312..27330">insert_date_time</td>
+      <td md-src-pos="27331..27366">DATETIME</td>
+      <td md-src-pos="27367..27606">Is the date when this row was added</td>
+      <td md-src-pos="27607..27687"></td>
+     </tr>
+     <tr md-src-pos="27689..28066">
+      <td md-src-pos="27690..27708">update_date_time</td>
+      <td md-src-pos="27709..27744">DATETIME</td>
+      <td md-src-pos="27745..27984">Is the latest date of when this row was updated</td>
+      <td md-src-pos="27985..28065"></td>
+     </tr>
+    </tbody>
+   </table>
+  </div>
+ </body>
+</html>

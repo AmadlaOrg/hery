@@ -15,7 +15,6 @@ var QueryCmd = &cobra.Command{
 	Short: "Query entities",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		typeFlag, _ := cmd.Flags().GetString("type")
-		selfFlag, _ := cmd.Flags().GetString("self")
 		metaFlag, _ := cmd.Flags().GetString("meta")
 		tagFlag, _ := cmd.Flags().GetString("tag")
 		jqFlag, _ := cmd.Flags().GetString("jq")
@@ -26,17 +25,16 @@ var QueryCmd = &cobra.Command{
 		}
 		dbPath := filepath.Join(homeDir, ".cache", "hery", "hery.db")
 
-		db := database.NewDatabaseService(dbPath)
+		db := database.New(dbPath)
 		if err := db.Initialize(); err != nil {
 			return fmt.Errorf("failed to open cache database: %w", err)
 		}
 		defer db.Close()
 
-		queryService := query.NewQueryService(db)
+		queryService := query.New(db)
 
 		results, err := queryService.Query(query.SelectionOpts{
 			Type: typeFlag,
-			Self: selfFlag,
 			Meta: metaFlag,
 			Tag:  tagFlag,
 			JQ:   jqFlag,
@@ -56,7 +54,6 @@ var QueryCmd = &cobra.Command{
 
 func init() {
 	QueryCmd.Flags().String("type", "", "Filter by entity type (glob pattern)")
-	QueryCmd.Flags().String("self", "", "Filter by entity self URI (exact match)")
 	QueryCmd.Flags().String("meta", "", "Filter by metadata content (substring)")
 	QueryCmd.Flags().String("tag", "", "Filter by tag (substring in meta)")
 	QueryCmd.Flags().String("jq", "", "jq expression for transformation")

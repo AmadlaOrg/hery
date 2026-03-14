@@ -33,7 +33,7 @@ func TestGet_Success(t *testing.T) {
 	mockBuild.EXPECT().Meta(*paths, "github.com/AmadlaOrg/TestEntity@v1.0.0").Return(entityMeta, nil)
 	mockEntity.EXPECT().CheckDuplicate(mock.Anything, entityMeta).Return(nil)
 
-	getService := &SGet{
+	getService := &getter{
 		Entity: mockEntity,
 		Build:  mockBuild,
 	}
@@ -60,7 +60,7 @@ func TestGet_DuplicateError(t *testing.T) {
 	mockBuild.EXPECT().Meta(*paths, "github.com/AmadlaOrg/TestEntity@v1.0.0").Return(entityMeta, nil)
 	mockEntity.EXPECT().CheckDuplicate(mock.Anything, entityMeta).Return(fmt.Errorf("duplicate entity found"))
 
-	getService := &SGet{
+	getService := &getter{
 		Entity: mockEntity,
 		Build:  mockBuild,
 	}
@@ -80,7 +80,7 @@ func TestGet_BuildMetaError(t *testing.T) {
 
 	mockBuild.EXPECT().Meta(*paths, "invalid-entity").Return(entity.Entity{}, fmt.Errorf("invalid entity URI"))
 
-	getService := &SGet{
+	getService := &getter{
 		Build: mockBuild,
 	}
 
@@ -89,7 +89,7 @@ func TestGet_BuildMetaError(t *testing.T) {
 }
 
 func TestDownload_AllHave(t *testing.T) {
-	getService := &SGet{}
+	getService := &getter{}
 
 	entities := []entity.Entity{
 		{Have: true, Name: "Entity1"},

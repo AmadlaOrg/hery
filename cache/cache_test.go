@@ -9,7 +9,7 @@ import (
 )
 
 func TestAddEntity(t *testing.T) {
-	cacheService := NewCacheService(filepath.Join(t.TempDir(), "test.db"))
+	cacheService := New(filepath.Join(t.TempDir(), "test.db"))
 	err := cacheService.Open()
 	assert.NoError(t, err)
 
@@ -29,7 +29,6 @@ func TestAddEntity(t *testing.T) {
 		Exist:   true,
 		Content: entity.Content{
 			Type: "github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
-			Self: "my-webserver",
 			Body: map[string]any{
 				"port": 8080,
 			},
@@ -41,7 +40,7 @@ func TestAddEntity(t *testing.T) {
 }
 
 func TestSelectEntity(t *testing.T) {
-	cacheService := NewCacheService(filepath.Join(t.TempDir(), "test.db"))
+	cacheService := New(filepath.Join(t.TempDir(), "test.db"))
 	err := cacheService.Open()
 	assert.NoError(t, err)
 
@@ -61,7 +60,6 @@ func TestSelectEntity(t *testing.T) {
 		Exist:   true,
 		Content: entity.Content{
 			Type: "github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
-			Self: "my-webserver",
 			Body: map[string]any{
 				"port": 8080,
 			},
@@ -74,11 +72,10 @@ func TestSelectEntity(t *testing.T) {
 	result, err := cacheService.SelectEntity("github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0")
 	assert.NoError(t, err)
 	assert.Equal(t, "WebServer", result.Name)
-	assert.Equal(t, "my-webserver", result.Content.Self)
 }
 
 func TestSelectEntity_NotFound(t *testing.T) {
-	cacheService := NewCacheService(filepath.Join(t.TempDir(), "test.db"))
+	cacheService := New(filepath.Join(t.TempDir(), "test.db"))
 	err := cacheService.Open()
 	assert.NoError(t, err)
 

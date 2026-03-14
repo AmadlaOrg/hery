@@ -5,9 +5,9 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version"
 )
 
-// NewEntityVersionValidationService to set up the Entity version validation service
-func NewEntityVersionValidationService(gitConfig *gitConfig.Config) IValidation {
-	return &SValidation{
-		Version: version.NewEntityVersionService(gitConfig),
+// New to set up the Entity version validation service
+func New(gitConfig *gitConfig.Config) Validator {
+	return &validator{
+		Version: version.New(gitConfig),
 	}
 }

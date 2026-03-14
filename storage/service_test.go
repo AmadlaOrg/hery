@@ -3,10 +3,10 @@ package storage
 import "testing"
 
 func Test_NewStorageService(t *testing.T) {
-	storageService := NewStorageService()
+	storageService := New()
 
 	if storageService == nil {
-		t.Fatal("Expected NewStorageService to return a non-nil value")
+		t.Fatal("Expected New to return a non-nil value")
 	}
 
 	if storageService.Storage != "" ||

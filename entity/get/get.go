@@ -16,21 +16,21 @@ import (
 	"sync"
 )
 
-// IGet is an interface for getting entities.
-type IGet interface {
+// Getter is an interface for getting entities.
+type Getter interface {
 	GetInTmp(entities []string) (storage.AbsPaths, error)
 	Get(storagePaths *storage.AbsPaths, entities []string) error
 	download(storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error
 }
 
-// SGet struct implements the EntityGetter interface.
-type SGet struct {
-	Entity                  entity.IEntity
-	EntityValidation        validation.IValidation
-	EntityVersion           version.IVersion
-	EntityVersionValidation versionValidationPkg.IValidation
-	Build                   build.IBuild
-	Schema                  schemaPkg.ISchema
+// getter struct implements the EntityGetter interface.
+type getter struct {
+	Entity                  entity.Service
+	EntityValidation        validation.Validator
+	EntityVersion           version.Version
+	EntityVersionValidation versionValidationPkg.Validator
+	Build                   build.Builder
+	Schema                  schemaPkg.Schema
 
 	// Config
 	GitConfig *gitConfig.Config
@@ -41,12 +41,12 @@ const perm os.FileMode = os.ModePerm
 // For easier mocking
 var (
 	osMkdirAll       = os.MkdirAll
-	gitNewGitService = git.NewGitService
+	gitNew = git.New
 )
 
 // GetInTmp retrieves entities into a temporary directory
-func (s *SGet) GetInTmp(entities []string) (storage.AbsPaths, error) {
-	storageService := storage.NewStorageService()
+func (s *getter) GetInTmp(entities []string) (storage.AbsPaths, error) {
+	storageService := storage.New()
 
 	storagePaths, err := storageService.TmpPaths()
 	if err != nil {
@@ -67,7 +67,7 @@ func (s *SGet) GetInTmp(entities []string) (storage.AbsPaths, error) {
 }
 
 // Get retrieves entities based on the provided entity URIs
-func (s *SGet) Get(storagePaths *storage.AbsPaths, entities []string) error {
+func (s *getter) Get(storagePaths *storage.AbsPaths, entities []string) error {
 	entityBuilds := make([]entity.Entity, len(entities))
 	for i, e := range entities {
 		entityMeta, err := s.Build.Meta(*storagePaths, e)
@@ -86,7 +86,7 @@ func (s *SGet) Get(storagePaths *storage.AbsPaths, entities []string) error {
 }
 
 // download retrieves entities in parallel
-func (s *SGet) download(storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
+func (s *getter) download(storagePaths *storage.AbsPaths, entitiesMeta []entity.Entity) error {
 	var wg sync.WaitGroup
 	wg.Add(len(entitiesMeta))
 
@@ -115,28 +115,28 @@ func (s *SGet) download(storagePaths *storage.AbsPaths, entitiesMeta []entity.En
 				return
 			}
 
-			// 2b. Resolve _parent chains via deep merge
-			parentLookup := func(selfURI string) (map[string]any, error) {
-				parentMeta, lookupErr := s.Build.Meta(*storagePaths, selfURI)
+			// 2b. Resolve _extends chains via deep merge
+			extendsLookup := func(selfURI string) (map[string]any, error) {
+				extendsMeta, lookupErr := s.Build.Meta(*storagePaths, selfURI)
 				if lookupErr != nil {
 					return nil, lookupErr
 				}
-				if !parentMeta.Have {
-					if dlErr := s.download(storagePaths, []entity.Entity{parentMeta}); dlErr != nil {
+				if !extendsMeta.Have {
+					if dlErr := s.download(storagePaths, []entity.Entity{extendsMeta}); dlErr != nil {
 						return nil, dlErr
 					}
 				}
-				parentDocs, readErr := s.Entity.ReadAll(parentMeta.AbsPath)
-				if readErr != nil || len(parentDocs) == 0 {
-					return nil, fmt.Errorf("could not read parent entity %s", selfURI)
+				extendsDocs, readErr := s.Entity.ReadAll(extendsMeta.AbsPath)
+				if readErr != nil || len(extendsDocs) == 0 {
+					return nil, fmt.Errorf("could not read extended entity %s", selfURI)
 				}
-				return parentDocs[0], nil
+				return extendsDocs[0], nil
 			}
 
 			for i, doc := range documents {
-				resolved, resolveErr := merge.ResolveParentChain(doc, parentLookup)
+				resolved, resolveErr := merge.ResolveExtendsChain(doc, extendsLookup)
 				if resolveErr != nil {
-					errCh <- fmt.Errorf("error resolving _parent chain: %v", resolveErr)
+					errCh <- fmt.Errorf("error resolving _extends chain: %v", resolveErr)
 					return
 				}
 				documents[i] = resolved
@@ -177,13 +177,13 @@ func (s *SGet) download(storagePaths *storage.AbsPaths, entitiesMeta []entity.En
 }
 
 // addRepo clones the entity repository and checks out the correct version
-func (s *SGet) addRepo(entityMeta entity.Entity) error {
+func (s *getter) addRepo(entityMeta entity.Entity) error {
 	err := osMkdirAll(entityMeta.AbsPath, perm)
 	if err != nil {
 		return err
 	}
 
-	gitService := gitNewGitService(entityMeta.RepoUrl, entityMeta.AbsPath, s.GitConfig)
+	gitService := gitNew(entityMeta.RepoUrl, entityMeta.AbsPath, s.GitConfig)
 
 	if err = gitService.Clone(); err != nil {
 		return fmt.Errorf("error fetching repo: %v", err)

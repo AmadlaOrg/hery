@@ -8,17 +8,17 @@
     "_type": {
       "$ref": "#/$defs/_type"
     },
-    "_self": {
-      "$ref": "#/$defs/_self"
-    },
-    "_parent": {
-      "$ref": "#/$defs/_parent"
+    "_extends": {
+      "$ref": "#/$defs/_extends"
     },
     "_meta": {
       "$ref": "#/$defs/_meta"
     },
     "_body": {
       "$ref": "#/$defs/_body"
+    },
+    "_requires": {
+      "$ref": "#/$defs/_requires"
     }
   },
   "required": [
@@ -29,11 +29,7 @@
       "type": "string",
       "description": "Entity type URI with version (e.g., amadla.org/entity/application@v1.0.0). Determines which JSON Schema validates this document."
     },
-    "_self": {
-      "type": "string",
-      "description": "Resolvable URI address of this entity instance. Functions as the merge discriminator."
-    },
-    "_parent": {
+    "_extends": {
       "type": "string",
       "description": "URI to another entity instance of the same type. Enables deep merge inheritance."
     },
@@ -44,6 +40,13 @@
     "_body": {
       "type": "object",
       "description": "Entity content data. Validated against the entity's JSON Schema."
+    },
+    "_requires": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Hard dependencies on other entities for execution ordering. Supports versioned entity type URIs and #element.hery references."
     }
   }
 }

@@ -11,9 +11,9 @@ import (
 	"strings"
 )
 
-// ISchema used by mockery
-type ISchema interface {
-	Load(schemaPath string) (*Schema, error)
+// Schema used by mockery
+type Schema interface {
+	Load(schemaPath string) (*Definition, error)
 	GenerateSchemaPath(entityPath string) string
 	GenerateURN(entityUri string) string
 
@@ -22,8 +22,8 @@ type ISchema interface {
 	mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any
 }
 
-// SSchema used by mockery
-type SSchema struct{}
+// schemaImpl used by mockery
+type schemaImpl struct{}
 
 // Help with mocking
 var (
@@ -33,7 +33,7 @@ var (
 )
 
 // Load loads the JSON schema from a file and merges it with a base schema
-func (s *SSchema) Load(schemaPath string) (*Schema, error) {
+func (s *schemaImpl) Load(schemaPath string) (*Definition, error) {
 	// 1. Read the schema file into memory
 	schemaData, err := s.loadSchemaFile(schemaPath)
 	if err != nil {
@@ -66,7 +66,7 @@ func (s *SSchema) Load(schemaPath string) (*Schema, error) {
 	}
 
 	// 5. Return the Schema struct
-	return &Schema{
+	return &Definition{
 		CompiledSchema: compiledSchema,
 		SchemaPath:     schemaPath,
 		SchemaName:     schemaName,
@@ -77,13 +77,13 @@ func (s *SSchema) Load(schemaPath string) (*Schema, error) {
 
 // GenerateSchemaPath returns the absolute path for the entity's schema.
 // In Draft 3.2, schema.hery.json is at the root of the entity type directory.
-func (s *SSchema) GenerateSchemaPath(entityPath string) string {
+func (s *schemaImpl) GenerateSchemaPath(entityPath string) string {
 	return filepath.Join(entityPath, EntityJsonSchemaFileName)
 }
 
 // GenerateURN returns the full URN for a HERY entity type.
 // Format: urn:hery:<type-uri-with-/-and-@-replaced-by-:>
-func (s *SSchema) GenerateURN(entityUri string) string {
+func (s *schemaImpl) GenerateURN(entityUri string) string {
 	urlToUrn := strings.Replace(entityUri, "/", ":", -1)
 	urn := strings.Replace(urlToUrn, "@", ":", 1)
 	return fmt.Sprintf("urn:hery:%s", urn)
@@ -94,7 +94,7 @@ func (s *SSchema) GenerateURN(entityUri string) string {
 //
 
 // loadSchemaFile reads a JSON schema file and returns it as a map
-func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
+func (s *schemaImpl) loadSchemaFile(schemaPath string) (map[string]any, error) {
 	// 1. Read the schema file into memory
 	file, err := osOpen(schemaPath)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *SSchema) loadSchemaFile(schemaPath string) (map[string]any, error) {
 }
 
 // mergeSchemas merges two schemas (base and main) into one
-func (s *SSchema) mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any {
+func (s *schemaImpl) mergeSchemas(baseSchema, mainSchema map[string]any) map[string]any {
 	// 1. Loop all the top properties in the entity.schema.json
 	for key, value := range baseSchema {
 

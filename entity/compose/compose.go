@@ -3,6 +3,7 @@ package compose
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/AmadlaOrg/hery/entity"
 	"github.com/AmadlaOrg/hery/entity/merge"
@@ -10,20 +11,20 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-// IComposer is an interface for composing entities.
-type IComposer interface {
+// Composer is an interface for composing entities.
+type Composer interface {
 	ComposeEntity(entityArg string, printToScreen bool) error
 }
 
-// SComposer struct implements the IComposer interface.
-type SComposer struct {
-	Storage storage.IStorage
-	Entity  entity.IEntity
+// composer struct implements the Composer interface.
+type composer struct {
+	Storage storage.Storage
+	Entity  entity.Service
 }
 
-// ComposeEntity reads all .hery files for an entity, resolves _parent chains
+// ComposeEntity reads all .hery files for an entity, resolves _extends chains
 // via deep merge, and outputs the composed result.
-func (s *SComposer) ComposeEntity(entityArg string, printToScreen bool) error {
+func (s *composer) ComposeEntity(entityArg string, printToScreen bool) error {
 	storagePaths, err := s.Storage.Paths()
 	if err != nil {
 		return fmt.Errorf("failed to get storage paths: %w", err)
@@ -54,21 +55,31 @@ func (s *SComposer) ComposeEntity(entityArg string, printToScreen bool) error {
 		matched = documents
 	}
 
-	// Resolve _parent chains for each document
-	parentLookup := func(selfURI string) (map[string]any, error) {
-		for _, doc := range documents {
-			if selfVal, ok := doc["_self"].(string); ok && selfVal == selfURI {
-				return doc, nil
-			}
+	// Resolve _extends chains by reading from the extended entity's directory in the entity cache.
+	// _extends is a git path (e.g., github.com/some-org/base-configs/webserver) that maps
+	// to a directory under the entities cache.
+	extendsLookup := func(extendsURI string) (map[string]any, error) {
+		extendsDir := filepath.Join(storagePaths.Entities, extendsURI)
+		extendsDocs, readErr := s.Entity.ReadAll(extendsDir)
+		if readErr != nil {
+			return nil, fmt.Errorf("extended entity not found at %s: %w", extendsURI, readErr)
 		}
-		return nil, fmt.Errorf("parent entity not found: %s", selfURI)
+		if len(extendsDocs) == 0 {
+			return nil, fmt.Errorf("no .hery files found for extended entity: %s", extendsURI)
+		}
+		// Merge all documents from the extended entity directory into one
+		result := extendsDocs[0]
+		for _, doc := range extendsDocs[1:] {
+			result = merge.DeepMerge(result, doc)
+		}
+		return result, nil
 	}
 
 	var resolved []map[string]any
 	for _, doc := range matched {
-		r, resolveErr := merge.ResolveParentChain(doc, parentLookup)
+		r, resolveErr := merge.ResolveExtendsChain(doc, extendsLookup)
 		if resolveErr != nil {
-			return fmt.Errorf("failed to resolve _parent chain: %w", resolveErr)
+			return fmt.Errorf("failed to resolve _extends chain: %w", resolveErr)
 		}
 		resolved = append(resolved, r)
 	}

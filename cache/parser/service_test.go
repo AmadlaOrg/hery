@@ -9,8 +9,8 @@ import (
 func TestNewParserService(t *testing.T) {
 	t.Run("should return a new instance of Parser", func(t *testing.T) {
 		mockDb := &database.MockCacheDatabase{}
-		service := NewParserService(mockDb)
+		service := New(mockDb)
 		assert.NotNil(t, service)
-		assert.IsType(t, &SParser{}, service)
+		assert.IsType(t, &parser{}, service)
 	})
 }

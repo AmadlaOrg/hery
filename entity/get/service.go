@@ -9,14 +9,14 @@ import (
 	versionValidationPkg "github.com/AmadlaOrg/hery/entity/version/validation"
 )
 
-// NewGetService to set up the Get service
-func NewGetService(gitConfig *gitConfig.Config) IGet {
-	return &SGet{
-		Entity:                  entity.NewEntityService(gitConfig),
-		EntityValidation:        validation.NewEntityValidationService(gitConfig),
-		EntityVersion:           version.NewEntityVersionService(gitConfig),
-		EntityVersionValidation: versionValidationPkg.NewEntityVersionValidationService(gitConfig),
-		Build:                   build.NewEntityBuildService(gitConfig),
+// New to set up the Get service
+func New(gitConfig *gitConfig.Config) Getter {
+	return &getter{
+		Entity:                  entity.New(gitConfig),
+		EntityValidation:        validation.New(gitConfig),
+		EntityVersion:           version.New(gitConfig),
+		EntityVersionValidation: versionValidationPkg.New(gitConfig),
+		Build:                   build.New(gitConfig),
 
 		// Config
 		GitConfig: gitConfig,

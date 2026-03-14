@@ -15,7 +15,7 @@ func TestParseEntity(t *testing.T) {
 	mockDb.EXPECT().IsInitialized().Return(true)
 	mockDb.EXPECT().Insert(mock.Anything).Return()
 	mockDb.EXPECT().Apply().Return(nil)
-	parserService := NewParserService(mockDb)
+	parserService := New(mockDb)
 
 	e := entity.Entity{
 		Id:              uuid.MustParse("c0fdd76d-a5b5-4f35-8784-e6238d6933ab"),
@@ -30,10 +30,9 @@ func TestParseEntity(t *testing.T) {
 		Have:            true,
 		Hash:            "",
 		Exist:           true,
-		Schema:          &schema.Schema{},
+		Schema:          &schema.Definition{},
 		Content: entity.Content{
 			Type: "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
-			Self: "c0fdd76d-a5b5-4f35-8784-e6238d6933ab",
 			Meta: map[string]any{
 				"_type": "github.com/AmadlaOrg/Entity@latest",
 				"_body": map[string]any{
@@ -60,14 +59,13 @@ func TestParseEntity(t *testing.T) {
 
 	row := dbTable[0].Rows[0]
 	assert.Equal(t, "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0", row["entity_type"])
-	assert.Equal(t, "c0fdd76d-a5b5-4f35-8784-e6238d6933ab", row["entity_self"])
 	assert.NotEmpty(t, row["meta_json"])
 	assert.NotEmpty(t, row["body_json"])
 	assert.NotEmpty(t, row["merged_json"])
 }
 
 func TestEntityToTableName(t *testing.T) {
-	parserService := NewParserService(nil)
+	parserService := New(nil)
 	tableName := parserService.EntityToTableName("github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0")
 	assert.Equal(t, "github_com_AmadlaOrg_EntityApplication_WebServer_v1_0_0", tableName)
 }

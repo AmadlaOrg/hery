@@ -14,7 +14,7 @@ func TestReadAll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	heryExtService := NewEntityService(&gitConfig.Config{})
+	heryExtService := New(&gitConfig.Config{})
 	tests := []struct {
 		name      string
 		inputPath string

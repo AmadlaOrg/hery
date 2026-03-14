@@ -1,136 +1,71 @@
 # Cache | Docs | HERY
-To be able to have an efficient querying system caching is essentials.
 
-Entity data is cached in an [SQLite](https://www.sqlite.org/) DB that is saved to the root of the collection's
-storage directory (e.g.: `amadla.cache`).
+Entity data is cached in SQLite for fast querying.
 
-Here is an example what it looks like inside the cache DB:
-
-![Example of a cache DB structure](./diagram/caching-db-struct.svg)
+- **Cache file:** `.hery.cache` at the project root (gitignored, derived data)
+- The `.hery` source files are the source of truth
+- Cache is rebuilt from source files as needed
 
 > [!NOTE]
-> `hery`-cli does not support other DBs, and it comes with its own [SQLite](https://github.com/mattn/go-sqlite3).
+> hery uses embedded SQLite (go-sqlite3). No external database is needed.
 
-## Queries
+## Primary Table: `entities`
+
+The `entities` table stores all entity data in a single flat structure:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `entity_type` | TEXT NOT NULL | `_type` URI with version |
+| `entity_extends` | TEXT | `_extends` URI |
+| `uri` | TEXT UNIQUE | Full entity URI |
+| `name` | TEXT | Simple name of the entity |
+| `repo_url` | TEXT | Full URL to the repository |
+| `origin` | TEXT | Partial path of the entity |
+| `version` | TEXT | Entity version |
+| `is_latest_version` | BOOLEAN | Whether this is the latest version |
+| `is_pseudo_version` | BOOLEAN | Whether this is a pseudo-version |
+| `abs_path` | TEXT UNIQUE | Full system path to entity files |
+| `have` | BOOLEAN | Whether entity content is on local machine |
+| `hash` | TEXT UNIQUE | Hash of entity content for validation |
+| `exist` | BOOLEAN | Whether the repository was found |
+| `schema_json` | TEXT | Full JSON Schema content |
+| `meta_json` | TEXT | `_meta` as JSON string |
+| `body_json` | TEXT | `_body` as JSON string |
+| `requires_json` | TEXT | `_requires` as JSON string |
+| `merged_json` | TEXT | Full merged entity as JSON |
+| `source_file` | TEXT | Origin `.hery` file path |
+| `insert_date_time` | DATETIME | Row creation timestamp |
+| `update_date_time` | DATETIME | Row update timestamp |
+
+## Indexes
+
+Indexed columns for fast selection queries:
+
+- `entity_type` -- for `--type` flag filtering
+- `name` -- for name lookups
+- `uri` -- for URI lookups
+- `version` -- for version filtering
+- `is_latest_version` -- for latest-version queries
+
+## Querying
+
+The `meta_json` and `body_json` columns are queried using SQLite `json_extract()`:
+
 ```sql
-.tables
-.schema <table name>
-.help
+-- --meta 'category=Application'
+SELECT merged_json FROM entities
+WHERE json_extract(meta_json, '$.category') = 'Application';
+
+-- --tag production
+SELECT merged_json FROM entities
+WHERE EXISTS (
+    SELECT 1 FROM json_each(json_extract(meta_json, '$.tags'))
+    WHERE value = 'production'
+);
 ```
-```sql
-SELECT * FROM entities;
-SELECT * FROM meta;
-SELECT * FROM body;
-SELECT * FROM body_merged;
-```
 
-## Internals
-### Tables
-#### `entities`
-`entities` table contains the definition of a entity with a specific version.
+## Additional Tables
 
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| _entity          | TEXT                              | Contains the entities URI (not unique)                                                                                                                                                                                                        | github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0                        |
-| Name             | TEXT                              | Just the name of the entity (not unique)                                                                                                                                                                                                      | WebServer                                                                      |
-| RepoUrl          | TEXT                              | The full URL to the repository containing the entity                                                                                                                                                                                          | https://github.com/AmadlaOrg/EntityApplication                                 |
-| Origin           | TEXT                              | Contains the partial path of the entity (from the domain directory to the root directory of the entity)                                                                                                                                       | github.com/AmadlaOrg/EntityApplication                                         |
-| Version          | TEXT                              | The entity version (not unique in the context of the table but for the entities yes)                                                                                                                                                          |                                                                                |
-| IsLatestVersion  | BOOLEAN                           | If the entity with this version is latest then this true (not unique in the context of the table but for the entities yes)                                                                                                                    |                                                                                |
-| IsPseudoVersion  | BOOLEAN                           | Sometimes there a no fix version, if that is the case then this is set to true (not unique in the context of the table but for the entities yes)                                                                                              |                                                                                |
-| AbsPath          | TEXT `{constraint: unique}`       | The full system path to the entity files (unique)                                                                                                                                                                                             |                                                                                |
-| Have             | BOOLEAN                           | This flag indicates that the content of the entity is on the local machine                                                                                                                                                                    |                                                                                |
-| Hash             | TEXT                              | This the hash of the content (files, etc) for quick comparison and validation                                                                                                                                                                 |                                                                                |
-| Exist            | BOOLEAN                           | This flag indicates that the entitie's repository was found                                                                                                                                                                                   |                                                                                |
-| Schema           | TEXT                              | The entire [JSON-Schema](https://json-schema.org/) content                                                                                                                                                                                    |                                                                                |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
+The `body_data_*` tables (TEXT, NUMERIC, REAL, BOOLEAN, DATE, DATETIME) store typed property values for potential future indexed property queries. The primary query path uses the JSON columns in the `entities` table.
 
-> [!NOTE]
-> [JSON](https://www.json.org/) is used for the storage of the cache because it then does not need to be transformed
-> from [YAML](https://yaml.org/) to [JSON](https://www.json.org/).
-
-### `_id`
-Is chief when it comes to entity data. `entities` is just for defining the entity and the `_id` table is for the data
-for that entity. There can be multiple `_id` for an entity. In other words there can be multiple data sets for an entity.
-
-`_id` is a string that must match the pattern `^[a-zA-Z0-9_\-:/]+$`. If omitted, a UUID v4 is auto-generated as the
-default value. Custom IDs are allowed as long as they match the pattern.
-
-| Column Name         | Column Type                     | Description                                                                                                                                                                                                                                   | Example                                             |
-|---------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| entities_id         | INT {constraint: foreign_key}   |                                                                                                                                                                                                                                               |                                                     |
-| id_with_entities_id | TEXT {constraint: unique}       | Only there to avoid caching collisions in the caching (it merges the `entities_id` with `_id`)                                                                                                                                                | 1-d4b783-f448-483c-8111-380d6082ae1c                |
-| _id                 | TEXT                            | To uniquely identifying each entity content (not unique in the caching, only unique for an entity type and version)                                                                                                                           | 97d4b783-f448-483c-8111-380d6082ae1c or a custom ID |
-| insert_date_time    | DATETIME                        | Is the date when this row was added                                                                                                                                                                                                           |                                                     |
-| update_date_time    | DATETIME                        | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                     |
-
-### `meta`
-Links the parent `_id` of an entity to the entity it is the meta of.
-
-| Column Name      | Column Type                           | Description                                                                                                                                                                                                                                     | Example |
-|------------------|---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| id               | INT `{constraint: primary_key}`       | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique)   | 1       |
-| entities_id      | INT {constraint: foreign_key}         |                                                                                                                                                                                                                                                 |         |
-| insert_date_time | DATETIME                              | Is the date when this row was added                                                                                                                                                                                                             |         |
-| update_date_time | DATETIME                              | Is the latest date of when this row was updated                                                                                                                                                                                                 |         |
-
-### `entity_inclusion`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
-
-### `body`
-| Column Name        | Column Type                       | Description                                                                                                                                                                                                                                   | Example |
-|--------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| id                 | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1       |
-| _id_id             | INT {constraint: foreign_key}     |                                                                                                                                                                                                                                               |         |
-| schema_property_id | INT {constraint: foreign_key}     |                                                                                                                                                                                                                                               |         |
-| property_name      | TEXT                              |                                                                                                                                                                                                                                               |         |
-| property_value     | TEXT                              | Simple string or JSON if there is other dimension to the content                                                                                                                                                                              |         |
-| insert_date_time   | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |         |
-| update_date_time   | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |         |
-
-### `schema`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
-
-### `schema_properties`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
-
-### `schema_property`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
-
-### `schema_item`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
-
-### `schema_item_properties`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
-
-### `schema_defs`
-| Column Name      | Column Type                       | Description                                                                                                                                                                                                                                   | Example                                                                        |
-|------------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| id               | INT `{constraint: primary_key}`   | The `id` in a table typically serves as the primary key, uniquely identifying each row in the table. It ensures that no two rows have the same value in the id column, enabling efficient indexing and relationships between tables. (unique) | 1                                                                              |
-| insert_date_time | DATETIME                          | Is the date when this row was added                                                                                                                                                                                                           |                                                                                |
-| update_date_time | DATETIME                          | Is the latest date of when this row was updated                                                                                                                                                                                               |                                                                                |
+See `resources/sql/hery-tables.sql` for the full schema.

@@ -8,12 +8,12 @@ import (
 	"github.com/AmadlaOrg/hery/entity/version/validation"
 )
 
-// NewEntityValidationService to set up the Entity Validation service
-func NewEntityValidationService(gitConfig *gitConfig.Config) IValidation {
-	return &SValidation{
-		Version:           version.NewEntityVersionService(gitConfig),
-		VersionValidation: validation.NewEntityVersionValidationService(gitConfig),
-		Schema:            schema.NewEntitySchemaService(),
-		SchemaValidation:  schemaValidationPkg.NewEntitySchemaValidationService(),
+// New to set up the Entity Validation service
+func New(gitConfig *gitConfig.Config) Validator {
+	return &validator{
+		Version:           version.New(gitConfig),
+		VersionValidation: validation.New(gitConfig),
+		Schema:            schema.New(),
+		SchemaValidation:  schemaValidationPkg.New(),
 	}
 }

@@ -10,8 +10,8 @@ import (
 	"sync"
 )
 
-// IDatabase defines the database interface
-type IDatabase interface {
+// Database defines the database interface
+type Database interface {
 	Initialize() error
 	Close() error
 	IsInitialized() bool
@@ -25,19 +25,19 @@ type IDatabase interface {
 	QueryRows(query string, args ...any) ([]map[string]any, error)
 }
 
-// SDatabase implements IDatabase
-type SDatabase struct {
+// db implements Database
+type dbImpl struct {
 	dbAbsPath   string
 	queries     *Queries
-	sqlDB       ISqlDb
+	sqlDB       SqlDB
 	initialized bool
 }
 
 var (
-	db          ISqlDb
+	db          SqlDB
 	dbMutex     sync.Mutex // sync.Locker
 	initialized bool
-	sqlOpen     = func(driverName, dataSourceName string) (ISqlDb, error) {
+	sqlOpen     = func(driverName, dataSourceName string) (SqlDB, error) {
 		return sql.Open(driverName, dataSourceName)
 	}
 	osRemove = os.Remove
@@ -47,7 +47,7 @@ var (
 var sqlTables string
 
 // Initialize establishes the database connection
-func (s *SDatabase) Initialize() error {
+func (s *dbImpl) Initialize() error {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 
@@ -86,7 +86,7 @@ func (s *SDatabase) Initialize() error {
 }
 
 // Close closes the database connection
-func (s *SDatabase) Close() error {
+func (s *dbImpl) Close() error {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 
@@ -110,13 +110,13 @@ func (s *SDatabase) Close() error {
 }
 
 // IsInitialized returns true if the database has been initialized
-func (s *SDatabase) IsInitialized() bool {
+func (s *dbImpl) IsInitialized() bool {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 	return initialized
 }
 
-func (s *SDatabase) query(
+func (s *dbImpl) query(
 	addTo *[]Query,
 	table Table,
 	buildQueryFunc func(table Table, columnNames, valuesPlaceholder []string) string,
@@ -133,7 +133,7 @@ func (s *SDatabase) query(
 }
 
 // addQuery adds the queries to the queries struct component
-func (s *SDatabase) addQuery(slice *[]Query, query string, values []any) {
+func (s *dbImpl) addQuery(slice *[]Query, query string, values []any) {
 	*slice = append(*slice, Query{
 		Query:  query,
 		Values: values,
@@ -141,12 +141,12 @@ func (s *SDatabase) addQuery(slice *[]Query, query string, values []any) {
 }
 
 // CreateTable creates a new table
-func (s *SDatabase) CreateTable() {
+func (s *dbImpl) CreateTable() {
 	s.addQuery(&s.queries.CreateTable, sqlTables, nil)
 }
 
 // Insert inserts records into the table
-func (s *SDatabase) Insert(table Table) {
+func (s *dbImpl) Insert(table Table) {
 	s.query(
 		&s.queries.Insert,
 		table,
@@ -165,7 +165,7 @@ func (s *SDatabase) Insert(table Table) {
 }
 
 // Update updates a record in the table
-func (s *SDatabase) Update(table Table, where []Condition) {
+func (s *dbImpl) Update(table Table, where []Condition) {
 	s.query(
 		&s.queries.Update,
 		table,
@@ -189,7 +189,7 @@ func (s *SDatabase) Update(table Table, where []Condition) {
 }
 
 // Select retrieves a record from the table
-func (s *SDatabase) Select(table Table, clauses SelectClauses, joinClauses []JoinClauses) {
+func (s *dbImpl) Select(table Table, clauses SelectClauses, joinClauses []JoinClauses) {
 	// Build the SELECT query
 	var b strings.Builder
 	b.WriteString("SELECT * FROM ")
@@ -223,7 +223,7 @@ func (s *SDatabase) Select(table Table, clauses SelectClauses, joinClauses []Joi
 }
 
 // Delete deletes records from the table
-func (s *SDatabase) Delete(table Table, clauses SelectClauses) {
+func (s *dbImpl) Delete(table Table, clauses SelectClauses) {
 	var b strings.Builder
 	b.WriteString("DELETE FROM ")
 	b.WriteString(table.Name)
@@ -235,7 +235,7 @@ func (s *SDatabase) Delete(table Table, clauses SelectClauses) {
 
 // DeleteDb delete a db file
 // - Used when the caching will be reset
-func (s *SDatabase) DeleteDb() error {
+func (s *dbImpl) DeleteDb() error {
 	if ok, err := ValidateDbAbsPath(s.dbAbsPath); !ok {
 		return err
 	}
@@ -250,7 +250,7 @@ func (s *SDatabase) DeleteDb() error {
 }
 
 // Apply executes all queued queries in s.queries
-func (s *SDatabase) Apply() error {
+func (s *dbImpl) Apply() error {
 	if !s.IsInitialized() {
 		return fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
@@ -283,7 +283,7 @@ func (s *SDatabase) Apply() error {
 }
 
 // QueryRows executes a SELECT query and returns results as a slice of maps.
-func (s *SDatabase) QueryRows(query string, args ...any) ([]map[string]any, error) {
+func (s *dbImpl) QueryRows(query string, args ...any) ([]map[string]any, error) {
 	if !s.IsInitialized() {
 		return nil, fmt.Errorf(ErrorDatabaseNotInitialized)
 	}
@@ -332,7 +332,7 @@ func (s *SDatabase) QueryRows(query string, args ...any) ([]map[string]any, erro
 }
 
 // exec loops through all the queries and executes them
-func (s *SDatabase) exec(sqlTx ISqlTx, allQueries []Query) error {
+func (s *dbImpl) exec(sqlTx SqlTx, allQueries []Query) error {
 	for _, q := range allQueries {
 		_, execErr := sqlTx.Exec(q.Query, q.Values...)
 		if execErr != nil {

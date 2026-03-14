@@ -1,12 +1,12 @@
 package build
 
 /*func Test_Integration_Builder_MetaFromRemote(t *testing.T) {
-	paths, err := storage.NewStorageService().Paths("amadla")
+	paths, err := storage.New().Paths("amadla")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	entityBuildService := NewEntityBuildService()
+	entityBuildService := New()
 	remote, err := entityBuildService.MetaFromRemote(*paths, "github.com/AmadlaOrg/EntityApplication")
 	if err != nil {
 		assert.FailNow(t, err.Error())

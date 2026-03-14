@@ -27,7 +27,7 @@ func TestInitialize_db_set(t *testing.T) {
 
 	db = NewMockSqlDb(t)
 
-	databaseService := NewDatabaseService(testDbAbsPath)
+	databaseService := New(testDbAbsPath)
 	err := databaseService.Initialize()
 
 	assert.NoError(t, err)
@@ -37,14 +37,14 @@ func TestInitialize(t *testing.T) {
 	tests := []struct {
 		name              string
 		inputDbPath       string
-		internalSqlOpenFn func(driverName, dataSourceName string) (ISqlDb, error)
+		internalSqlOpenFn func(driverName, dataSourceName string) (SqlDB, error)
 		expectedErr       error
 		hasError          bool
 	}{
 		{
 			name:        "Initialize database",
 			inputDbPath: "/tmp/hery.test.cache",
-			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+			internalSqlOpenFn: func(driverName, dataSourceName string) (SqlDB, error) {
 				mockSqlDb := NewMockSqlDb(t)
 				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, nil)
 				mockSqlDb.EXPECT().SetMaxOpenConns(mock.Anything)
@@ -60,7 +60,7 @@ func TestInitialize(t *testing.T) {
 		{
 			name:        "Error: db Open fail",
 			inputDbPath: "/tmp/hery.test.cache",
-			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+			internalSqlOpenFn: func(driverName, dataSourceName string) (SqlDB, error) {
 				return nil, assert.AnError
 			},
 			expectedErr: errors.New("error opening database: "),
@@ -69,7 +69,7 @@ func TestInitialize(t *testing.T) {
 		{
 			name:        "Error: db Exec function throws error",
 			inputDbPath: "/tmp/hery.test.cache",
-			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+			internalSqlOpenFn: func(driverName, dataSourceName string) (SqlDB, error) {
 				mockSqlDb := NewMockSqlDb(t)
 				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, assert.AnError) // assert.AnError
 				mockSqlDb.EXPECT().Close().Return(nil)
@@ -81,7 +81,7 @@ func TestInitialize(t *testing.T) {
 		{
 			name:        "Error: db Exec function throws error also db Close",
 			inputDbPath: "/tmp/hery.test.cache",
-			internalSqlOpenFn: func(driverName, dataSourceName string) (ISqlDb, error) {
+			internalSqlOpenFn: func(driverName, dataSourceName string) (SqlDB, error) {
 				mockSqlDb := NewMockSqlDb(t)
 				mockSqlDb.EXPECT().Exec(mock.Anything).Return(nil, assert.AnError) // assert.AnError
 				mockSqlDb.EXPECT().Close().Return(assert.AnError)
@@ -108,7 +108,7 @@ func TestInitialize(t *testing.T) {
 			defer func() { sqlOpen = originalSqlOpen }()
 			sqlOpen = tt.internalSqlOpenFn
 
-			databaseService := NewDatabaseService(testDbAbsPath)
+			databaseService := New(testDbAbsPath)
 			err := databaseService.Initialize()
 
 			if tt.hasError {
@@ -125,13 +125,13 @@ func TestClose(t *testing.T) {
 	tests := []struct {
 		name                string
 		externalInitialized bool
-		externalDb          ISqlDb
+		externalDb          SqlDB
 		hasError            bool
 	}{
 		{
 			name:                "Close database",
 			externalInitialized: true,
-			externalDb: func() ISqlDb {
+			externalDb: func() SqlDB {
 				mockSqlDb := NewMockSqlDb(t)
 				mockSqlDb.EXPECT().Close().Return(nil)
 				return mockSqlDb
@@ -141,7 +141,7 @@ func TestClose(t *testing.T) {
 		{
 			name:                "Database is closed",
 			externalInitialized: true,
-			externalDb: func() ISqlDb {
+			externalDb: func() SqlDB {
 				return nil
 			}(),
 			hasError: false,
@@ -152,7 +152,7 @@ func TestClose(t *testing.T) {
 		{
 			name:                "Error: Close database",
 			externalInitialized: true,
-			externalDb: func() ISqlDb {
+			externalDb: func() SqlDB {
 				mockSqlDb := NewMockSqlDb(t)
 				mockSqlDb.EXPECT().Close().Return(assert.AnError)
 				return mockSqlDb
@@ -172,7 +172,7 @@ func TestClose(t *testing.T) {
 
 			dbMutex = mockSyncLocker*/
 
-			databaseService := NewDatabaseService(testDbAbsPath)
+			databaseService := New(testDbAbsPath)
 			err := databaseService.Close()
 
 			if tt.hasError {
@@ -217,7 +217,7 @@ func TestIsInitialized(t *testing.T) {
 
 			dbMutex = mockSyncLocker*/
 
-			databaseService := NewDatabaseService(testDbAbsPath)
+			databaseService := New(testDbAbsPath)
 			got := databaseService.IsInitialized()
 			assert.Equal(t, tt.expectedInitialized, got)
 		})
@@ -227,7 +227,7 @@ func TestIsInitialized(t *testing.T) {
 func TestCreateTable(t *testing.T) {
 	orginalSqlTables := sqlTables
 	sqlTables = "SQL string to create table"
-	databaseService := SDatabase{
+	databaseService := dbImpl{
 		queries: &Queries{
 			CreateTable: []Query{},
 			DropTable:   []Query{},
@@ -298,7 +298,7 @@ func TestInsert(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := NewDatabaseService(testDbAbsPath)
+			databaseService := New(testDbAbsPath)
 			databaseService.Insert(tt.inputTable)
 		})
 	}
@@ -314,7 +314,7 @@ func TestInsert(t *testing.T) {
 	defer db.Close()
 
 	// Initialize database service
-	databaseService := &SDatabase{
+	databaseService := &dbImpl{
 		queries: &[]string{},
 	}
 
@@ -439,7 +439,7 @@ func TestUpdate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := SDatabase{
+			databaseService := dbImpl{
 				queries: &Queries{
 					CreateTable: []Query{},
 					DropTable:   []Query{},
@@ -690,7 +690,7 @@ func TestSelect(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := SDatabase{
+			databaseService := dbImpl{
 				queries: &Queries{
 					CreateTable: []Query{},
 					DropTable:   []Query{},
@@ -776,7 +776,7 @@ func TestDelete(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := SDatabase{
+			databaseService := dbImpl{
 				queries: &Queries{
 					CreateTable: []Query{},
 					DropTable:   []Query{},
@@ -840,7 +840,7 @@ func TestDeleteDb(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := SDatabase{
+			databaseService := dbImpl{
 				dbAbsPath: tt.serviceStructDbAbsPath,
 				queries: &Queries{
 					CreateTable: []Query{},
@@ -996,7 +996,7 @@ func TestApply(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			databaseService := &SDatabase{
+			databaseService := &dbImpl{
 				queries: tt.internalQueries,
 			}
 

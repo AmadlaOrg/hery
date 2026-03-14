@@ -9,8 +9,8 @@ import (
 func TestNewQueryService(t *testing.T) {
 	t.Run("should return a new instance of Query", func(t *testing.T) {
 		mockDb := &database.MockCacheDatabase{}
-		service := NewQueryService(mockDb)
+		service := New(mockDb)
 		assert.NotNil(t, service)
-		assert.IsType(t, &SQuery{}, service)
+		assert.IsType(t, &queryImpl{}, service)
 	})
 }

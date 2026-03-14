@@ -16,7 +16,7 @@ var ComposeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		entityArg := args[0]
 		printToScreen, _ := cmd.Flags().GetBool("print")
-		composeService := compose.NewComposeService(&gitConfig.Config{})
+		composeService := compose.New(&gitConfig.Config{})
 		err := composeService.ComposeEntity(entityArg, printToScreen)
 		if err != nil {
 			fmt.Println("Error:", err)

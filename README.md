@@ -12,15 +12,15 @@ This name reflects the utility's aim to elevate and celebrate structured data ma
 
 ## Apropos
 
-HERY differs from [YAML](https://yaml.org/) only by five "reserved" properties: `_type`, `_self`, `_parent`, `_meta`
-and `_body`. In other words any `.hery` file can be read by any [YAML](https://yaml.org/) library or editor.
+HERY differs from [YAML](https://yaml.org/) only by five "reserved" properties: `_type`, `_extends`, `_meta`,
+`_body`, and `_requires`. In other words any `.hery` file can be read by any [YAML](https://yaml.org/) library or editor.
 
 HERY's reserved properties organize content in a [YAML](https://yaml.org/) file into entities:
 - `_type` is the URI of the entity type being used, including the version
-- `_self` is an optional resolvable identifier for a specific entity content instance (merge discriminator)
-- `_parent` is an optional URI to a parent entity instance, enabling deep merge inheritance
+- `_extends` is an optional URI to an entity instance to inherit from, enabling deep merge inheritance (purely a data/merge operation)
 - `_meta` contains metadata for the entity, making it easier to query and organize (similar to HTML `<meta>`)
 - `_body` contains the entity data (similar to HTML `<body>`)
+- `_requires` declares hard dependencies on other entities for execution ordering (amadla builds a DAG and topologically sorts)
 
 Entities require a [JSON-Schema](https://json-schema.org/) (`schema.hery.json`) to define the standard for an entity.
 When an entity is added, it is validated against its schema.
@@ -32,8 +32,8 @@ Once entities are added to the filesystem, they are cached in an [SQLite3](https
 HERY uses a two-stage query model: selection via CLI flags hitting SQLite indexes, then optional transformation
 via [jq](https://jqlang.github.io/jq/) expressions (compiled in via gojq). Output is always [JSON](https://www.json.org/).
 
-Entities support deep merge inheritance via `_parent`: child values override parent values — objects merge recursively,
-arrays replace entirely, scalars are overridden by the child.
+Entities support deep merge inheritance via `_extends`: the extended entity's `_body`, `_meta`, and `_requires` are merged — objects merge recursively,
+arrays replace entirely, scalars are overridden by the child. `_type` is never merged.
 
 A simple definition parallel:
 
@@ -42,7 +42,6 @@ A simple definition parallel:
 | **Entity**            | Table                                  |
 | **Entity content**    | Row                                    |
 | **Meta**              | HTML `<meta>`                          |
-| **Self**              | Row identifier / merge discriminator   |
 
 To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a
 `schema.hery.json` file and one or more `.hery` content files.
@@ -92,13 +91,13 @@ the `hery` CLI can find it and so that IDEs can have better support.
 
 HERY format has five reserved properties:
 
-| Property   | Description                                                   |
-|------------|---------------------------------------------------------------|
-| `_type`    | Entity type URI with version (required)                       |
-| `_self`    | Resolvable identifier for entity content (optional)           |
-| `_parent`  | URI to parent entity for deep merge inheritance (optional)    |
-| `_meta`    | Metadata for the entity (optional)                            |
-| `_body`    | Contains the content of the entity (optional)                 |
+| Property   | Description                                                             |
+|------------|-------------------------------------------------------------------------|
+| `_type`    | Entity type URI with version (required, or inherited via `_extends`)     |
+| `_extends` | URI to entity for deep merge inheritance (optional)                     |
+| `_meta`    | Metadata for the entity (optional)                                      |
+| `_body`    | Contains the content of the entity (optional)                           |
+| `_requires` | Hard dependencies on other entities for execution ordering (optional)   |
 
 Here is an example:
 ```yaml

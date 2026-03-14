@@ -2,17 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:hery:amadla.org:entity:hery:v1.0.0:outer",
   "title": "HERY Outer Entity Schema",
-  "description": "Validates a HERY document at the root level. Only the five reserved properties are allowed.",
+  "description": "Validates a HERY document at the root level. Only the four reserved properties are allowed.",
   "type": "object",
   "properties": {
     "_type": {
       "$ref": "entity.schema.json#/$defs/_type"
     },
-    "_self": {
-      "$ref": "entity.schema.json#/$defs/_self"
-    },
-    "_parent": {
-      "$ref": "entity.schema.json#/$defs/_parent"
+    "_extends": {
+      "$ref": "entity.schema.json#/$defs/_extends"
     },
     "_meta": {
       "$ref": "entity.schema.json#/$defs/_meta"

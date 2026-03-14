@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// ISqlDb
-type ISqlDb interface {
+// SqlDB
+type SqlDB interface {
 	Begin() (*sql.Tx, error)
 	Exec(query string, args ...any) (sql.Result, error)
 	Query(query string, args ...any) (*sql.Rows, error)
@@ -18,8 +18,8 @@ type ISqlDb interface {
 	PingContext(ctx context.Context) error
 }
 
-// ISqlTx
-type ISqlTx interface {
+// SqlTx
+type SqlTx interface {
 	Exec(query string, args ...any) (sql.Result, error)
 	Rollback() error
 	Commit() error

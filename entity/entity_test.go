@@ -16,14 +16,13 @@ import (
 )
 
 func TestSetContent(t *testing.T) {
-	s := &SEntity{}
+	s := &service{}
 
 	tests := []struct {
 		name        string
 		entity      Entity
 		input       NotFormatedContent
 		expectType  string
-		expectSelf  string
 		expectError bool
 	}{
 		{
@@ -31,13 +30,11 @@ func TestSetContent(t *testing.T) {
 			entity: Entity{},
 			input: NotFormatedContent{
 				"_type":   "github.com/AmadlaOrg/Entity@v1.0.0",
-				"_self":   "my-entity",
-				"_parent": "parent-entity",
+				"_extends": "parent-entity",
 				"_meta":   map[string]any{"name": "Test"},
 				"_body":   map[string]any{"key": "value"},
 			},
 			expectType: "github.com/AmadlaOrg/Entity@v1.0.0",
-			expectSelf: "my-entity",
 		},
 		{
 			name:   "Type from entity URI",
@@ -65,7 +62,6 @@ func TestSetContent(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expectType, content.Type)
-				assert.Equal(t, tt.expectSelf, content.Self)
 			}
 		})
 	}
@@ -85,7 +81,7 @@ func TestFindDir(t *testing.T) {
 
 	mockVersionValidation := &versionValidationPkg.MockEntityVersionValidation{}
 	mockVersion := &versionPkg.MockEntityVersion{}
-	s := &SEntity{
+	s := &service{
 		EntityVersion:           mockVersion,
 		EntityVersionValidation: mockVersionValidation,
 	}
@@ -160,7 +156,7 @@ func TestFindDir(t *testing.T) {
 func TestCheckDuplicate(t *testing.T) {
 	mockVersionValidation := &versionValidationPkg.MockEntityVersionValidation{}
 	mockVersion := &versionPkg.MockEntityVersion{}
-	s := &SEntity{
+	s := &service{
 		EntityVersion:           mockVersion,
 		EntityVersionValidation: mockVersionValidation,
 	}
@@ -219,7 +215,7 @@ func TestCheckDuplicate(t *testing.T) {
 }
 
 func TestGeneratePseudoVersionPattern(t *testing.T) {
-	entityService := NewEntityService(&gitConfig.Config{})
+	entityService := New(&gitConfig.Config{})
 
 	tests := []struct {
 		name         string
@@ -267,7 +263,7 @@ func TestReadAll_Unit(t *testing.T) {
 	err = os.WriteFile(filepath.Join(tmpDir, "readme.txt"), []byte("ignore me"), 0644)
 	assert.NoError(t, err)
 
-	s := &SEntity{}
+	s := &service{}
 	docs, err := s.ReadAll(tmpDir)
 	assert.NoError(t, err)
 	assert.Len(t, docs, 1)
@@ -277,7 +273,7 @@ func TestReadAll_Unit(t *testing.T) {
 func TestReadAll_Unit_EmptyDir(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	s := &SEntity{}
+	s := &service{}
 	docs, err := s.ReadAll(tmpDir)
 	assert.NoError(t, err)
 	assert.Empty(t, docs)
@@ -290,7 +286,7 @@ func TestReadAll_Unit_InvalidYAML(t *testing.T) {
 	err := os.WriteFile(filepath.Join(tmpDir, "bad.hery"), content, 0644)
 	assert.NoError(t, err)
 
-	s := &SEntity{}
+	s := &service{}
 	_, err = s.ReadAll(tmpDir)
 	assert.Error(t, err)
 }

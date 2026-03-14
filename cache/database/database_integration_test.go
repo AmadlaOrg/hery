@@ -6,7 +6,7 @@ import (
 )
 
 func Test_Integration_IsInitialized_is_true(t *testing.T) {
-	databaseService := NewDatabaseService("/tmp/test-integration-IsInitialized-is-true.db")
+	databaseService := New("/tmp/test-integration-IsInitialized-is-true.db")
 	err := databaseService.Initialize()
 	assert.NoError(t, err)
 
@@ -21,7 +21,7 @@ func Test_Integration_IsInitialized_is_true(t *testing.T) {
 }
 
 func Test_Integration_CreateTable(t *testing.T) {
-	databaseService := NewDatabaseService("/tmp/test-integration-create-table.db")
+	databaseService := New("/tmp/test-integration-create-table.db")
 	err := databaseService.Initialize()
 	assert.NoError(t, err)
 
@@ -41,7 +41,7 @@ func Test_Integration_CreateTable(t *testing.T) {
 }
 
 func Test_Integration_Insert(t *testing.T) {
-	databaseService := NewDatabaseService("/tmp/test-integration-insert.db")
+	databaseService := New("/tmp/test-integration-insert.db")
 	err := databaseService.Initialize()
 	assert.NoError(t, err)
 
