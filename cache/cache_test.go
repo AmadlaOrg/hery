@@ -19,16 +19,16 @@ func TestAddEntity(t *testing.T) {
 	}()
 
 	e := &entity.Entity{
-		Uri:     "github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
+		Uri:     "github.com/AmadlaOrg/App/WebServer@v1.0.0",
 		Name:    "WebServer",
-		RepoUrl: "https://github.com/AmadlaOrg/EntityApp",
-		Origin:  "github.com/AmadlaOrg/EntityApp",
+		RepoUrl: "https://github.com/AmadlaOrg/App",
+		Origin:  "github.com/AmadlaOrg/App",
 		Version: "v1.0.0",
-		AbsPath: "/home/user/.cache/hery/entity/github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
+		AbsPath: "/home/user/.cache/hery/entity/github.com/AmadlaOrg/App/WebServer@v1.0.0",
 		Have:    true,
 		Exist:   true,
 		Content: entity.Content{
-			Type: "github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
+			Type: "github.com/AmadlaOrg/App/WebServer@v1.0.0",
 			Body: map[string]any{
 				"port": 8080,
 			},
@@ -50,16 +50,16 @@ func TestSelectEntity(t *testing.T) {
 	}()
 
 	e := &entity.Entity{
-		Uri:     "github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
+		Uri:     "github.com/AmadlaOrg/App/WebServer@v1.0.0",
 		Name:    "WebServer",
-		RepoUrl: "https://github.com/AmadlaOrg/EntityApp",
-		Origin:  "github.com/AmadlaOrg/EntityApp",
+		RepoUrl: "https://github.com/AmadlaOrg/App",
+		Origin:  "github.com/AmadlaOrg/App",
 		Version: "v1.0.0",
-		AbsPath: "/home/user/.cache/hery/entity/github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
+		AbsPath: "/home/user/.cache/hery/entity/github.com/AmadlaOrg/App/WebServer@v1.0.0",
 		Have:    true,
 		Exist:   true,
 		Content: entity.Content{
-			Type: "github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0",
+			Type: "github.com/AmadlaOrg/App/WebServer@v1.0.0",
 			Body: map[string]any{
 				"port": 8080,
 			},
@@ -69,7 +69,7 @@ func TestSelectEntity(t *testing.T) {
 	err = cacheService.AddEntity(e)
 	assert.NoError(t, err)
 
-	result, err := cacheService.SelectEntity("github.com/AmadlaOrg/EntityApp/WebServer@v1.0.0")
+	result, err := cacheService.SelectEntity("github.com/AmadlaOrg/App/WebServer@v1.0.0")
 	assert.NoError(t, err)
 	assert.Equal(t, "WebServer", result.Name)
 }

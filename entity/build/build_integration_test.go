@@ -7,7 +7,7 @@ package build
 	}
 
 	entityBuildService := New()
-	remote, err := entityBuildService.MetaFromRemote(*paths, "github.com/AmadlaOrg/EntityApplication")
+	remote, err := entityBuildService.MetaFromRemote(*paths, "github.com/AmadlaOrg/Application")
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}

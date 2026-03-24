@@ -7,13 +7,10 @@ An entity is:
 In an entity directory there is a basic file and directory structure. The file at the root of the entity repository
 is named with a `.hery` file extension.
 
-The schema file `schema.hery.json` is located at the root of the entity type directory. It is possible
-to have multiple [JSON Schemas](https://json-schema.org/), but they won't be connected automatically to the entity
-definition. That will have to be done manually following the [JSON Schema](https://json-schema.org/) documentation by
-adding a full URL to the schema file in the schema file of choosing.
+The schema file is a `<name>.hery.json` file located at the root of the entity type directory (e.g., `application.hery.json`, `package.hery.json`). There must be exactly one `.hery.json` file per entity type directory.
 
 The key files for an entity:
-- `schema.hery.json` — entity JSON Schema at the entity type directory root
+- `<name>.hery.json` — entity JSON Schema at the entity type directory root (e.g., `application.hery.json`)
 - `*.hery` — entity content files
 
 ## Properties
@@ -99,7 +96,7 @@ _body:
 
 ### Create Entity
 1. Create repository
-2. Create a `schema.hery.json` [JSON-Schema](https://json-schema.org/) at the repository root
+2. Create a `<name>.hery.json` [JSON-Schema](https://json-schema.org/) at the repository root (e.g., `application.hery.json`)
 3. Create one or more `.hery` content files
 4. Add it in git:
     - `git add .`

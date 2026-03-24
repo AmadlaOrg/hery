@@ -19,20 +19,20 @@ func TestParseEntity(t *testing.T) {
 
 	e := entity.Entity{
 		Id:              uuid.MustParse("c0fdd76d-a5b5-4f35-8784-e6238d6933ab"),
-		Uri:             "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
+		Uri:             "github.com/AmadlaOrg/Application/WebServer@v1.0.0",
 		Name:            "WebServer",
-		RepoUrl:         "https://github.com/AmadlaOrg/EntityApplication",
-		Origin:          "github.com/AmadlaOrg/EntityApplication",
+		RepoUrl:         "https://github.com/AmadlaOrg/Application",
+		Origin:          "github.com/AmadlaOrg/Application",
 		Version:         "v1.0.0",
 		IsLatestVersion: true,
 		IsPseudoVersion: false,
-		AbsPath:         "/home/user/.cache/hery/entity/github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
+		AbsPath:         "/home/user/.cache/hery/entity/github.com/AmadlaOrg/Application/WebServer@v1.0.0",
 		Have:            true,
 		Hash:            "",
 		Exist:           true,
 		Schema:          &schema.Definition{},
 		Content: entity.Content{
-			Type: "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
+			Type: "github.com/AmadlaOrg/Application/WebServer@v1.0.0",
 			Meta: map[string]any{
 				"_type": "github.com/AmadlaOrg/Entity@latest",
 				"_body": map[string]any{
@@ -58,7 +58,7 @@ func TestParseEntity(t *testing.T) {
 	assert.Len(t, dbTable[0].Rows, 1)
 
 	row := dbTable[0].Rows[0]
-	assert.Equal(t, "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0", row["entity_type"])
+	assert.Equal(t, "github.com/AmadlaOrg/Application/WebServer@v1.0.0", row["entity_type"])
 	assert.NotEmpty(t, row["meta_json"])
 	assert.NotEmpty(t, row["body_json"])
 	assert.NotEmpty(t, row["merged_json"])
@@ -66,6 +66,6 @@ func TestParseEntity(t *testing.T) {
 
 func TestEntityToTableName(t *testing.T) {
 	parserService := New(nil)
-	tableName := parserService.EntityToTableName("github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0")
-	assert.Equal(t, "github_com_AmadlaOrg_EntityApplication_WebServer_v1_0_0", tableName)
+	tableName := parserService.EntityToTableName("github.com/AmadlaOrg/Application/WebServer@v1.0.0")
+	assert.Equal(t, "github_com_AmadlaOrg_Application_WebServer_v1_0_0", tableName)
 }

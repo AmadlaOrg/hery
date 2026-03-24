@@ -47,7 +47,7 @@ tests := []struct {
 		collectionName: "amadla",
 		paths:          paths,
 		entityURIs: []string{
-			"github.com/AmadlaOrg/EntityApplication",
+			"github.com/AmadlaOrg/Application",
 		},
 	},
 	{
@@ -56,7 +56,7 @@ tests := []struct {
 		paths:          paths,
 		entityURIs: []string{
 			"github.com/AmadlaOrg/Entity",
-			"github.com/AmadlaOrg/EntityApplication",
+			"github.com/AmadlaOrg/Application",
 		},
 	},
 	{

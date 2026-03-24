@@ -128,7 +128,7 @@
         ]
       }
     ],
-    "github.com/AmadlaOrg/EntitySystem/Net@v1.0.0": [
+    "github.com/AmadlaOrg/System/Net@v1.0.0": [
       {
         "_id": "net_http_not_secure_and_secure",
         "ports": [
@@ -137,39 +137,39 @@
         ]
       }
     ],
-    "github.com/AmadlaOrg/EntitySystem/CPU@v1.0.0": [
+    "github.com/AmadlaOrg/System/CPU@v1.0.0": [
       {
 
       }
     ],
-    "github.com/AmadlaOrg/EntitySystem/Memory@v1.0.0": [
+    "github.com/AmadlaOrg/System/Memory@v1.0.0": [
       {
 
       }
     ],
-    "github.com/AmadlaOrg/EntitySystem/Storage@v1.0.0": [
+    "github.com/AmadlaOrg/System/Storage@v1.0.0": [
       {
 
       }
     ],
-    "github.com/AmadlaOrg/EntityApplication/DB@v1.0.0": [
+    "github.com/AmadlaOrg/Application/DB@v1.0.0": [
       {
         "username": "root",
         "password": "root"
       }
     ],
-    "github.com/AmadlaOrg/EntityApplication/DB/RDBMS@v1.0.0": [
+    "github.com/AmadlaOrg/Application/DB/RDBMS@v1.0.0": [
       {
 
       }
     ],
-    "github.com/AmadlaOrg/EntityInfrastructur/Container@v1.0.0": [
+    "github.com/AmadlaOrg/Infrastructur/Container@v1.0.0": [
       {
         "engine": "podman",
         "compose": true
       }
     ],
-    "github.com/AmadlaOrg/EntityApplication@v1.0.0": [
+    "github.com/AmadlaOrg/Application@v1.0.0": [
       {
         "_id": "6e7b1fe2-9ab8-4c02-af02-48e1490c1a6a",
         "restart_policy": {
@@ -178,7 +178,7 @@
         }
       }
     ],
-    "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0": [
+    "github.com/AmadlaOrg/Application/WebServer@v1.0.0": [
       {
         "_id": "1792255d-773b-4f04-b478-270cc7d5cdda",
         "server_name": "localhost",
@@ -232,15 +232,15 @@
       "_index": 10
     },
     "net_http_not_secure_and_secure": {
-      "_entity": "github.com/AmadlaOrg/EntitySystem/Net@v1.0.0",
+      "_entity": "github.com/AmadlaOrg/System/Net@v1.0.0",
       "_index": 0
     },
     "6e7b1fe2-9ab8-4c02-af02-48e1490c1a6a": {
-      "_entity": "github.com/AmadlaOrg/EntityApplication@v1.0.0",
+      "_entity": "github.com/AmadlaOrg/Application@v1.0.0",
       "_index": 0
     },
     "1792255d-773b-4f04-b478-270cc7d5cdda": {
-      "_entity": "github.com/AmadlaOrg/EntityApplication/WebServer@v1.0.0",
+      "_entity": "github.com/AmadlaOrg/Application/WebServer@v1.0.0",
       "_index": 0
     }
   }

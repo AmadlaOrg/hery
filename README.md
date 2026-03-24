@@ -22,7 +22,7 @@ HERY's reserved properties organize content in a [YAML](https://yaml.org/) file 
 - `_body` contains the entity data (similar to HTML `<body>`)
 - `_requires` declares hard dependencies on other entities for execution ordering (amadla builds a DAG and topologically sorts)
 
-Entities require a [JSON-Schema](https://json-schema.org/) (`schema.hery.json`) to define the standard for an entity.
+Entities require a [JSON-Schema](https://json-schema.org/) (`<name>.hery.json`, e.g., `application.hery.json`) to define the standard for an entity.
 When an entity is added, it is validated against its schema.
 
 HERY is also similar to a package manager whereby entities can be added via the CLI or inside the
@@ -44,7 +44,7 @@ A simple definition parallel:
 | **Meta**              | HTML `<meta>`                          |
 
 To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a
-`schema.hery.json` file and one or more `.hery` content files.
+`<name>.hery.json` schema file (e.g., `application.hery.json`) and one or more `.hery` content files.
 
 ## Amadla + HERY
 Amadla ecosystem follows as best as possible the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). So any storage sources that can `stdout` will
@@ -91,13 +91,13 @@ the `hery` CLI can find it and so that IDEs can have better support.
 
 HERY format has five reserved properties:
 
-| Property   | Description                                                             |
-|------------|-------------------------------------------------------------------------|
-| `_type`    | Entity type URI with version (required, or inherited via `_extends`)     |
-| `_extends` | URI to entity for deep merge inheritance (optional)                     |
-| `_meta`    | Metadata for the entity (optional)                                      |
-| `_body`    | Contains the content of the entity (optional)                           |
-| `_requires` | Hard dependencies on other entities for execution ordering (optional)   |
+| Property     | Description                                                                |
+|--------------|----------------------------------------------------------------------------|
+| `_type`      | Entity type URI with version (required, or inherited via `_extends`)       |
+| `_extends`   | URI to entity for deep merge inheritance (optional)                        |
+| `_meta`      | Metadata for the entity (optional)                                         |
+| `_body`      | Contains the content of the entity (optional)                              |
+| `_requires`  | Hard dependencies on other entities for execution ordering (optional)      |
 
 Here is an example:
 ```yaml
@@ -153,15 +153,11 @@ it easy to overwrite.
 > PRs are always welcome!
 
 ### IDE Plugins
-       ![Vim icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vim.png) [Vim](.editor/.vimrc)
+   ![Vim icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vim.png) [Vim](.editor/.vimrc)
 
-       ![Code icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vscode.png) [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
+   ![Code icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vscode.png) [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
 
-       ![IntelliJ icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/IntelliJ_IDEA.png) [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
-
-       ![Sublime Text icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/sublime.png) [Sublime Text](.editor/sublime.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-sublime-editor-plugin))
-
-       ![GNU Emacs icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/Emacs.png) [GNU Emacs](.editor/emacs.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-emacs-editor-plugin))
+   ![IntelliJ icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/IntelliJ_IDEA.png) [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
 
 ## Copyright
 - "[The Bear and Honey.](https://www.flickr.com/photos/97123293@N07/29003630251)" by [Swallowtail Garden Seeds](https://www.flickr.com/photos/97123293@N07) is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/?ref=openverse).
@@ -172,4 +168,4 @@ The license for the code and documentation can be found in the [LICENSE](./LICEN
 
 ---
 
-Made in Québec, Canada!
+Made in Québec 🏴󠁣󠁡󠁱󠁣󠁿, Canada 🇨🇦!

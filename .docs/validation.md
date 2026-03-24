@@ -7,7 +7,7 @@ Entities are validated against their JSON Schema to ensure predictable structure
 1. hery parses the YAML entity content
 2. Extracts `_type` to determine the entity type
 3. Resolves the `_type` URI to fetch the entity type (Git clone/pull to `~/.cache/hery/entity/`)
-4. Loads `schema.hery.json` from the entity type directory
+4. Discovers the `*.hery.json` schema file from the entity type directory
 5. Composes the schema (entity schema + base HERY schema via `allOf`)
 6. Validates the document against the composed schema
 

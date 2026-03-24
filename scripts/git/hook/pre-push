@@ -37,14 +37,17 @@ do
                 error "Directory '$hidden_dir' not found for file '$hery_file'."
             fi
 
-            schema_file="$hidden_dir/schema.hery.json"
-
-            echo "Checking for schema file: $schema_file"
-
-            # Check if schema.hery.json exists
-            if [ ! -f "$schema_file" ]; then
-                error "File '$schema_file' not found."
+            # Find the single *.hery.json schema file in the directory
+            schema_files=($hidden_dir/*.hery.json)
+            if [ ${#schema_files[@]} -eq 0 ] || [ ! -f "${schema_files[0]}" ]; then
+                error "No .hery.json schema file found in '$hidden_dir'."
             fi
+            if [ ${#schema_files[@]} -gt 1 ]; then
+                error "Multiple .hery.json schema files found in '$hidden_dir'. Expected exactly one."
+            fi
+            schema_file="${schema_files[0]}"
+
+            echo "Checking schema file: $schema_file"
 
             # Extract the 'id' property from the JSON schema
             id_value=$(grep -oP '"id"\s*:\s*"\K[^"]+' "$schema_file")

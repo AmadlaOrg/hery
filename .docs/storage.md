@@ -27,15 +27,15 @@ Resolved entity types are cached globally at `~/.cache/hery/entity/`, organized 
     amadla.org/
       entity/
         application@v1.0.0/
-          schema.hery.json
+          application.hery.json
           default.hery
         network@v1.0.0/
-          schema.hery.json
+          network.hery.json
           default.hery
     github.com/
       AmadlaOrg/
         EntityApplication@v1.0.0/
-          schema.hery.json
+          application.hery.json
           default.hery
       jnbdz/
         personal-website/        # Cloned for _extends resolution

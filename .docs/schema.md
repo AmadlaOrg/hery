@@ -1,16 +1,16 @@
 # Schema | Docs | HERY
 
-Every entity type has a JSON Schema file (`schema.hery.json`) at the root of its repository directory. This schema validates `_meta` and `_body` content for entities of that type.
+Every entity type has a JSON Schema file (`<name>.hery.json`) at the root of its repository directory. The schema filename matches the entity type name (e.g., `application.hery.json`, `package.hery.json`). This schema validates `_meta` and `_body` content for entities of that type.
 
 ## Schema File Location
 
 ```
 application/
-  schema.hery.json          # JSON Schema (the type definition)
+  application.hery.json     # JSON Schema (the type definition)
   default.hery              # Default values (optional)
 ```
 
-The schema file is **visible** (not in a hidden directory). One schema per entity type directory.
+The schema file is **visible** (not in a hidden directory). Exactly one `.hery.json` file per entity type directory.
 
 ## Schema ID Format
 
@@ -66,6 +66,6 @@ This tells parsers and downstream tools (weaver, judge) which parts of `_body` c
 1. Parse YAML (resolve anchors/aliases and merge keys)
 2. Extract `_type` to determine the entity type
 3. Resolve `_type` URI to fetch the entity type (Git clone/pull)
-4. Load `schema.hery.json` from the entity type directory
+4. Discover the `*.hery.json` schema file from the entity type directory
 5. Compose the schema (entity schema + base HERY schema via `allOf`)
 6. Validate the document against the composed schema

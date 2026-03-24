@@ -14,6 +14,7 @@ import (
 // Schema used by mockery
 type Schema interface {
 	Load(schemaPath string) (*Definition, error)
+	FindSchemaFile(entityPath string) (string, error)
 	GenerateSchemaPath(entityPath string) string
 	GenerateURN(entityUri string) string
 
@@ -30,6 +31,7 @@ var (
 	osOpen                = os.Open
 	jsonNewDecoder        = json.NewDecoder
 	jsonschemaNewCompiler = jsonschema.NewCompiler
+	filepathGlob          = filepath.Glob
 )
 
 // Load loads the JSON schema from a file and merges it with a base schema
@@ -75,10 +77,33 @@ func (s *schemaImpl) Load(schemaPath string) (*Definition, error) {
 	}, nil
 }
 
+// FindSchemaFile discovers the single *.hery.json schema file in the entity type directory.
+// Returns an error if no schema or multiple schemas are found.
+func (s *schemaImpl) FindSchemaFile(entityPath string) (string, error) {
+	pattern := filepath.Join(entityPath, "*"+EntityJsonSchemaFileExt)
+	matches, err := filepathGlob(pattern)
+	if err != nil {
+		return "", fmt.Errorf("failed to search for schema file: %w", err)
+	}
+	if len(matches) == 0 {
+		return "", fmt.Errorf("no %s schema file found in %s", EntityJsonSchemaFileExt, entityPath)
+	}
+	if len(matches) > 1 {
+		return "", fmt.Errorf("multiple %s schema files found in %s: expected exactly one", EntityJsonSchemaFileExt, entityPath)
+	}
+	return matches[0], nil
+}
+
 // GenerateSchemaPath returns the absolute path for the entity's schema.
-// In Draft 3.2, schema.hery.json is at the root of the entity type directory.
+// Deprecated: Use FindSchemaFile instead for dynamic schema file discovery.
 func (s *schemaImpl) GenerateSchemaPath(entityPath string) string {
-	return filepath.Join(entityPath, EntityJsonSchemaFileName)
+	schemaPath, err := s.FindSchemaFile(entityPath)
+	if err != nil {
+		// Fallback: derive name from directory
+		dirName := strings.ToLower(filepath.Base(entityPath))
+		return filepath.Join(entityPath, dirName+EntityJsonSchemaFileExt)
+	}
+	return schemaPath
 }
 
 // GenerateURN returns the full URN for a HERY entity type.
