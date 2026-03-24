@@ -1,6 +1,6 @@
 <img src=".assets/bear.jpg" alt="Electronics photo" style="width: 400px;" align="right">
 
-# `hery`
+# `hery` 🐻
 Hierarchical Entity Relational YAML (HERY)
 
 HERY is an extension to [YAML](https://yaml.org/), leveraging the concept of entities—[YAML](https://yaml.org/)
@@ -46,7 +46,7 @@ A simple definition parallel:
 To have an entity it needs to be in a repository that uses [Git](https://git-scm.com/). At the root it needs a
 `<name>.hery.json` schema file (e.g., `application.hery.json`) and one or more `.hery` content files.
 
-## Amadla + HERY
+## ❤️ Amadla + HERY
 Amadla ecosystem follows as best as possible the [UNIX philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). So any storage sources that can `stdout` will
 work. HERY is an optional storage source that is chiefly recommended for the Amadla ecosystem.
 
@@ -64,14 +64,14 @@ piped.
 
 It can be thought as an abstraction of a RDBMS and a Package Manager.
 
-## How Fast Is It?
+## 🏎 How Fast Is It?
 For the downloading of entities it will depend on how heavy the repository is. But generally an entity is just text so
 should be quick.
 
 For the query of data via HERY, it should be pretty quick since it uses [SQLite3](https://www.sqlite.org/) in the
 backend.
 
-## Install
+## 📥 Install
 ### With Go
 ```bash
 go install github.com/AmadlaOrg/hery
@@ -81,7 +81,7 @@ go install github.com/AmadlaOrg/hery
 go build -o hery
 ```
 
-## Quickstart
+## 🚀 Quickstart
 HERY does not require a lot of learning to get started. All you need to know is the five reserved properties, the
 `.hery` file format, that there is a SQLite caching system, a few of the commands, and the two-stage query model.
 
@@ -144,25 +144,25 @@ hery query --type "github.com/AmadlaOrg/Entity@latest" --jq '.[] | .name'
 ### More...
 To get more details on the functioning and commands: [.docs](.docs).
 
-## Dev
-### Developer Benefits
+## ⌨ Dev
+### 🔥 Developer Benefits
 A developer should find the code of this project to be well organized. It also comes with generated mocks that can make
 it very easy to write unit tests without needing to make mocks. It also comes with interfaces for each package making
 it easy to overwrite.
 
 > PRs are always welcome!
 
-### IDE Plugins
+### 📝 IDE Plugins
 &ensp;&ensp;![Vim icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vim.png) [Vim](.editor/.vimrc)
 
 &ensp;&ensp;![Code icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/vscode.png) [Visual Studio Code](.editor/code.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-code-editor-plugin))
 
 &ensp;&ensp;![IntelliJ icon](https://raw.githubusercontent.com/SiteNetSoft/resources/master/images/ide/x14/IntelliJ_IDEA.png) [JetBrains](.editor/jetbrains.yml) - ([GitHub](https://github.com/AmadlaOrg/hery-jetbrains-editor-plugin))
 
-## Copyright
+## ©️ Copyright
 - "[The Bear and Honey.](https://www.flickr.com/photos/97123293@N07/29003630251)" by [Swallowtail Garden Seeds](https://www.flickr.com/photos/97123293@N07) is marked with [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/?ref=openverse).
 
-## License
+## :scroll: License
 
 The license for the code and documentation can be found in the [LICENSE](./LICENSE) file.
 
