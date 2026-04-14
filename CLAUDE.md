@@ -2,12 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## AI Skills
+
+Follow the practices defined in `~/Projects/SiteNetSoft/ai-skills/`:
+- `dev-practices/golang/` — Go style, error handling, functions, testing, linting
+- `dev-practices/git/` — Git authorship rules
+
 ## Project Overview
 
 HERY (Hierarchical Entity Relational YAML) is a Go CLI utility that extends YAML with entity management capabilities. It combines concepts from RDBMS databases and package managers, enabling structured data organization with schema validation, Git-based versioning, and SQLite caching.
 
 **Core concept (Draft 3.5):** HERY adds five reserved YAML properties to organize content into entities:
-- `_type` - Entity type URI with version (e.g., `github.com/AmadlaOrg/Entity@latest`)
+- `_type` - Entity type URI with version (e.g., `github.com/AmadlaOrg/Application@latest`)
 - `_extends` - Optional extended entity URI (enables deep merge inheritance, purely data/merge — no execution ordering)
 - `_meta` - Metadata for the entity (like HTML `<meta>`)
 - `_body` - Contains entity data (like HTML `<body>`)

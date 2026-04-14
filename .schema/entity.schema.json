@@ -46,7 +46,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Hard dependencies on other entities for execution ordering. Supports versioned entity type URIs and #element.hery references."
+      "description": "Hard dependencies on other entities for execution ordering. Three forms: local file path (./file.hery), external file path (github.com/org/repo/file.hery@v1.0.0), type URI (amadla.org/entity/type@v1.0.0)."
     }
   }
 }

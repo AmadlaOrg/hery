@@ -40,12 +40,12 @@ definition. When present, its content is validated against the entity's JSON Sch
 ### `_requires`
 Declares hard dependencies on other entities (list). Used by amadla to build a dependency graph (DAG) and determine execution order via topological sort. hery validates syntax at parse time (valid URIs, no `../` escape).
 
-References can be:
-- Entity type URIs: `github.com/AmadlaOrg/Entities/Application/DB/RDBMS@^v1.0.0` (at least one must exist)
-- Specific elements: `github.com/SomeOrg/WordPress#php.hery`
-- Local elements: `#database.hery` (same entity directory)
+References support three forms:
+- Local file path: `./database.hery` (specific file in same directory, must be relative, no `../` escape)
+- External file path: `github.com/SomeOrg/base-infra/database.hery@v1.0.0` (specific file from another repo, with version)
+- Type URI: `amadla.org/entity/application/db/rdbms@^v1.0.0` (at least one entity of this type must exist)
 
-Version constraints are supported: `@v1.0.0` (exact), `@^v1.0.0` (compatible range). Relative paths are sandboxed to the entity directory (no `../` escape). `_requires: []` is valid and equivalent to omitting the property.
+Version constraints follow the same rules as `_type`: `@v1.0.0` (exact), `@^v1.0.0` (compatible range). `_requires: []` is valid and equivalent to omitting the property.
 
 ## Entity Examples:
 
