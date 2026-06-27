@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Follow the practices defined in `~/Projects/SiteNetSoft/ai-skills/`:
 - `dev-practices/golang/` — Go style, error handling, functions, testing, linting
-- `dev-practices/git/` — Git authorship rules
+- `dev-practices/git/` — Git authorship rules, multi-repo workspace patterns
 
 ## Project Overview
 
@@ -92,15 +92,24 @@ Key dependencies: Cobra (CLI), github.com/goccy/go-yaml (YAML), jsonschema/v6 (v
 
 Entry point in `main.go` uses `cli.New()` from LibraryFramework. Commands registered:
 - `hery entity` - Entity operations (get, list, validate)
-- `hery query` - Query entities (two-stage: selection flags + `--jq` transformation)
+- `hery query` - Query entities (two-stage: selection flags + `--jq` transformation). Reads from the SQLite cache by default, or from a file/stdin with `--from <file>` / `-f -`. Output: `-o table|json|yaml` (default table, like the rest of the suite — pipelines pass `-o json`), `--hery` to wrap in a HERY envelope.
 - `hery compose` - Compose multiple entities
 - `hery settings` - Configuration
 
 ### Query Model (Draft 3.2)
 
 Two-stage query:
-1. **Selection** — CLI flags (`--type`, `--meta`, `--tag`) hit SQLite indexes
+1. **Selection** — CLI flags (`--type`, `--meta`, `--tag`)
 2. **Transformation** — `--jq` flag applies jq expressions via gojq (compiled in, no external binary)
+
+**Data sources (mutually exclusive):**
+- Default — the SQLite cache (`--type` hits the GLOB index, `--meta`/`--tag` use `LIKE` on `meta_json`).
+- `--from <file>` / `-f -` — read entities from a file or stdin instead of the cache. Format is auto-detected (YAML multi-doc stream, YAML single doc, JSON array, JSON object, or NDJSON). This is the consumer side of `hery compose --dir | hery query --from -` (the Option F pipeline: plugins query the composed graph without flattening). For file/dir input, `--type` matches the doc's `_type` (version-stripped unless the pattern carries `@version`); `*` matches across `/`, matching is case-insensitive; `--meta`/`--tag` substring-match the JSON-encoded `_meta`.
+- `--dir <dir>` — convenience flag: resolves a directory of `.hery` files (`_extends` merge, `_requires` ordering, layering) exactly like `compose --dir`, then queries the resolved graph in memory — no shell pipe needed. Semantically identical to `hery compose --dir <dir> | hery query --from -`. Mutually exclusive with `--from`.
+
+**Output:** `-o table|json|yaml` (default `table`, matching the rest of the suite; pipelines/plugins pass `-o json`). `--hery` wraps results in a HERY envelope (`amadla.org/entity/query/result@v1.0.0`, json/yaml only — with default table it promotes to json, with explicit `-o table` it errors). Exit codes: `0` = results, `2` = no match (grep-style), `1` = error (reported to stderr).
+
+**Note:** `compose --dir` emits a `---`-separated multi-doc YAML stream so its output round-trips through `query --from`.
 
 ## File Locations
 

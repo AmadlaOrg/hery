@@ -306,11 +306,13 @@ func resolveRef(fromDir, ref string) (string, error) {
 	return "", fmt.Errorf("unsupported reference %q (only ./ and ../ are supported in MVP)", ref)
 }
 
-// Marshal renders a slice of Docs as concatenated YAML documents (no ---
-// separators) using order-preserving encoding.
+// Marshal renders a slice of Docs as a multi-document YAML stream, prefixing
+// each document with a "---" separator so the output is valid multi-doc YAML
+// that round-trips through a standard decoder (e.g. `hery query --from -`).
 func Marshal(docs []Doc) ([]byte, error) {
 	var buf bytes.Buffer
 	for _, d := range docs {
+		buf.WriteString("---\n")
 		enc := yaml.NewEncoder(&buf, yaml.Indent(2), yaml.IndentSequence(true))
 		if err := enc.Encode(d.Raw); err != nil {
 			return nil, err

@@ -79,12 +79,14 @@ _body:
 	require.NoError(t, err)
 	// Intra-layer order is alphabetical by filename: child.hery before parent.hery.
 	// _extends is a merge edge, not a dependency edge, so it doesn't drive ordering.
-	want := `_type: child@v1
+	want := `---
+_type: child@v1
 _extends: ./parent.hery
 _body:
   a: 1
   b: 99
   c: 3
+---
 _type: parent@v1
 _body:
   a: 1
