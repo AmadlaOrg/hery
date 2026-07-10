@@ -143,13 +143,46 @@ _body:
 	assert.Equal(t, "base@v1", res.Layers[1].Docs[0].Type)
 }
 
-func TestResolve_ErrorOnNonLocalReference(t *testing.T) {
+func TestResolve_NonLocalRequiresKeptWithWarning(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, dir, "x.hery", `_type: x@v1
 _requires:
   - github.com/foo/bar@v1.0.0
+  - ./y.hery
 _body: {}
 `)
-	_, err := New().Resolve(dir)
-	assert.Error(t, err)
+	writeFile(t, dir, "y.hery", `_type: y@v1
+_body: {}
+`)
+	res, err := New().Resolve(dir)
+	require.NoError(t, err)
+	require.Len(t, res.Layers, 1)
+	require.Len(t, res.Layers[0].Docs, 2)
+	// External declaration stays on the doc even though it was not walked.
+	assert.Equal(t, []string{"github.com/foo/bar@v1.0.0", "./y.hery"}, res.Layers[0].Docs[0].Requires)
+	require.Len(t, res.Warnings, 1)
+	assert.Contains(t, res.Warnings[0], "github.com/foo/bar@v1.0.0")
+	assert.Contains(t, res.Warnings[0], "_requires")
+}
+
+func TestResolve_TypeURIExtendsSkippedWithWarning(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "pref.hery", `_type: example/os/preference@v1.0.0
+_extends: amadla.org/entity/os@v1.0.0
+_body:
+  firewall: firewalld
+`)
+	res, err := New().Resolve(dir)
+	require.NoError(t, err)
+	require.Len(t, res.Layers, 1)
+	require.Len(t, res.Layers[0].Docs, 1)
+	doc := res.Layers[0].Docs[0]
+	// Entity is emitted un-merged with its declaration intact.
+	assert.Equal(t, "amadla.org/entity/os@v1.0.0", doc.Extends)
+	body := extractBody(doc.Raw)
+	require.Len(t, body, 1)
+	assert.Equal(t, "firewall", body[0].Key)
+	require.Len(t, res.Warnings, 1)
+	assert.Contains(t, res.Warnings[0], "amadla.org/entity/os@v1.0.0")
+	assert.Contains(t, res.Warnings[0], "_extends")
 }

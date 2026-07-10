@@ -126,6 +126,9 @@ func queryFromDir(dir string, opts query.SelectionOpts) ([]map[string]any, error
 	if err != nil {
 		return nil, err
 	}
+	for _, w := range res.Warnings {
+		fmt.Fprintf(os.Stderr, "warning: %s\n", w)
+	}
 	out, err := resolve.MarshalAll(res.Layers)
 	if err != nil {
 		return nil, err

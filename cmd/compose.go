@@ -42,6 +42,9 @@ func runDirCompose(dir string, layer int) error {
 	if err != nil {
 		return err
 	}
+	for _, w := range result.Warnings {
+		fmt.Fprintf(os.Stderr, "warning: %s\n", w)
+	}
 
 	var out []byte
 	if layer > 0 {

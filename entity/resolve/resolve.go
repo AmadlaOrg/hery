@@ -43,9 +43,11 @@ type Layer struct {
 }
 
 // Result is the full resolution output. Layers[0] is layer 1 (the starting
-// directory).
+// directory). Warnings holds non-fatal resolution notices (e.g. type-URI or
+// external references that cannot be resolved locally and were skipped).
 type Result struct {
-	Layers []Layer
+	Layers   []Layer
+	Warnings []string
 }
 
 // Resolver loads a directory tree into layered, resolved Docs.
@@ -70,6 +72,7 @@ func (r *resolver) Resolve(dir string) (*Result, error) {
 
 	visited := map[string]int{}
 	var layers []Layer
+	var warnings []string
 	queue := []string{absStart}
 
 	for len(queue) > 0 {
@@ -87,20 +90,33 @@ func (r *resolver) Resolve(dir string) (*Result, error) {
 
 		for i := range docs {
 			if docs[i].Extends != "" {
-				extendsAbs, err := resolveRef(cur, docs[i].Extends)
-				if err != nil {
-					return nil, fmt.Errorf("%s: _extends: %w", docs[i].Path, err)
-				}
-				if err := applyExtends(&docs[i], extendsAbs); err != nil {
-					return nil, err
-				}
-				extendsDir := filepath.Dir(extendsAbs)
-				if extendsDir != cur {
-					queue = append(queue, extendsDir)
+				switch {
+				case !isLocalRef(docs[i].Extends):
+					warnings = append(warnings, fmt.Sprintf(
+						"%s: _extends: skipping %q — only ./ and ../ resolve locally; emitting entity un-merged",
+						docs[i].Path, docs[i].Extends))
+				default:
+					extendsAbs, err := resolveRef(cur, docs[i].Extends)
+					if err != nil {
+						return nil, fmt.Errorf("%s: _extends: %w", docs[i].Path, err)
+					}
+					if err := applyExtends(&docs[i], extendsAbs); err != nil {
+						return nil, err
+					}
+					extendsDir := filepath.Dir(extendsAbs)
+					if extendsDir != cur {
+						queue = append(queue, extendsDir)
+					}
 				}
 			}
 
 			for _, req := range docs[i].Requires {
+				if !isLocalRef(req) {
+					warnings = append(warnings, fmt.Sprintf(
+						"%s: _requires: %q is not a local ./ or ../ path — declaration kept, not walked",
+						docs[i].Path, req))
+					continue
+				}
 				refAbs, err := resolveRef(cur, req)
 				if err != nil {
 					return nil, fmt.Errorf("%s: _requires %q: %w", docs[i].Path, req, err)
@@ -119,7 +135,7 @@ func (r *resolver) Resolve(dir string) (*Result, error) {
 		layers = append(layers, Layer{Dir: cur, Docs: docs})
 	}
 
-	return &Result{Layers: layers}, nil
+	return &Result{Layers: layers, Warnings: warnings}, nil
 }
 
 // readDir loads every .hery file in dir (non-recursive) into Docs, ordered
@@ -296,10 +312,17 @@ func replaceBody(ms yaml.MapSlice, body yaml.MapSlice) yaml.MapSlice {
 	return out
 }
 
+// isLocalRef reports whether ref is a local filesystem reference (./ or ../).
+// Anything else (type URIs, external github.com/... refs) cannot be resolved
+// by the local directory walker.
+func isLocalRef(ref string) bool {
+	return strings.HasPrefix(ref, "./") || strings.HasPrefix(ref, "../")
+}
+
 // resolveRef resolves a _extends or _requires reference relative to fromDir.
 // Trailing slash is preserved for directory references.
 func resolveRef(fromDir, ref string) (string, error) {
-	if strings.HasPrefix(ref, "./") || strings.HasPrefix(ref, "../") {
+	if isLocalRef(ref) {
 		joined := filepath.Join(fromDir, ref)
 		return filepath.Clean(joined), nil
 	}
