@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path/filepath"
 
-	"github.com/AmadlaOrg/hery/cache/database"
 	"github.com/AmadlaOrg/hery/entity/query"
 	"github.com/AmadlaOrg/hery/entity/resolve"
 	"github.com/spf13/cobra"
@@ -15,9 +13,10 @@ import (
 var QueryCmd = &cobra.Command{
 	Use:   "query",
 	Short: "Query entities",
-	Long: "Query entities from the SQLite cache, from a file/stdin with --from, or\n" +
-		"from a directory of .hery files with --dir (resolves _extends/_requires like\n" +
-		"`hery compose --dir`, then queries in memory — no shell pipe needed).\n\n" +
+	Long: "Query entities from the current directory's .hery files (default), from a\n" +
+		"file/stdin with --from, or from another directory with --dir. Directory\n" +
+		"sources resolve _extends/_requires like `hery compose --dir`, then query\n" +
+		"in memory — no shell pipe needed.\n\n" +
 		"Selection (--type/--meta/--tag) filters the entity set; --jq transforms each\n" +
 		"result. Output defaults to a table; pass -o json (or yaml) for pipelines, or\n" +
 		"wrap results in a HERY envelope with --hery.\n\n" +
@@ -78,7 +77,9 @@ func runQuery(cmd *cobra.Command) (string, int, error) {
 	case from != "":
 		results, err = queryFromInput(from, opts)
 	default:
-		results, err = queryFromCache(opts)
+		// Default source: the current directory's .hery files, resolved the
+		// same way as --dir '.' (the .hery sources are the source of truth).
+		results, err = queryFromDir(".", opts)
 	}
 	if err != nil {
 		return "", 0, err
@@ -138,23 +139,6 @@ func queryFromDir(dir string, opts query.SelectionOpts) ([]map[string]any, error
 		return nil, err
 	}
 	return query.QueryDocs(docs, opts)
-}
-
-// queryFromCache reads entities from the SQLite cache (default behavior).
-func queryFromCache(opts query.SelectionOpts) ([]map[string]any, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get home directory: %w", err)
-	}
-	dbPath := filepath.Join(homeDir, ".cache", "hery", "hery.db")
-
-	db := database.New(dbPath)
-	if err := db.Initialize(); err != nil {
-		return nil, fmt.Errorf("failed to open cache database: %w", err)
-	}
-	defer db.Close()
-
-	return query.New(db).Query(opts)
 }
 
 // formatResults renders results in the requested format, optionally wrapped in
