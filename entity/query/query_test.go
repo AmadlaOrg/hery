@@ -5,7 +5,6 @@ import (
 
 	"github.com/AmadlaOrg/hery/cache/database"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestQuery_NoFilters(t *testing.T) {
@@ -23,17 +22,16 @@ func TestQuery_NoFilters(t *testing.T) {
 
 func TestQuery_WithTypeFilter(t *testing.T) {
 	mockDb := &database.MockCacheDatabase{}
-	mockDb.EXPECT().QueryRows(
-		"SELECT merged_json FROM entities WHERE entity_type GLOB ?",
-		mock.Anything,
-	).Return([]map[string]any{
+	mockDb.EXPECT().QueryRows("SELECT merged_json FROM entities").Return([]map[string]any{
 		{"merged_json": `{"_type":"example.com/App@v1.0.0","_body":{"name":"matched"}}`},
+		{"merged_json": `{"_type":"example.com/Other@v1.0.0","_body":{"name":"filtered out"}}`},
 	}, nil)
 
 	q := &queryImpl{Database: mockDb}
 	results, err := q.Query(SelectionOpts{Type: "example.com/App*"})
 	assert.NoError(t, err)
 	assert.Len(t, results, 1)
+	assert.Equal(t, "matched", results[0]["_body"].(map[string]any)["name"])
 }
 
 func TestQuery_WithJQ(t *testing.T) {
@@ -52,7 +50,7 @@ func TestQuery_WithJQ(t *testing.T) {
 
 func TestQuery_EmptyResults(t *testing.T) {
 	mockDb := &database.MockCacheDatabase{}
-	mockDb.EXPECT().QueryRows("SELECT merged_json FROM entities WHERE entity_type GLOB ?", mock.Anything).
+	mockDb.EXPECT().QueryRows("SELECT merged_json FROM entities").
 		Return([]map[string]any{}, nil)
 
 	q := &queryImpl{Database: mockDb}

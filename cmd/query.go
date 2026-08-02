@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AmadlaOrg/hery/cache"
 	"github.com/AmadlaOrg/hery/entity/query"
 	"github.com/AmadlaOrg/hery/entity/resolve"
 	"github.com/spf13/cobra"
@@ -77,9 +78,7 @@ func runQuery(cmd *cobra.Command) (string, int, error) {
 	case from != "":
 		results, err = queryFromInput(from, opts)
 	default:
-		// Default source: the current directory's .hery files, resolved the
-		// same way as --dir '.' (the .hery sources are the source of truth).
-		results, err = queryFromDir(".", opts)
+		results, err = queryFromProject(opts)
 	}
 	if err != nil {
 		return "", 0, err
@@ -123,22 +122,56 @@ func queryFromInput(from string, opts query.SelectionOpts) ([]map[string]any, er
 // resolved graph in memory. It round-trips through the multi-doc YAML stream so
 // the semantics are identical to `hery compose --dir <dir> | hery query --from -`.
 func queryFromDir(dir string, opts query.SelectionOpts) ([]map[string]any, error) {
-	res, err := resolve.New().Resolve(dir)
+	docs, _, err := resolveDocs(dir)
 	if err != nil {
 		return nil, err
+	}
+	return query.QueryDocs(docs, opts)
+}
+
+// queryFromProject queries the current directory's .hery files (the source of
+// truth), served from the project-level .hery.cache when its manifest still
+// matches the sources (.docs/cache.md). A miss or any cache failure resolves
+// in memory instead; the rebuilt cache is written best-effort and an empty
+// project writes nothing, so stray runs don't litter directories.
+func queryFromProject(opts query.SelectionOpts) ([]map[string]any, error) {
+	pc := cache.NewProject(".")
+	if docs, ok := pc.LoadFresh(); ok {
+		return query.QueryDocs(docs, opts)
+	}
+
+	docs, res, err := resolveDocs(".")
+	if err != nil {
+		return nil, err
+	}
+	if len(docs) > 0 {
+		if rebuildErr := pc.Rebuild(res); rebuildErr != nil {
+			fmt.Fprintf(os.Stderr, "warning: could not write %s: %v\n", cache.ProjectCacheFile, rebuildErr)
+		}
+	}
+	return query.QueryDocs(docs, opts)
+}
+
+// resolveDocs resolves a directory and returns its docs as plain maps via the
+// same multi-doc YAML round-trip the compose pipeline uses, plus the raw
+// resolution for callers that persist it. Warnings go to stderr.
+func resolveDocs(dir string) ([]map[string]any, *resolve.Result, error) {
+	res, err := resolve.New().Resolve(dir)
+	if err != nil {
+		return nil, nil, err
 	}
 	for _, w := range res.Warnings {
 		fmt.Fprintf(os.Stderr, "warning: %s\n", w)
 	}
 	out, err := resolve.MarshalAll(res.Layers)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	docs, err := query.LoadDocs(bytes.NewReader(out))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return query.QueryDocs(docs, opts)
+	return docs, res, nil
 }
 
 // formatResults renders results in the requested format, optionally wrapped in

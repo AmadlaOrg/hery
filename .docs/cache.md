@@ -49,20 +49,30 @@ Indexed columns for fast selection queries:
 
 ## Querying
 
-The `meta_json` and `body_json` columns are queried using SQLite `json_extract()`:
+`hery query` loads `merged_json` from the cache and runs the same in-memory
+selection predicates (case-insensitive type glob with version stripping,
+`_meta` substring match) as the `--from` and `--dir` sources, so results are
+identical no matter where the data came from. SQL-side filtering on the
+indexed columns is a possible future optimization.
 
-```sql
--- --meta 'category=Application'
-SELECT merged_json FROM entities
-WHERE json_extract(meta_json, '$.category') = 'Application';
+## Staleness: `cache_manifest`
 
--- --tag production
-SELECT merged_json FROM entities
-WHERE EXISTS (
-    SELECT 1 FROM json_each(json_extract(meta_json, '$.tags'))
-    WHERE value = 'production'
-);
-```
+The cache records what it was built from in the `cache_manifest` table:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `path` | TEXT PRIMARY KEY | Absolute path of a source `.hery` file or directory |
+| `is_dir` | BOOLEAN | TRUE for directory rows |
+| `mtime_ns` | INTEGER | File modification time (ns); 0 for directories |
+| `size` | INTEGER | File size in bytes; 0 for directories |
+| `hery_names` | TEXT | Directory rows: sorted JSON array of `.hery` filenames |
+
+A file row goes stale when its mtime or size changes; a directory row goes
+stale when the set of `.hery` filenames changes (catching added or removed
+files). Directory mtimes are deliberately not used — writing `.hery.cache`
+into the project root would perturb them. Any mismatch, missing table, or
+read error makes `hery query` re-resolve the sources and rebuild the cache
+transparently.
 
 ## Additional Tables
 

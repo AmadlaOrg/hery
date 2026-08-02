@@ -35,37 +35,17 @@ type queryImpl struct {
 	Database database.Database
 }
 
-// Query performs two-stage query: selection from SQLite, then optional jq transformation.
+// Query loads every cached document and runs the same two-stage selection as
+// QueryDocs. Filtering happens in memory rather than in SQL so the semantics
+// (case-insensitive glob, version stripping) are identical across the cache,
+// --from and --dir data sources.
 func (q *queryImpl) Query(opts SelectionOpts) ([]map[string]any, error) {
-	// Stage 1: Build selection query
-	var conditions []string
-	var args []any
-
-	if opts.Type != "" {
-		conditions = append(conditions, "entity_type GLOB ?")
-		args = append(args, opts.Type)
-	}
-	if opts.Meta != "" {
-		conditions = append(conditions, "meta_json LIKE ?")
-		args = append(args, "%"+opts.Meta+"%")
-	}
-	if opts.Tag != "" {
-		conditions = append(conditions, "meta_json LIKE ?")
-		args = append(args, "%"+opts.Tag+"%")
-	}
-
-	query := "SELECT merged_json FROM entities"
-	if len(conditions) > 0 {
-		query += " WHERE " + strings.Join(conditions, " AND ")
-	}
-
-	rows, err := q.Database.QueryRows(query, args...)
+	rows, err := q.Database.QueryRows("SELECT merged_json FROM entities")
 	if err != nil {
 		return nil, fmt.Errorf("selection query failed: %w", err)
 	}
 
-	// Parse merged_json from each row
-	var results []map[string]any
+	var docs []map[string]any
 	for _, row := range rows {
 		jsonStr, ok := row["merged_json"].(string)
 		if !ok || jsonStr == "" {
@@ -75,15 +55,10 @@ func (q *queryImpl) Query(opts SelectionOpts) ([]map[string]any, error) {
 		if unmarshalErr := json.Unmarshal([]byte(jsonStr), &doc); unmarshalErr != nil {
 			continue
 		}
-		results = append(results, doc)
+		docs = append(docs, doc)
 	}
 
-	// Stage 2: Apply jq transformation if provided
-	if opts.JQ != "" {
-		return ApplyJQToAll(opts.JQ, results)
-	}
-
-	return results, nil
+	return QueryDocs(docs, opts)
 }
 
 // QueryDocs runs the same two-stage query as Query (selection + optional jq

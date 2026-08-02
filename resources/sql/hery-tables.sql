@@ -110,3 +110,15 @@ CREATE TABLE IF NOT EXISTS body_data_connection (
     FOREIGN KEY (parent_body_data_TEXT_rowid) REFERENCES body_data_TEXT(rowid),
     FOREIGN KEY (body_data_TEXT_rowid) REFERENCES body_data_TEXT(rowid)
 );
+
+-- Manifest of the source files a project cache (.hery.cache) was built from.
+-- Directory rows record the sorted .hery filenames so added/removed files are
+-- caught without depending on directory mtimes (which the cache file itself
+-- would perturb).
+CREATE TABLE IF NOT EXISTS cache_manifest (
+    path TEXT PRIMARY KEY,      -- Absolute path of a source .hery file or directory
+    is_dir BOOLEAN,             -- TRUE for directory rows
+    mtime_ns INTEGER,           -- File modification time (ns); 0 for directories
+    size INTEGER,               -- File size in bytes; 0 for directories
+    hery_names TEXT             -- Directory rows: JSON array of .hery filenames
+);
