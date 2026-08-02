@@ -92,7 +92,7 @@ Key dependencies: Cobra (CLI), github.com/goccy/go-yaml (YAML), jsonschema/v6 (v
 
 Entry point in `main.go` uses `cli.New()` from LibraryFramework. Commands registered:
 - `hery entity` - Entity operations (get, list, validate)
-- `hery query` - Query entities (two-stage: selection flags + `--jq` transformation). Reads from the SQLite cache by default, or from a file/stdin with `--from <file>` / `-f -`. Output: `-o table|json|yaml` (default table, like the rest of the suite — pipelines pass `-o json`), `--hery` to wrap in a HERY envelope.
+- `hery query` - Query entities (two-stage: selection flags + `--jq` transformation). Default source: the current directory's `.hery` files, served from the project-level `.hery.cache` when fresh; or a file/stdin with `--from <file>` / `-f -`. Output: `-o table|json|yaml` (default table, like the rest of the suite — pipelines pass `-o json`), `--hery` to wrap in a HERY envelope.
 - `hery compose` - Compose multiple entities
 - `hery settings` - Configuration
 
@@ -103,7 +103,7 @@ Two-stage query:
 2. **Transformation** — `--jq` flag applies jq expressions via gojq (compiled in, no external binary)
 
 **Data sources (mutually exclusive):**
-- Default — the SQLite cache (`--type` hits the GLOB index, `--meta`/`--tag` use `LIKE` on `meta_json`).
+- Default — the current directory's `.hery` files (the source of truth), resolved like `--dir '.'` and served from the project-level `.hery.cache` (SQLite, gitignored, derived). The cache carries a manifest of its sources (file mtime+size, per-directory `.hery` filename listing); any mismatch triggers a transparent re-resolve and rebuild. Cache writes are best-effort (a failure warns and falls back to in-memory), an empty project writes no cache file, and selection always runs through the same in-memory predicates as the other sources — identical semantics everywhere.
 - `--from <file>` / `-f -` — read entities from a file or stdin instead of the cache. Format is auto-detected (YAML multi-doc stream, YAML single doc, JSON array, JSON object, or NDJSON). This is the consumer side of `hery compose --dir | hery query --from -` (the Option F pipeline: plugins query the composed graph without flattening). For file/dir input, `--type` matches the doc's `_type` (version-stripped unless the pattern carries `@version`); `*` matches across `/`, matching is case-insensitive; `--meta`/`--tag` substring-match the JSON-encoded `_meta`.
 - `--dir <dir>` — convenience flag: resolves a directory of `.hery` files (`_extends` merge, `_requires` ordering, layering) exactly like `compose --dir`, then queries the resolved graph in memory — no shell pipe needed. Semantically identical to `hery compose --dir <dir> | hery query --from -`. Mutually exclusive with `--from`.
 
